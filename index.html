@@ -1,0 +1,526 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Recettes de Tseung Kwan O</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+HK:wght@500;700&display=swap">
+<style>
+/* Ticket de cuisine : encre sur os, vermillon pour l'action, jade pour le fait */
+:root{
+  --bg:#F2F2EE; --surface:#FFFFFF; --surface-2:#E9E9E2;
+  --ink:#1A1C1A; --ink-2:#5C5F5B; --ink-3:#8A8D88; --line:#D8D8D0;
+  --accent:#C23B1E; --accent-soft:#F9E9E4;
+  --done:#2E6B52; --done-soft:#E3EFE8;
+  --font-sans:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --font-cjk:'Noto Sans HK','PingFang HK','Microsoft JhengHei',sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15171A; --surface:#1E2125; --surface-2:#272A30;
+  --ink:#ECECE6; --ink-2:#A6A9A4; --ink-3:#72756E; --line:#32353B;
+  --accent:#E8613F; --accent-soft:#39201A;
+  --done:#5CB593; --done-soft:#1B2E26;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#15171A; --surface:#1E2125; --surface-2:#272A30;
+  --ink:#ECECE6; --ink-2:#A6A9A4; --ink-3:#72756E; --line:#32353B;
+  --accent:#E8613F; --accent-soft:#39201A;
+  --done:#5CB593; --done-soft:#1B2E26;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--surface);z-index:20}
+.wrap{max-width:620px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:var(--surface);border-bottom:1px solid var(--line)}
+.head-in{padding-block:12px 0}
+.brand{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+select{width:100%;appearance:none;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;color:var(--ink);font-family:var(--font-sans);font-size:16px;font-weight:500;padding:11px 36px 11px 13px;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 19px) 50%,calc(100% - 13px) 50%;background-size:6px 6px,6px 6px;background-repeat:no-repeat}
+select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.meta-row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.pill{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;background:var(--surface-2);color:var(--ink-2);padding:4px 9px;border-radius:3px}
+.pill.cjk{font-family:var(--font-cjk);font-size:13px;letter-spacing:0;text-transform:none;background:var(--accent-soft);color:var(--accent);font-weight:500;padding:3px 9px}
+.tabs{display:flex;gap:2px;margin-top:10px}
+.tab{flex:1;appearance:none;border:0;background:none;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--ink-3);padding:10px 4px;cursor:pointer;border-bottom:2px solid transparent}
+.tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+main{padding-block:18px 56px}
+.sec{margin-bottom:24px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.sec-t{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.sec-n{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+.item{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.item:last-child{border-bottom:0}
+.dot{flex:0 0 auto;width:18px;height:18px;margin-top:2px;border:1.5px solid var(--ink-3);border-radius:50%;display:grid;place-items:center;transition:background .12s,border-color .12s}
+.dot svg{width:11px;height:11px;opacity:0;stroke:var(--surface);stroke-width:2.6;fill:none}
+.item.on .dot{background:var(--done);border-color:var(--done)}
+.item.on .dot svg{opacity:1}
+.item-body{flex:1;min-width:0}
+.item-n{font-size:14.5px}
+.item.on .item-n{color:var(--ink-3);text-decoration:line-through}
+.qty{flex:0 0 auto;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;padding-top:1px;text-align:right;max-width:38%}
+.item.on .qty{color:var(--ink-3)}
+.hanzi{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:3px 9px;background:var(--accent-soft);color:var(--accent);border-radius:3px;text-decoration:none;font-family:var(--font-cjk);font-size:15px;font-weight:500;line-height:1.3}
+.hanzi .ar{font-family:var(--font-sans);font-size:10px;font-weight:600;opacity:.75}
+.tip{font-size:12.5px;color:var(--ink-2);margin-top:4px}
+
+.step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.step:last-child{border-bottom:0}
+.num{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--surface-2);color:var(--ink-2);font-family:var(--font-mono);font-size:11.5px;font-weight:500;display:grid;place-items:center;margin-top:1px}
+.step.on .num{background:var(--done);color:var(--surface)}
+.step.on .step-t{color:var(--ink-3);text-decoration:line-through}
+.step-t{font-size:14.5px;flex:1;min-width:0}
+.flag{display:inline-block;margin-top:5px;font-size:12px;color:var(--accent);font-weight:500}
+
+.note{background:var(--accent-soft);border-radius:6px;padding:12px 14px;font-size:13.5px;margin-top:12px}
+.note b{font-weight:600}
+.note.kid{background:var(--done-soft)}
+.note.pair{background:var(--surface-2)}
+
+.reset{display:block;width:100%;margin-top:20px;padding:11px;background:none;border:1px solid var(--line);border-radius:6px;color:var(--ink-2);font-family:var(--font-sans);font-size:13px;cursor:pointer}
+.reset:hover{border-color:var(--ink-3);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header>
+  <div class="wrap head-in">
+    <div class="brand">Carnet de cuisine · 3 couverts</div>
+    <select id="pick" aria-label="Choisir une recette"></select>
+    <div class="meta-row" id="meta"></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-p="ing">Ingrédients</button>
+      <button class="tab" role="tab" aria-selected="false" data-p="prep">Préparation</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="ing"></div>
+  <div id="prep" hidden></div>
+</main>
+
+<script>
+var CHECK='<span class="dot"><svg viewBox="0 0 12 12"><path d="M2 6.3 4.6 9 10 3"/></svg></span>';
+
+/* Chaque entrée : g = groupe d'ingrédients, i = [nom, quantité, {h:hanzi, t:astuce}] */
+var R = {
+
+gongbao:{n:"Gongbao jiding",cjk:"宮保雞丁",c:"Chine",prep:"25 min",cook:"8 min",
+ g:[
+  ["Marinade",[
+   ["Cuisse de poulet désossée, en dés de 1,5 cm","500 g",{t:"Surtout pas du blanc, il sèche en dés."}],
+   ["Sauce soja claire","1 c. à s."],["Shaoxing","1 c. à s."],["Maïzena","1 c. à s."],["Eau","1 c. à s."]]],
+  ["Sauce, mélangée dans un bol",[
+   ["Vinaigre de Chinkiang","2 c. à s.",{h:"鎮江香醋",t:"C'est lui qui fait le profil aigre-doux. Pas de substitution."}],
+   ["Sucre","2 c. à c."],["Sauce soja claire","1 c. à s."],["Sauce soja épaisse","½ c. à c."],
+   ["Maïzena","1 c. à c."],["Bouillon de volaille","4 c. à s."]]],
+  ["Aromates et finition",[
+   ["Piments rouges séchés, épépinés, en deux","10",{h:"乾辣椒",t:"Les petits rouges courts, pas les longs très forts."}],
+   ["Poivre de Sichuan en grains","1 c. à c.",{h:"花椒",t:"Petites cosses rouges ouvertes. Il engourdit, il ne pique pas."}],
+   ["Ail en lamelles","3 gousses"],["Gingembre en lamelles","2 cm"],
+   ["Blancs de ciboule en tronçons de 1,5 cm","6"],
+   ["Cacahuètes grillées non salées","80 g"],["Huile neutre","3 c. à s."],["Riz jasmin","300 g"]]]],
+ s:["Mélanger le poulet et la marinade, masser à la main. Laisser 20 minutes.",
+    "Mélanger la sauce dans un bol. Couper les piments en deux et secouer les graines dehors.",
+    "Tout découper et aligner à côté du wok. La cuisson dure 5 minutes, pas le temps de couper quoi que ce soit.",
+    "Huile dans le wok à feu <b>moyen</b>, pas vif. Piments et poivre de Sichuan, 30 secondes, jusqu'à ce que les piments foncent et embaument.",
+    "Monter à feu maximum. Poulet en une couche, 1 minute 30 sans y toucher, puis sauter 2 minutes.",
+    "Ail, gingembre et blancs de ciboule, 30 secondes.",
+    "Remuer le bol de sauce puis le verser d'un coup. Mélanger 30 secondes, elle épaissit et enrobe tout.",
+    "Hors du feu, ajouter les cacahuètes, mélanger et servir immédiatement.|Jamais les cacahuètes avant, elles ramollissent"],
+ no:[["Feu moyen pour les piments, maximum pour le poulet.","C'est le seul changement de température et il est critique. Dans une huile trop chaude les piments noircissent en dix secondes et toute la sauce devient amère, sans rattrapage."],
+    ["Les piments ne se mangent pas.","Ils parfument l'huile. Le gongbao authentique est un plat aigre-doux légèrement piquant, pas un plat brûlant."],
+    ["Pour Chloé","Descendez à 5 piments bien épépinés et sautez le poivre de Sichuan dans le wok. Vous pêchez les piments de son assiette. Le sucré-vinaigré et les cacahuètes marchent très bien à six ans.",1]],
+ p:"Servi avec le chou-fleur à l'ail : le chou-fleur en premier, il supporte l'attente. Le gongbao en dernier, il ne se réchauffe pas."},
+
+yuxiang:{n:"Porc yuxiang",cjk:"魚香肉絲",c:"Chine",prep:"25 min",cook:"6 min",
+ g:[
+  ["Marinade",[
+   ["Filet mignon ou échine de porc en lanières de 5 mm","400 g",{t:"Passez le morceau 20 minutes au congélateur avant de le trancher, les lanières seront bien plus régulières."}],
+   ["Sauce soja claire","1 c. à s."],["Shaoxing","1 c. à s."],["Maïzena","1 c. à s."],["Eau","1 c. à s."]]],
+  ["Légumes",[
+   ["Champignons noirs séchés","15 g",{h:"木耳",t:"Réhydratés 20 minutes à l'eau tiède, ils triplent de volume. Séchez-les bien ou l'huile crépitera."}],
+   ["Pousses de bambou en lanières","150 g",{h:"筍絲"}],
+   ["Carotte en fines lanières","1"],
+   ["Blancs de ciboule en biseau","4"],
+   ["Ail haché","4 gousses"],["Gingembre haché","2 cm"]]],
+  ["L'assaisonnement yuxiang",[
+   ["Piments marinés hachés","4",{h:"泡椒",t:"L'ingrédient d'origine, au rayon des bocaux. À défaut, 1,5 c. à soupe de doubanjiang de Pixian."}]]],
+  ["Sauce, mélangée dans un bol",[
+   ["Sucre","2 c. à s."],["Vinaigre de Chinkiang","2 c. à s."],
+   ["Sauce soja claire","1 c. à s."],["Maïzena","1 c. à c."],["Bouillon de volaille","4 c. à s."]]],
+  ["Le reste",[
+   ["Huile neutre","4 c. à s."],["Riz jasmin","300 g"]]]],
+ s:["Réhydrater les champignons noirs 20 minutes à l'eau tiède. Égoutter, retirer les pieds durs, émincer et bien sécher.",
+    "Trancher le porc en lanières de 5 mm. Mélanger avec la marinade, masser à la main, laisser 15 minutes.",
+    "Mélanger la sauce dans un bol. Goûter : elle doit être franchement sucrée-vinaigrée, elle s'adoucit au wok.",
+    "Tout découper et aligner à côté du wok. La cuisson dure 5 minutes.",
+    "Huile à feu très vif. Porc en une couche, 1 minute sans y toucher, puis sauter 1 minute 30 jusqu'à ce qu'il soit doré. Réserver.",
+    "Baisser à feu moyen. Piments marinés ou doubanjiang, 1 minute, l'huile doit rougir.",
+    "Ail, gingembre et blancs de ciboule, 30 secondes.",
+    "Feu maximum. Champignons noirs, bambou et carotte, 2 minutes.",
+    "Remettre le porc. Remuer le bol de sauce, le verser d'un coup, 30 secondes à gros bouillons jusqu'à ce qu'elle nappe."],
+ no:[["Il n'y a pas de poisson dedans.","Yuxiang désigne l'assaisonnement que le Sichuan utilise pour le poisson : piment mariné, gingembre, ail, ciboule, sucre et vinaigre. Rien de marin dans l'assiette."],
+    ["Sucre et vinaigre à parts égales.","C'est la colonne vertébrale du profil. Goûtez le bol de sauce avant de le verser, il doit paraître trop marqué, le wok l'adoucit."],
+    ["La découpe fait le plat.","肉絲 veut dire lanières. Des morceaux irréguliers cuisent irrégulièrement et le plat perd sa texture. Vingt minutes au congélateur avant de trancher changent tout."],
+    ["Pour Chloé","Deux piments marinés au lieu de quatre, ou une cuillère à café de doubanjiang. Le profil sucré-vinaigré passe très bien à six ans, c'est souvent le plat sichuanais préféré des enfants.",1]],
+ p:"Il contient déjà ses légumes, inutile de l'accompagner d'un deuxième plat élaboré. Un chou-fleur à l'ail ou un kale sauté suffit."},
+
+suanla:{n:"Soupe aigre-piquante",cjk:"酸辣湯",c:"Chine",prep:"25 min",cook:"20 min",
+ g:[
+  ["Le fond",[
+   ["Bouillon de volaille","1,2 l"],
+   ["Champignons noirs séchés","10 g",{h:"木耳",t:"Trempés 20 minutes à l'eau tiède."}],
+   ["Champignons shiitake séchés","4",{h:"冬菇",t:"Gardez leur eau de trempage, filtrée, elle va dans le bouillon. C'est elle qui donne la profondeur."}],
+   ["Pousses de bambou en lanières","100 g",{h:"筍絲"}],
+   ["Tofu ferme en lanières","200 g",{t:"Du ferme cette fois, pas du soyeux. Il doit tenir en lanières."}]]],
+  ["La viande",[
+   ["Porc en fines lanières","150 g"],
+   ["Sauce soja claire","1 c. à s."],["Maïzena","1 c. à c."]]],
+  ["L'assaisonnement",[
+   ["Vinaigre de Chinkiang","4 c. à s.",{t:"Oui, quatre. Le vinaigre est la moitié du nom du plat."}],
+   ["Poivre blanc moulu","1,5 c. à c.",{h:"白胡椒粉",t:"C'est lui qui pique, pas le piment. Soyez généreux, c'est l'autre moitié du nom."}],
+   ["Sauce soja claire","2 c. à s."],["Sauce soja épaisse","1 c. à c."],
+   ["Maïzena délayée dans 6 c. à s. d'eau froide","3 c. à s."],
+   ["Œufs battus","2"],["Huile de sésame","1 c. à c."],["Sel","—"]]],
+  ["Au service",[
+   ["Ciboule ciselée","3 tiges"],["Coriandre fraîche","quelques feuilles"],
+   ["Huile pimentée","facultatif, à table"]]]],
+ s:["Tremper champignons noirs et shiitake 20 minutes à l'eau tiède. Égoutter, retirer les pieds durs, émincer. Filtrer l'eau des shiitake et la garder.",
+    "Tailler tofu, champignons, bambou et porc en lanières de la même finesse. Une soupe réussie a tous ses éléments de la même taille.",
+    "Mélanger le porc avec la sauce soja et la maïzena de sa ligne.",
+    "Porter le bouillon et l'eau de shiitake filtrée à frémissement. Ajouter champignons et bambou, 5 minutes.",
+    "Ajouter le porc en séparant les lanières, 2 minutes. Puis le tofu, 2 minutes.",
+    "Sauce soja claire et épaisse, sel. Goûter le fond, il doit être franchement salé.",
+    "Verser la maïzena délayée en deux fois, en laissant rebouillonner entre les deux. La soupe doit napper la cuillère.",
+    "Baisser au minimum. Verser les œufs battus en filet très fin tout en remuant lentement dans un seul sens. Arrêter de remuer et laisser prendre 10 secondes.|Prélever le bol de Chloé maintenant",
+    "Hors du feu : vinaigre, poivre blanc, huile de sésame. Goûter et ajuster, c'est ici que le plat se règle.",
+    "Ciboule et coriandre dans chaque bol au moment de servir."],
+ no:[["Le piquant vient du poivre blanc.","Pas du piment. Le 辣 de 酸辣湯 est un poivre blanc généreux, une cuillère et demie à café pour 1,2 litre au minimum. Et il arrive hors du feu, la chaleur émousse son mordant."],
+    ["Le vinaigre en dernier, hors du feu.","Il s'évapore. Versé pendant le mijotage, la soupe perd son acidité et vous vous retrouvez avec un bouillon plat que vous n'arriverez plus à rattraper."],
+    ["La maïzena avant l'œuf.","Un bouillon épaissi tient les rubans en suspension. Dans un bouillon clair, l'œuf tombe au fond et s'agglutine."],
+    ["Les rubans d'œuf.","Feu au minimum, filet le plus fin possible, et on remue lentement dans un seul sens. Un remuage énergique casse les rubans en miettes."],
+    ["Pour Chloé","Prélevez son bol à la fin de l'étape 8, avant le poivre et le vinaigre. Ajoutez-lui ensuite une demi-cuillère de vinaigre et une pincée de poivre dans son bol. Elle aura la même soupe, dosée pour elle.",1]],
+ p:"Se sert en même temps que les plats et le riz, pas en entrée. Avec un sauté de viande, elle fait le repas complet et remplace le légume."},
+
+choufleur:{n:"Chou-fleur sauté à l'ail",cjk:"蒜蓉花菜",c:"Chine",prep:"5 min",cook:"12 min",
+ g:[["Ingrédients",[
+   ["Chou-fleur en petits bouquets","600 g",{h:"松花菜",t:"La variété lâche aux longues tiges saute bien mieux que le chou-fleur serré européen."}],
+   ["Ail haché","6 gousses"],["Sauce d'huître","1 c. à s."],["Sauce soja claire","1 c. à c."],
+   ["Sucre","1 pincée"],["Eau","4 c. à s."],["Huile neutre","2 c. à s."],["Sel, poivre blanc","—"]]]],
+ s:["Détacher le chou-fleur en bouquets de la taille d'une bouchée. Bien les sécher.",
+    "Wok à feu vif avec l'huile. Jeter le chou-fleur et le laisser sans y toucher 2 minutes pour qu'il colore.",
+    "Faire sauter 2 minutes de plus. Des taches brunes doivent apparaître.",
+    "Verser l'eau sur les bords du wok, couvrir immédiatement, 3 minutes. La vapeur cuit le cœur.",
+    "Découvrir, ajouter l'ail haché, 30 secondes.",
+    "Sauce d'huître, sauce soja, sucre, sel et poivre blanc. Sauter 1 minute à découvert jusqu'à évaporation."],
+ no:[["Colorer avant de cuire.","Le chou-fleur blanc et bouilli n'a aucun goût. Les deux premières minutes sans y toucher, à feu vif, créent les taches brunes qui font tout le plat."]]},
+
+bpbeef:{n:"Black pepper beef",cjk:"",c:"Chine",prep:"20 min",cook:"12 min",
+ g:[["Marinade",[
+   ["Filet ou rumsteck en lamelles de 5 mm","500 g",{t:"Dans le sens contraire des fibres."}],
+   ["Sauce soja claire","1 c. à s."],["Shaoxing","1 c. à s."],["Maïzena","1 c. à s."],
+   ["Huile neutre","1 c. à s."],["Bicarbonate de soude","¼ c. à c.",{t:"Le secret du bœuf tendre des restaurants. Pas plus, sinon goût savonneux."}]]],
+  ["Légumes",[
+   ["Poivrons rouge et vert en lanières","1 + 1"],["Céleri branche en biseau","3 tiges"],
+   ["Ail haché","4 gousses"],["Gingembre râpé","2 cm"]]],
+  ["Sauce, mélangée dans un bol",[
+   ["Sauce d'huître","2 c. à s."],["Sauce soja claire","1 c. à s."],
+   ["Sauce soja épaisse","1 c. à c.",{h:"老抽",t:"Noire et sirupeuse. Sert à la couleur, pas au sel."}],
+   ["Sucre","1 c. à c."],["Bouillon","10 cl"],["Maïzena","1 c. à c."]]],
+  ["Finition",[
+   ["Poivre noir en grains","2 c. à s.",{t:"En grains obligatoirement, le moulu est plat."}],
+   ["Beurre","20 g"],["Huile neutre","3 c. à s."],["Riz jasmin","300 g"]]]],
+ s:["Mélanger le bœuf et la marinade, masser une minute jusqu'à ce que la viande colle. Laisser 20 minutes.",
+    "Concasser le poivre au mortier en gros éclats. Séparer en deux moitiés.",
+    "Mélanger la sauce dans un bol.",
+    "Huile fumante dans le wok. Saisir le bœuf en deux fois, 1 minute par face sans y toucher. Encore rosé au centre. Réserver.",
+    "Huile restante, première moitié du poivre, 20 secondes. Ail et gingembre, 20 secondes.",
+    "Céleri 1 minute, puis poivrons 2 minutes. Ils restent croquants.",
+    "Remuer le bol de sauce puis le verser. Laisser épaissir 1 minute à gros bouillons.|Servir la part de Chloé maintenant",
+    "Remettre le bœuf, 30 secondes. Hors du feu, le beurre et la seconde moitié du poivre."],
+ no:[["Le poivre en deux temps.","La première moitié cuit dans l'huile et donne la profondeur, la seconde arrive hors du feu et donne le parfum. Tout mettre au début ne laisse que l'amertume."],
+    ["Sans oignon.","L'oignon est normalement la vedette avec les poivrons. Le céleri branche apporte le même croquant et une amertume végétale qui tient tête au poivre."],
+    ["Pour Chloé","Servez sa part après l'étape 7, avant la dernière moitié de poivre.",1]],
+ p:"Servi avec le chou déchiré au porc : le chou en premier, le bœuf en dernier."},
+
+chouporc:{n:"Chou déchiré au porc",cjk:"手撕包菜",c:"Chine",prep:"10 min",cook:"10 min",
+ g:[["Ingrédients",[
+   ["Chou de Taiwan","600 g",{h:"高麗菜",t:"Tête peu serrée, feuilles claires et souples. Pas le chou vert dur."}],
+   ["Poitrine de porc fraîche en lamelles de 3 cm","100 g",{h:"五花肉",t:"Couches de gras et de maigre bien alternées."}],
+   ["Ail en lamelles","5 gousses"],["Piments rouges séchés, coupés en deux","3"],
+   ["Sauce soja claire","1,5 c. à s."],["Sauce soja épaisse","½ c. à c."],
+   ["Vinaigre de Chinkiang","1,5 c. à s."],["Sucre","1 c. à c."],["Huile neutre","1 c. à s."],["Sel","—"]]]],
+ s:["Déchirer le chou à la main en morceaux de la taille d'une paume. Jamais au couteau.",
+    "Laver et sécher vraiment bien, à l'essoreuse à salade si possible.",
+    "Wok à feu moyen, 1 seule cuillère d'huile. Poitrine 4 minutes sans la bousculer, les bords dorent et se recroquevillent.",
+    "S'il y a plus de 2 cuillères de graisse, retirer l'excédent. Garder la viande dans le wok.",
+    "Monter à feu maximum. Piments et ail, 15 secondes.",
+    "Tout le chou d'un coup, 2 minutes en retournant sans arrêt. Les bords doivent brunir par endroits.",
+    "Sauce soja claire, sauce soja épaisse, sucre, une pincée de sel. Encore 1 minute.",
+    "Vinaigre versé sur la paroi brûlante, jamais au centre. Mélanger 20 secondes et servir."],
+ no:[["Le gras du porc remplace l'huile.","D'où la cuillère unique au départ. Feu moyen pour le porc, feu maximum dès que le chou arrive. Jamais de couvercle, et le sel seulement à l'étape 7."],
+    ["Le vinaigre sur la paroi.","Au centre du wok il dilue, sur la paroi il se vaporise et parfume tout. C'est le geste qui sépare un chou correct de celui des petits restaurants."],
+    ["Pour Chloé","Piments entiers plutôt que coupés en deux, retirés avant de servir. Ils parfument l'huile sans libérer leur force.",1]]},
+
+mapo:{n:"Mapo tofu",cjk:"麻婆豆腐",c:"Chine",prep:"20 min",cook:"20 min",
+ g:[["Base",[
+   ["Tofu tendre ou soyeux en cubes de 3 cm","600 g",{t:"Surtout pas du ferme. Le bon mapo a un tofu qui tremble."}],
+   ["Bœuf haché","200 g"],
+   ["Doubanjiang de Pixian","1,5 c. à s.",{h:"郫縣豆瓣醬",t:"L'âme du plat. Cherchez 郫縣 sur l'étiquette, pas une sauce chili générique."}],
+   ["Douchi, rincés et hachés","1 c. à s.",{h:"豆豉",t:"Haricots noirs ridés et secs, pas ceux en conserve dans leur jus."}],
+   ["Ail haché","4 gousses"],["Gingembre râpé","2 cm"],
+   ["Shaoxing","1 c. à s."],["Sauce soja claire","1 c. à s."],
+   ["Bouillon de volaille","15 cl",{t:"Pas 25. Le tofu rend déjà beaucoup d'eau."}],
+   ["Maïzena délayée dans 4 c. à s. d'eau froide","2 c. à s."],
+   ["Huile neutre","4 c. à s."],["Riz jasmin","300 g"]]],
+  ["À la fin",[
+   ["Tiges d'ail ou ciboule en tronçons","3",{h:"蒜苗"}],
+   ["Poivre de Sichuan en grains","1 c. à c.",{h:"花椒"}],
+   ["Huile pimentée","à servir à part"]]]],
+ s:["Griller les grains de poivre de Sichuan à sec 2 minutes, les écraser au mortier. Réserver dans un bol, ils ne vont pas dans la poêle.",
+    "Eau salée à frémissement, pas à ébullition. Glisser le tofu, 3 minutes. Égoutter et laisser s'égoutter 5 bonnes minutes dans la passoire.",
+    "Lancer le riz.",
+    "Huile dans le wok à feu vif. Dorer le bœuf 5 minutes en l'écrasant, jusqu'à ce qu'il soit brun et sec.",
+    "Baisser à feu moyen. Doubanjiang, 1 minute 30, l'huile doit virer au rouge profond. Puis douchi, ail et gingembre, 30 secondes.",
+    "Déglacer au Shaoxing, verser le bouillon et la sauce soja. Porter à frémissement.",
+    "Faire glisser le tofu. À partir d'ici ne plus remuer à la spatule, pousser le wok en avant et en arrière.",
+    "Mijoter 4 à 5 minutes. Regarder le niveau : s'il a monté, laisser réduire 2 à 3 minutes à découvert.|Ne liez jamais avant que le tofu ait fini de rendre son eau",
+    "Verser un tiers de la maïzena, attendre que ça rebouillonne franchement, recommencer deux fois.",
+    "Tiges d'ail, une dernière poussée du wok, servir. Chacun moud son poivre de Sichuan et ajoute l'huile pimentée à table."],
+ no:[["La maïzena en trois fois, à ébullition franche.","Elle ne prend qu'à gros bouillons. À frémissement elle reste en suspension et la sauce redevient liquide en refroidissant. Refouettez le bol à chaque fois, elle retombe au fond en une minute."],
+    ["Pour Chloé","Le doubanjiang est déjà descendu à 1,5 cuillère et le poivre de Sichuan sort de la cuisson. Vous rattrapez dans votre bol avec l'huile pimentée. C'est ainsi qu'on le sert dans beaucoup de restaurants de Chengdu.",1],
+    ["Version adultes seuls","Montez à 3 cuillères de doubanjiang et ajoutez 1 cuillère à café de flocons de piment avec l'ail."]]},
+
+dandan:{n:"Dan dan noodles",cjk:"擔擔麵",c:"Chine",prep:"15 min",cook:"25 min",
+ g:[["La viande",[
+   ["Porc haché","300 g"],
+   ["Ya cai, rincé et essoré","80 g",{h:"宜賓芽菜",t:"Petit sachet souple, souvent au rayon sec. C'est lui qui fait la différence."}],
+   ["Shaoxing","1 c. à s."],["Sauce soja épaisse","1 c. à c."],["Huile neutre","2 c. à s."]]],
+  ["Sauce, par bol (×3)",[
+   ["Pâte de sésame chinoise","1 c. à s.",{h:"芝麻醬",t:"Pas du tahini. Plus foncée, graines torréfiées, elle se sépare dans le pot."}],
+   ["Sauce soja claire","1 bonne c. à s."],["Vinaigre de Chinkiang","2 c. à c."],
+   ["Huile pimentée avec son dépôt","1,5 à 2 c. à s."],["Poivre de Sichuan moulu","1 pincée"],
+   ["Sucre","1 pincée"],["Ail râpé","1 gousse"],["Bouillon de volaille chaud","5 cl"]]],
+  ["Le reste",[
+   ["Nouilles de blé fraîches fines","450 g"],["Ciboule ciselée","4 tiges"],
+   ["Cacahuètes grillées non salées, concassées","60 g"],["Choy sum ou bok choy","300 g"]]]],
+ s:["Griller les grains de poivre de Sichuan à sec 2 minutes, les écraser au mortier.",
+    "Wok à feu vif. Porc haché écrasé à la spatule, 8 à 10 minutes. Il doit perdre toute son eau, brunir et devenir presque croustillant.",
+    "Ajouter le ya cai, le Shaoxing et la sauce soja épaisse. Sauter 3 minutes. Réserver au chaud.",
+    "Monter la sauce directement dans les trois bols de service. Fouetter à la fourchette pour détendre la pâte de sésame avec le bouillon chaud.",
+    "Blanchir le choy sum 2 minutes, le retirer. Cuire les nouilles dans la même eau.",
+    "Égoutter les nouilles sans les rincer et les poser sur la sauce. Ajouter porc, choy sum, ciboule, cacahuètes.",
+    "Servir en couches et mélanger à table."],
+ no:[["La sauce attend au fond du bol.","Elle ne cuit jamais et ne se mélange pas aux nouilles dans une casserole. C'est le convive qui remue. Si monter trois bols vous paraît fastidieux, mélangez tout dans un saladier et répartissez, le résultat est identique."],
+    ["La viande doit vraiment sécher.","Les 8 à 10 minutes sont l'étape que tout le monde écourte et c'est celle qui compte."],
+    ["Pour Chloé","Montez son bol sans huile pimentée et avec une pincée de poivre de Sichuan seulement. Compensez par une demi-cuillère de pâte de sésame et un filet de bouillon.",1]]},
+
+charsiu:{n:"Char siu maison",cjk:"叉燒",c:"Chine",prep:"15 min + 4 h",cook:"35 min",
+ g:[["Ingrédients",[
+   ["Échine de porc en bandes","700 g",{t:"Une coupe dans la longueur par morceau, bandes de 4 à 5 cm. Gardez le gras."}],
+   ["Sauce hoisin","3 c. à s."],["Sauce soja claire","3 c. à s."],["Miel","3 c. à s."],
+   ["Shaoxing","2 c. à s."],["Ail râpé","4 gousses"],["Cinq-épices","1 c. à c."],
+   ["Bok choy","500 g"],["Huile neutre","2 c. à s."],["Riz jasmin","300 g"]]]],
+ s:["Couper le porc en bandes de 4 à 5 cm, dans la longueur. Entailler en diagonale tous les 2 cm sans trancher jusqu'au bout.",
+    "Marinade : hoisin, sauce soja, 2 c. à soupe de miel, Shaoxing, ail râpé, cinq-épices.",
+    "Enrober le porc, couvrir, 4 heures au frais, idéalement toute une nuit.",
+    "Four à 200°C, 30 minutes, en retournant et badigeonnant toutes les 10 minutes. Sans four : poêle couverte, 25 minutes à feu moyen en retournant souvent.",
+    "Badigeonner du miel restant, laisser caraméliser 5 minutes.",
+    "Blanchir le bok choy 3 minutes, le sauter 2 minutes avec l'ail et un filet d'huile.",
+    "Laisser reposer la viande 5 minutes avant de la trancher finement."],
+ no:[["Les entailles en diagonale.","La marinade pénètre bien mieux et le miel accroche dedans."],
+    ["Si la marinade brûle avant la fin.","Baissez le feu et couvrez. Le char siu doit être laqué, pas carbonisé."]]},
+
+kale:{n:"Kale sauté à l'ail",cjk:"",c:"Chine",prep:"5 min",cook:"5 min",
+ g:[["Ingrédients",[
+   ["Kale","500 g",{t:"La côte centrale reste coriace quoi qu'on fasse, détachez les feuilles en tirant le long de la tige."}],
+   ["Ail émincé","5 gousses"],["Shaoxing","2 c. à s."],["Sauce d'huître","1 c. à s."],
+   ["Sucre","1 pincée"],["Huile neutre","2 c. à s."],["Huile de sésame","un filet"],["Sel","—"]]]],
+ s:["Détacher les feuilles de la côte centrale, les déchirer en gros morceaux.",
+    "Wok à feu très vif avec l'huile neutre. Ail 20 secondes, pas plus.",
+    "Tout le kale d'un coup. Saler et sauter 1 minute.",
+    "Verser le Shaoxing sur les bords brûlants, couvrir immédiatement, 1 minute.",
+    "Découvrir, sauce d'huître et sucre, 1 minute. Les feuilles doivent être vert vif et fermes.",
+    "Hors du feu, un filet d'huile de sésame."],
+ no:[["Variante au fu yu.","Écrasez un cube de tofu fermenté rouge avec une cuillère à café de son jus, à la place de la sauce d'huître. C'est le traitement classique des légumes verts à Hong Kong."],
+    ["Pour Chloé","Le kale est franchement amer. Blanchir les feuilles 1 minute avant de les sauter enlève une bonne partie de l'amertume, au prix d'un peu de croquant.",1]]},
+
+armoricaine:{n:"Crevettes à l'armoricaine",cjk:"",c:"France",prep:"20 min",cook:"50 min",
+ g:[["Crevettes",[
+   ["Grosses crevettes entières avec tête","900 g",{t:"Entières, pas décortiquées. Les têtes et carapaces font toute la sauce."}],
+   ["Beurre","40 g"],["Huile d'olive","3 c. à s."]]],
+  ["La sauce",[
+   ["Carotte en petits dés","1"],["Fenouil en petits dés","½ bulbe"],["Ail écrasé","4 gousses"],
+   ["Concentré de tomate","2 c. à s."],["Tomates concassées","400 g"],
+   ["Cognac ou brandy","5 cl"],["Vin blanc sec","15 cl"],["Eau","30 cl"],
+   ["Estragon","1 c. à c. séché"],["Piment de Cayenne","1 pincée"],
+   ["Riz jasmin","300 g"],["Sel, poivre","—"]]]],
+ s:["Décortiquer les crevettes. Garder têtes et carapaces, réserver la chair au frais.",
+    "Huile dans une sauteuse à feu vif. Têtes et carapaces 5 minutes, en les écrasant à la spatule pour faire sortir le jus des têtes. Elles virent au rouge orangé soutenu.",
+    "Verser le cognac et flamber, ou laisser évaporer 1 minute.",
+    "Carotte, fenouil et ail, 5 minutes. Puis le concentré de tomate, 2 minutes, il doit brunir légèrement.",
+    "Vin blanc, réduire de moitié. Ajouter tomates concassées, eau, estragon, Cayenne. Saler.",
+    "Mijoter 25 minutes à couvert.",
+    "Passer au chinois en pressant fort à la louche. Jeter les carapaces. Réduire à découvert 10 minutes jusqu'à ce que la sauce nappe.",
+    "Beurre et huile dans une poêle très chaude. Saisir les crevettes 1 minute 30 par face.",
+    "Verser la sauce chaude sur les crevettes, mélanger 30 secondes hors du feu, servir."],
+ no:[["Les crevettes finissent dans la sauce, elles n'y cuisent pas.","Trente secondes de trop et elles deviennent caoutchouteuses. La sauce doit être terminée avant que vous ne touchiez à la poêle."],
+    ["Sans oignon ni échalote.","La base aromatique est montée sur carotte, fenouil et ail. Le fenouil apporte la douceur que l'oignon donnait, ne le sautez pas."],
+    ["L'estragon à Hong Kong.","Difficile à trouver frais au wet market. Le séché fait très bien l'affaire, city'super et Oliver's en ont du frais."]]},
+
+bourguignon:{n:"Bœuf bourguignon",cjk:"",c:"France",prep:"20 min",cook:"2 h 30",
+ g:[["Viande et base",[
+   ["Paleron ou macreuse en cubes de 5 cm","900 g"],
+   ["Poitrine fumée en lardons épais","150 g",{t:"Les lardons français sont rares à HK. Prenez de la poitrine fumée en tranches épaisses et coupez-la vous-même."}],
+   ["Carottes en gros tronçons","4"],["Céleri branche en dés","2 tiges"],["Ail écrasé","5 gousses"],
+   ["Farine","2 c. à s."],["Concentré de tomate","1 c. à s."],
+   ["Vin rouge sec","1 bouteille"],["Bouillon de bœuf","30 cl"],
+   ["Thym","4 branches"],["Laurier","2 feuilles"],["Huile neutre","3 c. à s."],["Sel, poivre","—"]]],
+  ["Garniture, à part",[
+   ["Champignons de Paris","400 g"],["Beurre","40 g"],["Persil plat","quelques feuilles"],
+   ["Pommes de terre vapeur","700 g"]]]],
+ s:["Sortir la viande une heure avant. Sécher chaque cube au papier absorbant, vraiment sec, puis saler.",
+    "Faire rendre les lardons à sec dans une cocotte, 5 minutes. Les retirer, garder la graisse.",
+    "Huile et feu vif. Colorer la viande en trois fois, jamais plus de six ou sept cubes à la fois, 2 minutes par face jusqu'au brun foncé. Réserver.",
+    "Feu moyen. Carottes, céleri et ail, 6 minutes dans les sucs.",
+    "Remettre viande et lardons. Saupoudrer la farine, 2 minutes. Concentré de tomate, 1 minute.",
+    "Verser le vin, gratter le fond à la cuillère en bois. Bouillonner 3 minutes.",
+    "Bouillon, thym, laurier. Le liquide affleure la viande sans la noyer.",
+    "Couvrir, mijoter 2 h 30 à feu très doux. La surface frémit à peine.|Si ça bout, la viande devient filandreuse",
+    "Vingt minutes avant la fin, sauter les champignons en deux dans le beurre à feu vif, 6 minutes. Saler à la fin. Les ajouter à la cocotte.",
+    "Si la sauce est trop liquide, découvrir et réduire 15 minutes. Persil au moment de servir."],
+ no:[["Sécher et colorer en trois fois.","Une viande humide ne colore pas, elle bout. C'est dans ces dix premières minutes que se joue tout le goût."],
+    ["Les champignons se cuisent à part.","Jetés crus dans la cocotte ils rendent leur eau, grisent et délavent la sauce."],
+    ["Sans oignon.","Base montée sur carotte, céleri et ail, et garniture compensée par davantage de champignons, 400 g au lieu de 250."],
+    ["Le vin.","Pas besoin d'un bourgogne à Hong Kong. Un rouge sec et charpenté suffit. Évitez les vins sucrés ou trop boisés."],
+    ["Meilleur le lendemain.","N'hésitez pas à le faire la veille."]]}
+
+};
+
+var ORDER=[["Chine",["gongbao","yuxiang","suanla","choufleur","bpbeef","chouporc","mapo","dandan","charsiu","kale"]],
+           ["France",["armoricaine","bourguignon"]]];
+
+var cur=null;
+
+function esc(s){return s;}
+
+function buildSelect(){
+  var sel=document.getElementById('pick'), out='';
+  ORDER.forEach(function(grp){
+    out+='<optgroup label="'+grp[0]+'">';
+    grp[1].forEach(function(id){
+      var r=R[id];
+      out+='<option value="'+id+'">'+r.n+(r.cjk?'  '+r.cjk:'')+'</option>';
+    });
+    out+='</optgroup>';
+  });
+  sel.innerHTML=out;
+}
+
+function key(id,kind,i){return 'ck-'+id+'-'+kind+'-'+i;}
+function get(k){try{return localStorage.getItem(k)==='1';}catch(e){return false;}}
+function set(k,v){try{localStorage.setItem(k,v?'1':'0');}catch(e){}}
+
+function render(id){
+  cur=id;
+  var r=R[id];
+
+  var m='<span class="pill">'+r.c+'</span><span class="pill">3 pers.</span>'+
+        '<span class="pill">Prep '+r.prep+'</span><span class="pill">Cuisson '+r.cook+'</span>';
+  if(r.cjk) m+='<span class="pill cjk">'+r.cjk+'</span>';
+  document.getElementById('meta').innerHTML=m;
+
+  var n=0, ing='';
+  r.g.forEach(function(grp){
+    ing+='<div class="sec"><div class="sec-h"><span class="sec-t">'+grp[0]+'</span><span class="sec-n" data-c="'+n+'"></span></div>';
+    grp[1].forEach(function(it){
+      var o=it[2]||{}, k=key(id,'i',n);
+      ing+='<div class="item'+(get(k)?' on':'')+'" data-k="'+k+'" data-grp="'+n+'">'+CHECK+
+           '<div class="item-body"><div class="item-n">'+it[0]+'</div>'+
+           (o.h?'<a class="hanzi" href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(o.h)+'" target="_blank" rel="noopener">'+o.h+' <span class="ar">photo</span></a>':'')+
+           (o.t?'<div class="tip">'+o.t+'</div>':'')+
+           '</div><span class="qty">'+it[1]+'</span></div>';
+      n++;
+    });
+    ing+='</div>';
+  });
+  ing+='<button class="reset" id="r-i">Tout décocher</button>';
+  document.getElementById('ing').innerHTML=ing;
+
+  var prep='<div class="sec"><div class="sec-h"><span class="sec-t">Préparation</span><span class="sec-n">'+r.s.length+' étapes</span></div>';
+  r.s.forEach(function(t,i){
+    var parts=t.split('|'), k=key(id,'s',i);
+    prep+='<div class="step'+(get(k)?' on':'')+'" data-k="'+k+'"><span class="num">'+(i+1)+'</span><div class="step-t">'+parts[0]+
+          (parts[1]?'<span class="flag">'+parts[1]+'</span>':'')+'</div></div>';
+  });
+  prep+='</div>';
+  (r.no||[]).forEach(function(nt){
+    prep+='<div class="note'+(nt[2]?' kid':'')+'"><b>'+nt[0]+'</b> '+nt[1]+'</div>';
+  });
+  if(r.p) prep+='<div class="note pair"><b>Avec quoi le servir.</b> '+r.p+'</div>';
+  prep+='<button class="reset" id="r-s">Décocher toutes les étapes</button>';
+  document.getElementById('prep').innerHTML=prep;
+
+  wire();
+  counts();
+  try{localStorage.setItem('carnet-last',id);}catch(e){}
+}
+
+function counts(){
+  document.querySelectorAll('#ing .sec-n').forEach(function(el){
+    var g=el.dataset.c;
+    var all=document.querySelectorAll('#ing .item[data-grp="'+g+'"]');
+    var on=document.querySelectorAll('#ing .item.on[data-grp="'+g+'"]');
+    el.textContent=on.length+' / '+all.length;
+  });
+}
+
+function wire(){
+  document.querySelectorAll('#ing .item').forEach(function(el){
+    el.addEventListener('click',function(ev){
+      if(ev.target.closest('a'))return;
+      el.classList.toggle('on'); set(el.dataset.k, el.classList.contains('on')); counts();
+    });
+  });
+  document.querySelectorAll('#prep .step').forEach(function(el){
+    el.addEventListener('click',function(){
+      el.classList.toggle('on'); set(el.dataset.k, el.classList.contains('on'));
+    });
+  });
+  var ri=document.getElementById('r-i');
+  if(ri) ri.addEventListener('click',function(){
+    document.querySelectorAll('#ing .item').forEach(function(el){el.classList.remove('on');set(el.dataset.k,false);});
+    counts();
+  });
+  var rs=document.getElementById('r-s');
+  if(rs) rs.addEventListener('click',function(){
+    document.querySelectorAll('#prep .step').forEach(function(el){el.classList.remove('on');set(el.dataset.k,false);});
+  });
+}
+
+function showTab(name){
+  document.getElementById('ing').hidden = (name!=='ing');
+  document.getElementById('prep').hidden = (name!=='prep');
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.setAttribute('aria-selected', String(t.dataset.p===name));
+  });
+  window.scrollTo(0,0);
+}
+
+buildSelect();
+document.getElementById('pick').addEventListener('change',function(e){
+  render(e.target.value); showTab('ing');
+});
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click',function(){ showTab(t.dataset.p); });
+});
+
+var start='gongbao';
+try{var l=localStorage.getItem('carnet-last'); if(l&&R[l]) start=l;}catch(e){}
+document.getElementById('pick').value=start;
+render(start);
+</script>
