@@ -434,12 +434,12 @@ function render(id){
   if(r.cjk) m+='<span class="pill cjk">'+r.cjk+'</span>';
   document.getElementById('meta').innerHTML=m;
 
-  var n=0, ing='';
+  var n=0, gi=0, ing='';
   r.g.forEach(function(grp){
-    ing+='<div class="sec"><div class="sec-h"><span class="sec-t">'+grp[0]+'</span><span class="sec-n" data-c="'+n+'"></span></div>';
+    ing+='<div class="sec"><div class="sec-h"><span class="sec-t">'+grp[0]+'</span><span class="sec-n" data-c="'+gi+'"></span></div>';
     grp[1].forEach(function(it){
       var o=it[2]||{}, k=key(id,'i',n);
-      ing+='<div class="item'+(get(k)?' on':'')+'" data-k="'+k+'" data-grp="'+n+'">'+CHECK+
+      ing+='<div class="item'+(get(k)?' on':'')+'" data-k="'+k+'" data-grp="'+gi+'">'+CHECK+
            '<div class="item-body"><div class="item-n">'+it[0]+'</div>'+
            (o.h?'<a class="hanzi" href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(o.h)+'" target="_blank" rel="noopener">'+o.h+' <span class="ar">photo</span></a>':'')+
            (o.t?'<div class="tip">'+o.t+'</div>':'')+
@@ -447,6 +447,7 @@ function render(id){
       n++;
     });
     ing+='</div>';
+    gi++;
   });
   ing+='<button class="reset" id="r-i">Tout décocher</button>';
   document.getElementById('ing').innerHTML=ing;
