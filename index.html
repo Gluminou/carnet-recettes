@@ -206,6 +206,36 @@ suanla:{n:"Soupe aigre-piquante",cjk:"酸辣湯",c:"Chine",prep:"25 min",cook:"2
     ["Pour Chloé","Prélevez son bol à la fin de l'étape 8, avant le poivre et le vinaigre. Ajoutez-lui ensuite une demi-cuillère de vinaigre et une pincée de poivre dans son bol. Elle aura la même soupe, dosée pour elle.",1]],
  p:"Se sert en même temps que les plats et le riz, pas en entrée. Avec un sauté de viande, elle fait le repas complet et remplace le légume."},
 
+tofubraise:{n:"Tofu braisé aux shiitake et pak choi",cjk:"紅燒豆腐",c:"Chine",prep:"20 min + 20 min de pressage",cook:"20 min",
+ g:[["Ingrédients",[
+   ["Tofu ferme, barquette marquée 煎炸","500 g",{h:"煎炸豆腐",t:"La barquette rouge chez Pak Took, celle dont la photo montre des cubes dorés. La verte 蒸煮拌 est tendre et se déliterait. Plus ferme encore : du 板豆腐 à l'étal de tofu du wet market."}],
+   ["Champignons shiitake frais émincés","200 g"],
+   ["Pak choi coupé en deux","400 g"],
+   ["Ail haché","3 gousses"],["Gingembre râpé","2 cm"],
+   ["Ciboule ciselée","2 tiges"]]],
+  ["Sauce, mélangée dans un bol",[
+   ["Sauce d'huître","2 c. à s."],["Sauce soja claire","1 c. à s."],
+   ["Sauce soja épaisse","½ c. à c."],["Sucre","1 c. à c."],
+   ["Bouillon de légumes","20 cl"],["Maïzena","1 c. à c."]]],
+  ["Le reste",[
+   ["Huile neutre","4 c. à s."],["Huile de sésame","1 c. à c."],["Riz jasmin","300 g"]]]],
+ s:["Presser le tofu avant tout le reste : posez le bloc entre deux feuilles de papier absorbant, une assiette par-dessus, une boîte de conserve sur l'assiette. 15 à 20 minutes. L'épongeage seul ne suffit pas.",
+    "Trancher en cubes de 2 cm réguliers.",
+    "Huile dans une poêle large à feu moyen-vif. Saisir le tofu en deux fournées, une seule couche, avec de l'espace entre les morceaux.|500 g d'un coup se cuisent à la vapeur les uns des autres",
+    "4 minutes par face sans y toucher. Tant qu'un morceau colle, la croûte n'est pas faite. Quand elle l'est, il se décolle tout seul. Réserver sur une assiette.",
+    "Si de l'eau apparaît au fond de la poêle, montez le feu et laissez-la s'évaporer avant de poursuivre. Le tofu ne dore pas dans l'eau, il cuit à la vapeur.",
+    "Essuyer la poêle, huile neuve. Faire sauter les shiitake 4 minutes. Attendre que le fond redevienne sec et qu'ils commencent à colorer, c'est là que leur goût se concentre.",
+    "Ail et gingembre, 30 secondes.",
+    "Remuer le bol de sauce et le verser. Remettre le tofu à la spatule, en laissant au fond de l'assiette le liquide qu'il a rendu en attendant.|Ce liquide diluerait la sauce juste avant la liaison",
+    "Mijoter 5 minutes à couvert. Pousser la poêle d'avant en arrière plutôt que remuer, le tofu doré est fragile.",
+    "Poser le pak choi sur le dessus, couvrir encore 3 minutes, il cuit à la vapeur de la sauce. Hors du feu, huile de sésame et ciboule."],
+ no:[["Quel tofu acheter.","Il faut du ferme. Chez Pak Took, c'est la barquette à étiquette rouge marquée 煎炸, celle dont la photo montre des cubes dorés. La verte marquée 蒸煮拌 est tendre et se délitera dans la poêle."],
+    ["Presser, puis deux fournées.","Les deux erreurs qui coûtent la croûte dorée. Un tofu non pressé rend son eau dans la poêle. Une poêle surchargée produit le même résultat, les morceaux se cuisent à la vapeur les uns des autres. Dans les deux cas le tofu reste blanc et finit par se défaire."],
+    ["Ne cherchez pas à dorer toutes les faces.","Avec du tofu de barquette, retourner chaque cube une deuxième fois casse plus de morceaux que ça n'ajoute de couleur. Deux faces bien colorées suffisent largement."],
+    ["Le pak choi à la fin, par-dessus.","Il cuit à la vapeur de la sauce en trois minutes et garde sa couleur. Mélangé plus tôt, il devient kaki et rend de l'eau."],
+    ["Pour Chloé","Plat doux, rien à retirer. Le tofu doré est beaucoup plus accessible aux enfants que le tofu nature.",1]],
+ p:"Complet avec le riz. Si vous voulez l'accompagner, une soupe claire plutôt qu'un second sauté."},
+
 choufleur:{n:"Chou-fleur sauté à l'ail",cjk:"蒜蓉花菜",c:"Chine",prep:"5 min",cook:"12 min",
  g:[["Ingrédients",[
    ["Chou-fleur en petits bouquets","600 g",{h:"松花菜",t:"La variété lâche aux longues tiges saute bien mieux que le chou-fleur serré européen."}],
@@ -401,7 +431,7 @@ bourguignon:{n:"Bœuf bourguignon",cjk:"",c:"France",prep:"20 min",cook:"2 h 30"
 
 };
 
-var ORDER=[["Chine",["gongbao","yuxiang","suanla","choufleur","bpbeef","chouporc","mapo","dandan","charsiu","kale"]],
+var ORDER=[["Chine",["gongbao","yuxiang","suanla","tofubraise","choufleur","bpbeef","chouporc","mapo","dandan","charsiu","kale"]],
            ["France",["armoricaine","bourguignon"]]];
 
 var cur=null;
