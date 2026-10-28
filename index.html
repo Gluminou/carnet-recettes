@@ -87,7 +87,7 @@ main{padding-block:18px 56px}
 
 <header>
   <div class="wrap head-in">
-    <div class="brand">Carnet de cuisine · 3 couverts</div>
+    <div class="brand">Carnet de cuisine · <span id="count"></span></div>
     <select id="pick" aria-label="Choisir une recette"></select>
     <div class="meta-row" id="meta"></div>
     <div class="tabs" role="tablist">
@@ -572,7 +572,18 @@ function showTab(name){
   window.scrollTo(0,0);
 }
 
-buildSelect();
+function boot(keep){
+  buildSelect();
+  var start=null;
+  if(keep && R[keep]) start=keep;
+  if(!start){ try{var l=localStorage.getItem('carnet-last'); if(l&&R[l]) start=l;}catch(e){} }
+  if(!start) start=ORDER[0][1][0];
+  document.getElementById('pick').value=start;
+  render(start);
+  var c=document.getElementById('count');
+  if(c) c.textContent=Object.keys(R).length+' recettes';
+}
+
 document.getElementById('pick').addEventListener('change',function(e){
   render(e.target.value); showTab('ing');
 });
@@ -580,8 +591,19 @@ document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click',function(){ showTab(t.dataset.p); });
 });
 
-var start='gongbao';
-try{var l=localStorage.getItem('carnet-last'); if(l&&R[l]) start=l;}catch(e){}
-document.getElementById('pick').value=start;
-render(start);
+boot(null);
+
+/* Les recettes embarquées ci-dessus servent de secours hors ligne.
+   Quand le réseau répond, recipes.json fait autorité, ce qui évite
+   d'avoir à recréer le raccourci iOS à chaque nouvelle recette. */
+fetch('recipes.json?t='+Date.now(),{cache:'no-store'})
+  .then(function(res){ return res.ok ? res.json() : null; })
+  .then(function(d){
+    if(!d || !d.R || !d.ORDER) return;
+    if(JSON.stringify(d.R)===JSON.stringify(R) && JSON.stringify(d.ORDER)===JSON.stringify(ORDER)) return;
+    var keep=document.getElementById('pick').value;
+    R=d.R; ORDER=d.ORDER;
+    boot(keep);
+  })
+  .catch(function(){});
 </script>

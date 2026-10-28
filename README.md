@@ -25,11 +25,13 @@ liste de courses en cours sur une recette n'affecte pas les autres.
 
 ## Recettes
 
-Chine : gongbao jiding, porc yuxiang, soupe aigre-piquante, chou-fleur
-à l'ail, black pepper beef, chou déchiré au porc, mapo tofu, dan dan
-noodles, char siu, kale sauté.
+Chine : gongbao jiding, porc yuxiang, soupe aigre-piquante, tofu braisé
+aux shiitake et pak choi, chou-fleur à l'ail, black pepper beef, chou
+déchiré au porc, mapo tofu, dan dan noodles, char siu, kale sauté.
 
 France : crevettes à l'armoricaine, bœuf bourguignon.
+
+Sucré : cookies au chocolat.
 
 ## Modifier
 
@@ -37,3 +39,17 @@ Tout est dans `index.html`. Les recettes sont un objet JavaScript nommé
 `R` en haut du `<script>`, une entrée par recette. Pour en ajouter une,
 copiez une entrée existante et ajoutez son identifiant au tableau
 `ORDER` juste en dessous.
+
+Puis régénérez `recipes.json`, qui doit toujours refléter `index.html` :
+
+    node build-recipes.js index.html recipes.json
+
+## Pourquoi recipes.json
+
+Un raccourci ajouté à l'écran d'accueil d'un iPhone garde sa propre
+copie de la page, sans barre d'adresse ni rafraîchissement. Les
+recettes embarquées dans `index.html` servent donc de secours hors
+ligne, et au démarrage la page va chercher `recipes.json` avec un
+horodatage qui contourne le cache. Dès que le réseau répond, ce
+fichier fait autorité et la page se redessine. Une nouvelle recette
+apparaît donc sans avoir à recréer le raccourci.
