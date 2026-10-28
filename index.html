@@ -402,6 +402,35 @@ armoricaine:{n:"Crevettes à l'armoricaine",cjk:"",c:"France",prep:"20 min",cook
     ["Sans oignon ni échalote.","La base aromatique est montée sur carotte, fenouil et ail. Le fenouil apporte la douceur que l'oignon donnait, ne le sautez pas."],
     ["L'estragon à Hong Kong.","Difficile à trouver frais au wet market. Le séché fait très bien l'affaire, city'super et Oliver's en ont du frais."]]},
 
+cookies:{n:"Cookies au chocolat",cjk:"",c:"Dessert",y:"18 cookies",prep:"20 min + 24 h de repos",cook:"11 min",
+ g:[["Pâte",[
+   ["Beurre doux","170 g",{t:"無鹽牛油. Sorti du frigo une heure avant, il doit céder sous le doigt sans être fondu."}],
+   ["Cassonade ou sucre roux","150 g"],
+   ["Sucre blanc","100 g"],
+   ["Œuf entier","1"],
+   ["Jaune d'œuf","1",{t:"Le jaune supplémentaire est ce qui donne le cœur moelleux."}],
+   ["Extrait de vanille","2 c. à café"],
+   ["Farine T55 ou all-purpose","250 g",{t:"À peser, jamais au volume. Hong Kong est humide, la farine se tasse et un verre doseur peut vous en faire mettre un tiers de trop."}],
+   ["Bicarbonate de soude","1 c. à café"],
+   ["Sel fin","1 c. à café"]]],
+  ["Chocolat et finition",[
+   ["Chocolat noir 60 à 70 %, haché au couteau","200 g",{t:"Une tablette hachée, pas des pépites. Les morceaux irréguliers font des coulées et la poudre fine marbre la pâte."}],
+   ["Fleur de sel","pour le dessus"]]]],
+ s:["Travailler le beurre mou avec les deux sucres 3 minutes, jusqu'à ce que le mélange pâlisse et devienne mousseux.",
+    "Ajouter l'œuf entier, puis le jaune, puis la vanille, en mélangeant après chaque ajout.",
+    "Mélanger à part la farine, le bicarbonate et le sel, puis les verser d'un coup sur le beurre.",
+    "Mélanger juste jusqu'à disparition de la farine, pas une seconde de plus.|Une pâte trop travaillée donne des cookies durs",
+    "Incorporer le chocolat haché à la spatule.",
+    "Couvrir et laisser reposer au réfrigérateur 24 heures, 48 si vous pouvez. Une heure vaut déjà mieux que rien.",
+    "Préchauffer le four à 180°C. Former des boules d'environ 55 g, la taille d'une balle de golf, six par plaque maximum et bien espacées.",
+    "Enfourner 10 à 12 minutes. Les bords doivent être pris et dorés, le centre encore pâle et visiblement sous-cuit.|Sortez-les quand ils vous semblent crus au milieu",
+    "Parsemer de fleur de sel et laisser 10 minutes sur la plaque brûlante sans y toucher. C'est là qu'ils finissent de cuire et que le centre prend."],
+ no:[["Le repos au frigo change tout.","Pendant 24 heures la farine s'hydrate complètement et les sucres se dissolvent. Le goût passe de sucré-plat à caramel et toffee, et le cookie s'étale moins à la cuisson. La même pâte cuite immédiatement et cuite le lendemain donnent deux biscuits différents."],
+    ["Sortir sous-cuit.","C'est l'erreur numéro un. La plaque brûlante continue la cuisson pendant cinq bonnes minutes. Un cookie déjà doré au centre dans le four sera sec une fois froid."],
+    ["Pépites ou tablette.","Les pépites contiennent des stabilisants qui les empêchent de fondre, elles restent des points durs. Une tablette hachée au couteau donne des coulées de chocolat et de la poudre qui colore la pâte."],
+    ["Pour Chloé","Elle peut rouler les boules, planter quelques morceaux de chocolat sur le dessus avant d'enfourner, et parsemer la fleur de sel à la sortie. La pâte reposée se roule très bien à la main et ne colle pas.",1]],
+ p:"La pâte crue se garde 3 jours au réfrigérateur et 3 mois au congélateur en boules déjà formées. Enfournez-les directement congelées, 2 minutes de plus."},
+
 bourguignon:{n:"Bœuf bourguignon",cjk:"",c:"France",prep:"20 min",cook:"2 h 30",
  g:[["Viande et base",[
    ["Paleron ou macreuse en cubes de 5 cm","900 g"],
@@ -432,7 +461,8 @@ bourguignon:{n:"Bœuf bourguignon",cjk:"",c:"France",prep:"20 min",cook:"2 h 30"
 };
 
 var ORDER=[["Chine",["gongbao","yuxiang","suanla","tofubraise","choufleur","bpbeef","chouporc","mapo","dandan","charsiu","kale"]],
-           ["France",["armoricaine","bourguignon"]]];
+           ["France",["armoricaine","bourguignon"]],
+           ["Sucré",["cookies"]]];
 
 var cur=null;
 
@@ -459,7 +489,7 @@ function render(id){
   cur=id;
   var r=R[id];
 
-  var m='<span class="pill">'+r.c+'</span><span class="pill">3 pers.</span>'+
+  var m='<span class="pill">'+r.c+'</span><span class="pill">'+(r.y||'3 pers.')+'</span>'+
         '<span class="pill">Prep '+r.prep+'</span><span class="pill">Cuisson '+r.cook+'</span>';
   if(r.cjk) m+='<span class="pill cjk">'+r.cjk+'</span>';
   document.getElementById('meta').innerHTML=m;
