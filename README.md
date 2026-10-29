@@ -26,8 +26,9 @@ liste de courses en cours sur une recette n'affecte pas les autres.
 ## Recettes
 
 Chine : gongbao jiding, porc yuxiang, soupe aigre-piquante, tofu braisé
-aux shiitake et pak choi, chou-fleur à l'ail, black pepper beef, chou
-déchiré au porc, mapo tofu, dan dan noodles, char siu, kale sauté.
+aux shiitake et pak choi, bœuf braisé aux pommes de terre, chou-fleur à
+l'ail, black pepper beef, chou déchiré au porc, mapo tofu, dan dan
+noodles, char siu, kale sauté.
 
 France : crevettes à l'armoricaine, bœuf bourguignon.
 
@@ -40,9 +41,17 @@ Tout est dans `index.html`. Les recettes sont un objet JavaScript nommé
 copiez une entrée existante et ajoutez son identifiant au tableau
 `ORDER` juste en dessous.
 
-Puis régénérez `recipes.json`, qui doit toujours refléter `index.html` :
+Le fichier de travail est `carnet.html`, qui est aussi publié comme
+artifact Claude. `index.html` et `recipes.json` en sont dérivés et ne
+se modifient jamais à la main :
 
-    node build-recipes.js index.html recipes.json
+    node build-site.js carnet.html index.html
+    node build-recipes.js carnet.html recipes.json
+
+`build-site.js` ajoute l'en-tête HTML que la plateforme Claude fournit
+d'elle-même mais que GitHub Pages ne fournit pas : doctype, charset,
+viewport et les métadonnées de raccourci iOS. `build-recipes.js`
+extrait les données et vérifie que `R` et `ORDER` concordent.
 
 ## Pourquoi recipes.json
 
