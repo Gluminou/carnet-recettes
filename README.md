@@ -26,9 +26,9 @@ liste de courses en cours sur une recette n'affecte pas les autres.
 ## Recettes
 
 Chine : gongbao jiding, porc yuxiang, soupe aigre-piquante, tofu braisé
-aux shiitake et pak choi, bœuf braisé aux pommes de terre, chou-fleur à
-l'ail, black pepper beef, chou déchiré au porc, mapo tofu, dan dan
-noodles, char siu, kale sauté.
+aux shiitake et pak choi, boulettes tête de lion, bœuf braisé aux pommes
+de terre, chou-fleur à l'ail, black pepper beef, chou déchiré au porc,
+mapo tofu, dan dan noodles, char siu, kale sauté.
 
 France : crevettes à l'armoricaine, bœuf bourguignon.
 
