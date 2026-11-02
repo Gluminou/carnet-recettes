@@ -92,6 +92,8 @@ main{padding-block:18px 56px}
 
 .reset{display:block;width:100%;margin-top:20px;padding:11px;background:none;border:1px solid var(--line);border-radius:6px;color:var(--ink-2);font-family:var(--font-sans);font-size:13px;cursor:pointer}
 .reset:hover{border-color:var(--ink-3);color:var(--ink)}
+.py{font-family:var(--font-sans);font-style:italic;font-size:.82em;font-weight:400;letter-spacing:0;color:var(--ink-3);margin-left:.4em;white-space:nowrap}
+.hanzi .py,.pill.cjk .py{color:currentColor;opacity:.72}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -113,6 +115,11 @@ main{padding-block:18px 56px}
 </main>
 
 <script>
+
+var PY={"宮保雞丁": "gōngbǎo jīdīng", "鎮江香醋": "zhènjiāng xiāngcù", "乾辣椒": "gān làjiāo", "花椒": "huājiāo", "魚香肉絲": "yúxiāng ròusī", "木耳": "mù'ěr", "筍絲": "sǔnsī", "泡椒": "pàojiāo", "肉絲": "ròusī", "酸辣湯": "suānlàtāng", "冬菇": "dōnggū", "白胡椒粉": "bái hújiāofěn", "辣": "là", "紅燒豆腐": "hóngshāo dòufu", "煎炸": "jiānzhá", "煎炸豆腐": "jiānzhá dòufu", "蒸煮拌": "zhēngzhǔbàn", "板豆腐": "bǎn dòufu", "土豆燒牛肉": "tǔdòu shāo niúròu", "牛腩": "niúnǎn", "八角": "bājiǎo", "桂皮": "guìpí", "紹興酒": "shàoxīngjiǔ", "老抽": "lǎochōu", "冰糖": "bīngtáng", "蒜蓉花菜": "suànróng huācài", "松花菜": "sōnghuācài", "手撕包菜": "shǒusī bāocài", "高麗菜": "gāolícài", "五花肉": "wǔhuāròu", "麻婆豆腐": "mápó dòufu", "郫縣豆瓣醬": "píxiàn dòubànjiàng", "郫縣": "píxiàn", "豆豉": "dòuchǐ", "蒜苗": "suànmiáo", "擔擔麵": "dàndànmiàn", "宜賓芽菜": "yíbīn yácài", "芝麻醬": "zhīmajiàng", "叉燒": "chāshāo", "無鹽牛油": "wúyán niúyóu", "紅燒獅子頭": "hóngshāo shīzitóu", "三七肥瘦": "sānqī féishòu", "清蒸魚": "qīngzhēngyú", "臘味煲仔飯": "làwèi bāozǎifàn", "臘味": "làwèi", "芋頭炆雞": "yùtóu mēnjī", "荔浦芋頭": "lìpǔ yùtóu", "南乳": "nánrǔ", "臘腸": "làcháng", "潤腸": "rùncháng", "臘肉": "làròu", "紹菜": "shàocài", "馬蹄": "mǎtí", "小棠菜": "xiǎotángcài", "菜心": "càixīn", "芥蘭": "jièlán", "蒸魚豉油": "zhēngyú chǐyóu"};
+/* Toute suite de caracteres chinois affichee est suivie de son pinyin. */
+function pin(h){return h.replace(/[\u3400-\u9FFF]+/g,function(m){
+  return PY[m]?m+'<span class="py">'+PY[m]+'</span>':m;});}
 var CHECK='<span class="dot"><svg viewBox="0 0 12 12"><path d="M2 6.3 4.6 9 10 3"/></svg></span>';
 
 /* Chaque entrée : g = groupe d'ingrédients, i = [nom, quantité, {h:hanzi, t:astuce}] */
@@ -550,7 +557,7 @@ function render(id){
   var m='<span class="pill">'+r.c+'</span><span class="pill">'+(r.y||'3 pers.')+'</span>'+
         '<span class="pill">Prep '+r.prep+'</span><span class="pill">Cuisson '+r.cook+'</span>';
   if(r.cjk) m+='<span class="pill cjk">'+r.cjk+'</span>';
-  document.getElementById('meta').innerHTML=m;
+  document.getElementById('meta').innerHTML=pin(m);
 
   var n=0, gi=0, ing='';
   r.g.forEach(function(grp){
@@ -568,7 +575,7 @@ function render(id){
     gi++;
   });
   ing+='<button class="reset" id="r-i">Tout décocher</button>';
-  document.getElementById('ing').innerHTML=ing;
+  document.getElementById('ing').innerHTML=pin(ing);
 
   var prep='<div class="sec"><div class="sec-h"><span class="sec-t">Préparation</span><span class="sec-n">'+r.s.length+' étapes</span></div>';
   r.s.forEach(function(t,i){
@@ -582,7 +589,7 @@ function render(id){
   });
   if(r.p) prep+='<div class="note pair"><b>Avec quoi le servir.</b> '+r.p+'</div>';
   prep+='<button class="reset" id="r-s">Décocher toutes les étapes</button>';
-  document.getElementById('prep').innerHTML=prep;
+  document.getElementById('prep').innerHTML=pin(prep);
 
   wire();
   counts();
