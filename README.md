@@ -30,7 +30,8 @@ aux shiitake et pak choi, boulettes tête de lion, bœuf braisé aux pommes
 de terre, chou-fleur à l'ail, black pepper beef, chou déchiré au porc,
 mapo tofu, dan dan noodles, char siu, kale sauté.
 
-France : crevettes à l'armoricaine, bœuf bourguignon.
+France : crevettes à l'armoricaine, bœuf bourguignon, cordon bleu
+maison.
 
 Sucré : cookies au chocolat.
 

@@ -116,7 +116,7 @@ main{padding-block:18px 56px}
 
 <script>
 
-var PY={"宮保雞丁": "gōngbǎo jīdīng", "鎮江香醋": "zhènjiāng xiāngcù", "乾辣椒": "gān làjiāo", "花椒": "huājiāo", "魚香肉絲": "yúxiāng ròusī", "木耳": "mù'ěr", "筍絲": "sǔnsī", "泡椒": "pàojiāo", "肉絲": "ròusī", "酸辣湯": "suānlàtāng", "冬菇": "dōnggū", "白胡椒粉": "bái hújiāofěn", "辣": "là", "紅燒豆腐": "hóngshāo dòufu", "煎炸": "jiānzhá", "煎炸豆腐": "jiānzhá dòufu", "蒸煮拌": "zhēngzhǔbàn", "板豆腐": "bǎn dòufu", "土豆燒牛肉": "tǔdòu shāo niúròu", "牛腩": "niúnǎn", "八角": "bājiǎo", "桂皮": "guìpí", "紹興酒": "shàoxīngjiǔ", "老抽": "lǎochōu", "冰糖": "bīngtáng", "蒜蓉花菜": "suànróng huācài", "松花菜": "sōnghuācài", "手撕包菜": "shǒusī bāocài", "高麗菜": "gāolícài", "五花肉": "wǔhuāròu", "麻婆豆腐": "mápó dòufu", "郫縣豆瓣醬": "píxiàn dòubànjiàng", "郫縣": "píxiàn", "豆豉": "dòuchǐ", "蒜苗": "suànmiáo", "擔擔麵": "dàndànmiàn", "宜賓芽菜": "yíbīn yácài", "芝麻醬": "zhīmajiàng", "叉燒": "chāshāo", "無鹽牛油": "wúyán niúyóu", "紅燒獅子頭": "hóngshāo shīzitóu", "三七肥瘦": "sānqī féishòu", "清蒸魚": "qīngzhēngyú", "臘味煲仔飯": "làwèi bāozǎifàn", "臘味": "làwèi", "芋頭炆雞": "yùtóu mēnjī", "荔浦芋頭": "lìpǔ yùtóu", "南乳": "nánrǔ", "臘腸": "làcháng", "潤腸": "rùncháng", "臘肉": "làròu", "紹菜": "shàocài", "馬蹄": "mǎtí", "小棠菜": "xiǎotángcài", "菜心": "càixīn", "芥蘭": "jièlán", "蒸魚豉油": "zhēngyú chǐyóu"};
+var PY={"宮保雞丁": "gōngbǎo jīdīng", "鎮江香醋": "zhènjiāng xiāngcù", "乾辣椒": "gān làjiāo", "花椒": "huājiāo", "魚香肉絲": "yúxiāng ròusī", "木耳": "mù'ěr", "筍絲": "sǔnsī", "泡椒": "pàojiāo", "肉絲": "ròusī", "酸辣湯": "suānlàtāng", "冬菇": "dōnggū", "白胡椒粉": "bái hújiāofěn", "辣": "là", "紅燒豆腐": "hóngshāo dòufu", "煎炸": "jiānzhá", "煎炸豆腐": "jiānzhá dòufu", "蒸煮拌": "zhēngzhǔbàn", "板豆腐": "bǎn dòufu", "土豆燒牛肉": "tǔdòu shāo niúròu", "牛腩": "niúnǎn", "八角": "bājiǎo", "桂皮": "guìpí", "紹興酒": "shàoxīngjiǔ", "老抽": "lǎochōu", "冰糖": "bīngtáng", "蒜蓉花菜": "suànróng huācài", "松花菜": "sōnghuācài", "手撕包菜": "shǒusī bāocài", "高麗菜": "gāolícài", "五花肉": "wǔhuāròu", "麻婆豆腐": "mápó dòufu", "郫縣豆瓣醬": "píxiàn dòubànjiàng", "郫縣": "píxiàn", "豆豉": "dòuchǐ", "蒜苗": "suànmiáo", "擔擔麵": "dàndànmiàn", "宜賓芽菜": "yíbīn yácài", "芝麻醬": "zhīmajiàng", "叉燒": "chāshāo", "無鹽牛油": "wúyán niúyóu", "紅燒獅子頭": "hóngshāo shīzitóu", "三七肥瘦": "sānqī féishòu", "清蒸魚": "qīngzhēngyú", "臘味煲仔飯": "làwèi bāozǎifàn", "臘味": "làwèi", "芋頭炆雞": "yùtóu mēnjī", "荔浦芋頭": "lìpǔ yùtóu", "南乳": "nánrǔ", "臘腸": "làcháng", "潤腸": "rùncháng", "臘肉": "làròu", "紹菜": "shàocài", "馬蹄": "mǎtí", "小棠菜": "xiǎotángcài", "菜心": "càixīn", "芥蘭": "jièlán", "蒸魚豉油": "zhēngyú chǐyóu", "日式麵包糠": "rìshì miànbāokāng", "麵包糠": "miànbāokāng"};
 /* Toute suite de caracteres chinois affichee est suivie de son pinyin. */
 function pin(h){return h.replace(/[\u3400-\u9FFF]+/g,function(m){
   return PY[m]?m+'<span class="py">'+PY[m]+'</span>':m;});}
@@ -529,6 +529,39 @@ cookies:{n:"Cookies au chocolat",cjk:"",c:"Dessert",y:"18 cookies",prep:"20 min 
     ["Pour Chloé","Elle peut rouler les boules, planter quelques morceaux de chocolat sur le dessus avant d'enfourner, et parsemer la fleur de sel à la sortie. La pâte reposée se roule très bien à la main et ne colle pas.",1]],
  p:"La pâte crue se garde 3 jours au réfrigérateur et 3 mois au congélateur en boules déjà formées. Enfournez-les directement congelées, 2 minutes de plus."},
 
+cordonbleu:{n:"Cordon bleu maison",cjk:"",c:"France",y:"3 pièces",prep:"30 min + 30 min de repos au froid",cook:"20 min",
+ g:[["Les cordons bleus",[
+   ["Blancs de poulet","3, environ 180 g chacun",{t:"Épais et réguliers. Un blanc fin et pointu ne se fend pas en portefeuille."}],
+   ["Jambon blanc en tranches fines","6"],
+   ["Gruyère, comté ou emmental en tranches","6, environ 150 g"],
+   ["Moutarde de Dijon","1 c. à c."],
+   ["Sel, poivre","au goût"]]],
+  ["Panure",[
+   ["Farine","60 g"],
+   ["Œufs","2"],
+   ["Panko","150 g",{h:"日式麵包糠",t:"Au rayon japonais de n'importe quel supermarché de Hong Kong, et moins cher que la chapelure importée. Plus léger, plus croustillant, et il boit moins d'huile."}]]],
+  ["Cuisson et service",[
+   ["Huile neutre","4 c. à s."],["Beurre","40 g"],
+   ["Citron","1"],["Salade verte","1"]]]],
+ s:["Poser un blanc à plat, la paume bien à plat dessus, et le fendre horizontalement avec un couteau fin sans aller jusqu'au bord opposé. Ouvrir comme un livre.",
+    "Glisser l'escalope ouverte dans un sac congélation et l'aplatir à 5 mm au rouleau ou au fond d'une casserole, en frappant du centre vers les bords.|En dessous de 5 mm la viande se déchire, et le fromage sortira par le trou ; au-dessus, le cœur sera cru quand la panure sera dorée",
+    "Saler et poivrer l'intérieur, étaler une fine couche de moutarde.",
+    "Poser une tranche de jambon, le fromage dessus, puis une seconde tranche de jambon, en laissant 2 cm de poulet nu tout autour.|Le jambon emballe le fromage, c'est lui qui retient la coulée. Du fromage posé au contact du bord trouvera toujours une sortie",
+    "Rabattre et souder les bords en pressant fermement du bout des doigts sur tout le pourtour.",
+    "Trois assiettes creuses : farine, œufs battus, panko. Passer dans la farine en tapotant l'excédent, puis dans l'œuf, puis dans le panko en pressant bien.",
+    "Repasser une seconde fois dans l'œuf puis dans le panko, en insistant sur la tranche.|La double panure est l'assurance anti-fuite ; c'est toujours par le côté que ça lâche",
+    "Réfrigérer 30 minutes, à découvert, sur une grille ou une assiette.|L'étape que tout le monde saute et qui décide de tout : la panure sèche, durcit et adhère à la viande. Sans ce repos elle se décolle dans la poêle et le fromage part avec elle",
+    "Préchauffer le four à 180°C. Huile et beurre dans une grande poêle à feu moyen.|Trop chaud, la panure est noire en trois minutes et le centre encore froid",
+    "Vérifier la température en jetant une miette de panko : elle doit dorer en 3 ou 4 secondes, en grésillant doucement, pas en crépitant violemment.",
+    "4 à 5 minutes par face, jusqu'à un brun doré uniforme. Ne retourner qu'une seule fois.|Retourner plusieurs fois décolle la panure encore fragile",
+    "Transférer sur une grille posée sur une plaque et finir au four 8 minutes.|La grille évite que le dessous ramollisse dans sa propre vapeur, et le four cuit le cœur sans pousser la couleur plus loin",
+    "Laisser reposer 3 minutes avant de couper, sinon le fromage fondu gicle. Servir avec le citron et la salade."],
+ no:[["Pourquoi le fromage s'échappe.","Il n'y a jamais qu'une seule raison, il y en a quatre, et elles s'additionnent : une escalope trop fine et percée, du fromage qui touche le bord, une panure simple au lieu de double, et surtout l'absence de repos au froid. Faites les quatre correctement et il ne sort rien."],
+    ["Du panko, pas de la chapelure.","C'est le meilleur hasard de cuisiner à Hong Kong : le panko est partout, pour trois fois rien, alors que la chapelure française est un produit d'importation. Et il donne une croûte franchement meilleure, plus aérée et moins grasse."],
+    ["À préparer en avance.","Panés et filmés, ils se gardent 24 heures au réfrigérateur, ce qui améliore même la tenue de la panure. Crus et panés, ils se congèlent très bien séparés par du papier cuisson, et se cuisent sans décongélation avec 5 minutes de four en plus."],
+    ["Pour Chloé","Un des rares plats qu'un enfant de six ans peut fabriquer presque entièrement. Donnez-lui les trois assiettes de panure, elle trempe et elle retourne, c'est salissant et c'est exactement l'intérêt. Faites le sien plus petit, avec un demi-blanc, il cuira en 3 minutes par face.",1]],
+ p:"Salade verte et quartier de citron suffisent. Si vous voulez plus consistant, des pommes de terre sautées ou une purée, mais pas les deux, le cordon bleu est déjà riche."},
+
 bourguignon:{n:"Bœuf bourguignon",cjk:"",c:"France",prep:"20 min",cook:"2 h 30",
  g:[["Viande et base",[
    ["Paleron ou macreuse en cubes de 5 cm","900 g"],
@@ -559,7 +592,7 @@ bourguignon:{n:"Bœuf bourguignon",cjk:"",c:"France",prep:"20 min",cook:"2 h 30"
 };
 
 var ORDER=[["Chine",["gongbao","yuxiang","suanla","tofubraise","boulettes","boeufpdt","choufleur","bpbeef","chouporc","mapo","dandan","charsiu","kale"]],
-           ["France",["armoricaine","bourguignon"]],
+           ["France",["armoricaine","bourguignon","cordonbleu"]],
            ["Sucré",["cookies"]]];
 
 var cur=null;
