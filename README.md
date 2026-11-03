@@ -33,7 +33,7 @@ mapo tofu, dan dan noodles, char siu, kale sauté.
 France : crevettes à l'armoricaine, bœuf bourguignon, cordon bleu
 maison.
 
-Sucré : cookies au chocolat.
+Sucré : cookies au chocolat, donuts levés.
 
 ## Modifier
 
