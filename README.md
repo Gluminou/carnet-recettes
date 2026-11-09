@@ -32,8 +32,8 @@ mapo tofu, dan dan noodles, char siu, kale sauté.
 
 Vietnam : poulet au caramel.
 
-France : crevettes à l'armoricaine, bœuf bourguignon, cordon bleu
-maison.
+France : crevettes à l'armoricaine, bœuf bourguignon, filet de panga
+en croûte d'herbes, cordon bleu maison.
 
 Sucré : cookies au chocolat, donuts levés.
 
