@@ -44,6 +44,19 @@ Tout est dans `index.html`. Les recettes sont un objet JavaScript nommé
 copiez une entrée existante et ajoutez son identifiant au tableau
 `ORDER` juste en dessous.
 
+## Deux langues
+
+Le carnet existe en français et en anglais, avec un bouton FR / EN dans
+l'en-tête. Les deux versions sont deux jeux de données complets,
+`R_FR` / `ORDER_FR` et `R_EN` / `ORDER_EN`, pas une traduction calculée
+à la volée.
+
+Les cases cochées sont indexées par position, donc les deux jeux
+doivent rester superposables : même ordre de recettes, même nombre de
+groupes, d'ingrédients, d'étapes et de notes, mêmes caractères chinois
+aux mêmes places. `build-recipes.js` vérifie tout cela et refuse de
+produire `recipes.json` en cas d'écart.
+
 Le fichier de travail est `carnet.html`, qui est aussi publié comme
 artifact Claude. `index.html` et `recipes.json` en sont dérivés et ne
 se modifient jamais à la main :

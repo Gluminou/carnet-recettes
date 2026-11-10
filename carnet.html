@@ -43,6 +43,10 @@ select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .meta-row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
 .pill{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;background:var(--surface-2);color:var(--ink-2);padding:4px 9px;border-radius:3px}
 .pill.cjk{font-family:var(--font-cjk);font-size:13px;letter-spacing:0;text-transform:none;background:var(--accent-soft);color:var(--accent);font-weight:500;padding:3px 9px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.top .brand{margin-bottom:0}
+.lang{appearance:none;border:1px solid var(--line);background:var(--bg);font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.12em;color:var(--ink-2);padding:4px 9px;border-radius:999px;cursor:pointer;flex:none}
+.lang:hover{color:var(--accent);border-color:var(--accent)}
 .tabs{display:flex;gap:2px}
 .tab{flex:1;appearance:none;border:0;background:none;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--ink-3);padding:10px 4px;cursor:pointer;border-bottom:2px solid transparent}
 .tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
@@ -91,7 +95,7 @@ main{padding-block:18px 56px}
 
 <header>
   <div class="wrap head-in">
-    <div class="brand">Carnet de cuisine · <span id="count"></span></div>
+    <div class="top"><div class="brand" id="u-brand"></div><button class="lang" id="lang"></button></div>
     <select id="pick" aria-label="Choisir une recette"></select>
     <div class="meta-row" id="meta"></div>
   </div>
@@ -100,8 +104,8 @@ main{padding-block:18px 56px}
 <nav class="tabbar">
   <div class="wrap">
     <div class="tabs" role="tablist">
-      <button class="tab" role="tab" aria-selected="true" data-p="ing">Ingrédients</button>
-      <button class="tab" role="tab" aria-selected="false" data-p="prep">Préparation</button>
+      <button class="tab" role="tab" aria-selected="true" data-p="ing"></button>
+      <button class="tab" role="tab" aria-selected="false" data-p="prep"></button>
     </div>
   </div>
 </nav>
@@ -120,7 +124,7 @@ function pin(h){return h.replace(/[\u3400-\u9FFF]+/g,function(m){
 var CHECK='<span class="dot"><svg viewBox="0 0 12 12"><path d="M2 6.3 4.6 9 10 3"/></svg></span>';
 
 /* Chaque entrée : g = groupe d'ingrédients, i = [nom, quantité, {h:hanzi, t:astuce}] */
-var R = {
+var R_FR = {
 
 gongbao:{n:"Gongbao jiding",cjk:"宮保雞丁",c:"Chine",prep:"25 min",cook:"8 min",
  g:[
@@ -745,7 +749,7 @@ bourguignon:{n:"Bœuf bourguignon",cjk:"",c:"France",prep:"20 min",cook:"2 h 30"
 
 };
 
-var ORDER=[["Chine",["gongbao","yuxiang","suanla","tofubraise","boulettes","boeufpdt","choufleur","bpbeef","chouporc","mapo","dandan","charsiu","kale"]],
+var ORDER_FR=[["Chine",["gongbao","yuxiang","suanla","tofubraise","boulettes","boeufpdt","choufleur","bpbeef","chouporc","mapo","dandan","charsiu","kale"]],
            ["Vietnam",["pouletcaramel"]],
            ["France",["fondboeuf","armoricaine","bourguignon","panga","cordonbleu"]],
            ["Sucré",["cookies","donuts"]]];
@@ -767,6 +771,744 @@ function buildSelect(){
   sel.innerHTML=out;
 }
 
+var R_EN={
+
+gongbao:{n:"Gongbao chicken",cjk:"宮保雞丁",c:"China",prep:"25 min",cook:"8 min",
+ g:[["Marinade",[
+   ["Boneless chicken thigh, in 1.5 cm dice","500 g",{t:"Never breast, it dries out once diced."}],
+   ["Light soy sauce","1 tbsp"],
+   ["Shaoxing wine","1 tbsp"],
+   ["Cornstarch","1 tbsp"],
+   ["Water","1 tbsp"]]],
+  ["Sauce, mixed in a bowl",[
+   ["Chinkiang vinegar","2 tbsp",{h:"鎮江香醋",t:"This is what creates the sweet-sour profile. No substitution."}],
+   ["Sugar","2 tsp"],
+   ["Light soy sauce","1 tbsp"],
+   ["Dark soy sauce","½ tsp"],
+   ["Cornstarch","1 tsp"],
+   ["Chicken stock","4 tbsp"]]],
+  ["Aromatics and finish",[
+   ["Dried red chillies, seeded, halved","10",{h:"乾辣椒",t:"The short red ones, not the long very hot ones."}],
+   ["Sichuan peppercorns","1 tsp",{h:"花椒",t:"Small open red husks. They numb, they do not burn."}],
+   ["Garlic, sliced","3 cloves"],
+   ["Ginger, sliced","2 cm"],
+   ["Spring onion whites, in 1.5 cm lengths","6"],
+   ["Roasted unsalted peanuts","80 g"],
+   ["Neutral oil","3 tbsp"],
+   ["Jasmine rice","300 g"]]]],
+ s:["Mix the chicken with the marinade, working it in by hand. Leave 20 minutes.",
+    "Mix the sauce in a bowl. Halve the chillies and shake the seeds out.",
+    "Cut and line up everything beside the wok. The cooking takes 5 minutes, with no time to chop anything.",
+    "Oil in the wok over <b>medium</b> heat, not high. Chillies and Sichuan peppercorns, 30 seconds, until the chillies darken and turn fragrant.",
+    "Raise to maximum heat. Chicken in a single layer, 1 minute 30 untouched, then toss for 2 minutes.",
+    "Garlic, ginger and spring onion whites, 30 seconds.",
+    "Stir the bowl of sauce and pour it in at once. Toss for 30 seconds, it thickens and coats everything.",
+    "Off the heat, add the peanuts, toss and serve immediately.|Never add the peanuts earlier, they go soft"],
+ no:[["Medium heat for the chillies, maximum for the chicken.","The only temperature change in the recipe, and it is critical. In oil that is too hot the chillies blacken within ten seconds and the whole sauce turns bitter, with no way back."],
+    ["The chillies are not eaten.","They flavour the oil. Authentic gongbao is a sweet-sour dish with a mild heat, not a burning one."],
+    ["For Chloé","Drop to 5 chillies, well seeded, and leave the Sichuan peppercorns out of the wok. You fish the chillies off her plate. The sweet-and-sour profile and the peanuts work very well at six.",1]],
+ p:"Served with the garlic cauliflower: the cauliflower first, it tolerates waiting. The gongbao last, it does not reheat."},
+
+yuxiang:{n:"Yuxiang pork",cjk:"魚香肉絲",c:"China",prep:"25 min",cook:"6 min",
+ g:[["Marinade",[
+   ["Pork tenderloin or collar, in 5 mm strips","400 g",{t:"Put the piece in the freezer for 20 minutes before slicing, the strips will be far more even."}],
+   ["Light soy sauce","1 tbsp"],
+   ["Shaoxing wine","1 tbsp"],
+   ["Cornstarch","1 tbsp"],
+   ["Water","1 tbsp"]]],
+  ["Vegetables",[
+   ["Dried wood ear mushrooms","15 g",{h:"木耳",t:"Soaked 20 minutes in warm water, they triple in volume. Dry them well or the oil will spit."}],
+   ["Bamboo shoots, in strips","150 g",{h:"筍絲"}],
+   ["Carrot, in fine strips","1"],
+   ["Spring onion whites, on the bias","4"],
+   ["Garlic, chopped","4 cloves"],
+   ["Ginger, chopped","2 cm"]]],
+  ["The yuxiang seasoning",[
+   ["Pickled chillies, chopped","4",{h:"泡椒",t:"The original ingredient, in the jars aisle. Failing that, 1½ tbsp of Pixian doubanjiang."}]]],
+  ["Sauce, mixed in a bowl",[
+   ["Sugar","2 tbsp"],
+   ["Chinkiang vinegar","2 tbsp"],
+   ["Light soy sauce","1 tbsp"],
+   ["Cornstarch","1 tsp"],
+   ["Chicken stock","4 tbsp"]]],
+  ["Everything else",[
+   ["Neutral oil","4 tbsp"],
+   ["Jasmine rice","300 g"]]]],
+ s:["Soak the wood ears 20 minutes in warm water. Drain, remove the hard stems, slice and dry thoroughly.",
+    "Slice the pork into 5 mm strips. Mix with the marinade, work it in by hand, leave 15 minutes.",
+    "Mix the sauce in a bowl. Taste it: it should be distinctly sweet-sour, it mellows in the wok.",
+    "Cut and line up everything beside the wok. The cooking takes 5 minutes.",
+    "Oil over very high heat. Pork in a single layer, 1 minute untouched, then toss 1 minute 30 until golden. Set aside.",
+    "Lower to medium heat. Pickled chillies or doubanjiang, 1 minute, the oil should turn red.",
+    "Garlic, ginger and spring onion whites, 30 seconds.",
+    "Maximum heat. Wood ears, bamboo and carrot, 2 minutes.",
+    "Return the pork. Stir the bowl of sauce, pour it in at once, 30 seconds at a hard boil until it coats."],
+ no:[["There is no fish in it.","Yuxiang names the seasoning Sichuan uses for fish: pickled chilli, ginger, garlic, spring onion, sugar and vinegar. Nothing from the sea ends up on the plate."],
+    ["Sugar and vinegar in equal parts.","That is the backbone of the profile. Taste the bowl of sauce before pouring it: it should seem too pronounced, the wok tones it down."],
+    ["The knife work makes the dish.","肉絲 means strips. Irregular pieces cook irregularly and the dish loses its texture. Twenty minutes in the freezer before slicing changes everything."],
+    ["For Chloé","Two pickled chillies instead of four, or one teaspoon of doubanjiang. The sweet-sour profile goes down very well at six, it is often children's favourite Sichuan dish.",1]],
+ p:"It already contains its vegetables, so there is no need for a second elaborate dish. Garlic cauliflower or stir-fried kale is enough."},
+
+suanla:{n:"Hot and sour soup",cjk:"酸辣湯",c:"China",prep:"25 min",cook:"20 min",
+ g:[["The base",[
+   ["Chicken stock","1.2 litres"],
+   ["Dried wood ear mushrooms","10 g",{h:"木耳",t:"Soaked 20 minutes in warm water."}],
+   ["Dried shiitake mushrooms","4",{h:"冬菇",t:"Keep their soaking water, strained, it goes into the broth. That is what gives the depth."}],
+   ["Bamboo shoots, in strips","100 g",{h:"筍絲"}],
+   ["Firm tofu, in strips","200 g",{t:"Firm this time, not silken. It has to hold its shape in strips."}]]],
+  ["The meat",[
+   ["Pork, in fine strips","150 g"],
+   ["Light soy sauce","1 tbsp"],
+   ["Cornstarch","1 tsp"]]],
+  ["The seasoning",[
+   ["Chinkiang vinegar","4 tbsp",{t:"Yes, four. Vinegar is half the name of the dish."}],
+   ["Ground white pepper","1½ tsp",{h:"白胡椒粉",t:"This is what bites, not chilli. Be generous, it is the other half of the name."}],
+   ["Light soy sauce","2 tbsp"],
+   ["Dark soy sauce","1 tsp"],
+   ["Cornstarch slaked in 6 tbsp cold water","3 tbsp"],
+   ["Beaten eggs","2"],
+   ["Sesame oil","1 tsp"],
+   ["Salt","to taste"]]],
+  ["To serve",[
+   ["Spring onion, chopped","3 stalks"],
+   ["Fresh coriander","a few leaves"],
+   ["Chilli oil","optional, at the table"]]]],
+ s:["Soak the wood ears and shiitake 20 minutes in warm water. Drain, remove the hard stems, slice. Strain the shiitake water and keep it.",
+    "Cut the tofu, mushrooms, bamboo and pork into strips of the same fineness. A good soup has all its elements the same size.",
+    "Mix the pork with the soy sauce and cornstarch from its own line.",
+    "Bring the stock and the strained shiitake water to a simmer. Add the mushrooms and bamboo, 5 minutes.",
+    "Add the pork, separating the strips, 2 minutes. Then the tofu, 2 minutes.",
+    "Light and dark soy sauce, salt. Taste the base, it should be distinctly salty.",
+    "Pour in the slaked cornstarch in two goes, letting it come back to the boil in between. The soup should coat the spoon.",
+    "Lower to minimum. Pour the beaten eggs in the thinnest possible stream while stirring slowly in one direction. Stop stirring and let them set for 10 seconds.|Take out Chloé's bowl now",
+    "Off the heat: vinegar, white pepper, sesame oil. Taste and adjust, this is where the dish is tuned.",
+    "Spring onion and coriander in each bowl as you serve."],
+ no:[["The heat comes from white pepper.","Not from chilli. The 辣 in 酸辣湯 is a generous dose of white pepper, a teaspoon and a half for 1.2 litres at minimum. And it goes in off the heat, because cooking dulls its bite."],
+    ["Vinegar last, off the heat.","It evaporates. Poured in during the simmer, the soup loses its acidity and you end up with a flat broth you can no longer rescue."],
+    ["Cornstarch before the egg.","A thickened broth holds the ribbons in suspension. In a thin broth the egg sinks and clumps at the bottom."],
+    ["The egg ribbons.","Heat at minimum, the thinnest possible stream, and stir slowly in one direction. Vigorous stirring shatters the ribbons into specks."],
+    ["For Chloé","Take out her bowl at the end of step 8, before the pepper and vinegar. Then add half a teaspoon of vinegar and a pinch of pepper to her bowl. She gets the same soup, dosed for her.",1]],
+ p:"Served alongside the dishes and the rice, not as a starter. With one stir-fried meat dish it makes a complete meal and replaces the vegetable."},
+
+tofubraise:{n:"Braised tofu with shiitake and pak choi",cjk:"紅燒豆腐",c:"China",prep:"20 min + 20 min pressing",cook:"20 min",
+ g:[["Ingredients",[
+   ["Firm tofu, pack marked 煎炸","500 g",{h:"煎炸豆腐",t:"The red pack at Pak Took, the one whose photo shows golden cubes. The green 蒸煮拌 is soft and would fall apart. Firmer still: 板豆腐 from the tofu stall at the wet market."}],
+   ["Fresh shiitake, sliced","200 g"],
+   ["Pak choi, halved","400 g"],
+   ["Garlic, chopped","3 cloves"],
+   ["Ginger, grated","2 cm"],
+   ["Spring onion, chopped","2 stalks"]]],
+  ["Sauce, mixed in a bowl",[
+   ["Oyster sauce","2 tbsp"],
+   ["Light soy sauce","1 tbsp"],
+   ["Dark soy sauce","½ tsp"],
+   ["Sugar","1 tsp"],
+   ["Vegetable stock","200 ml"],
+   ["Cornstarch","1 tsp"]]],
+  ["Everything else",[
+   ["Neutral oil","4 tbsp"],
+   ["Sesame oil","1 tsp"],
+   ["Jasmine rice","300 g"]]]],
+ s:["Press the tofu before anything else: set the block between two sheets of kitchen paper, a plate on top, a tin on the plate. 15 to 20 minutes. Blotting alone is not enough.",
+    "Cut into even 2 cm cubes.",
+    "Oil in a wide pan over medium-high heat. Sear the tofu in two batches, a single layer, with space between the pieces.|500 g at once steam each other",
+    "4 minutes per side untouched. As long as a piece sticks, the crust has not formed. Once it has, it releases by itself. Set aside on a plate.",
+    "If water appears in the bottom of the pan, raise the heat and let it evaporate before going on. Tofu does not brown in water, it steams.",
+    "Wipe the pan, fresh oil. Stir-fry the shiitake 4 minutes. Wait until the pan goes dry again and they start to colour, that is where their flavour concentrates.",
+    "Garlic and ginger, 30 seconds.",
+    "Stir the bowl of sauce and pour it in. Return the tofu with a spatula, leaving behind the liquid it released while waiting on the plate.|That liquid would dilute the sauce just before it thickens",
+    "Simmer 5 minutes covered. Push the pan back and forth rather than stirring, browned tofu is fragile.",
+    "Lay the pak choi on top, cover another 3 minutes, it steams in the sauce. Off the heat, sesame oil and spring onion."],
+ no:[["Which tofu to buy.","It has to be firm. At Pak Took that is the red-labelled pack marked 煎炸, the one whose photo shows golden cubes. The green one marked 蒸煮拌 is soft and will disintegrate in the pan."],
+    ["Press, then two batches.","The two mistakes that cost you the golden crust. Unpressed tofu releases its water into the pan. An overloaded pan produces the same result, the pieces steam each other. Either way the tofu stays white and eventually falls apart."],
+    ["Do not try to brown every side.","With supermarket tofu, turning each cube a second time breaks more pieces than it adds colour. Two well-coloured sides are plenty."],
+    ["Pak choi at the end, on top.","It steams in the sauce in three minutes and keeps its colour. Stirred in earlier it turns khaki and releases water."],
+    ["For Chloé","A mild dish with nothing to remove. Golden tofu is far more approachable for children than plain tofu.",1]],
+ p:"Complete with the rice. If you want to serve something alongside, a clear soup rather than a second stir-fry."},
+
+boulettes:{n:"Lion's head meatballs with Chinese cabbage",cjk:"紅燒獅子頭",c:"China",prep:"30 min",cook:"1 h",
+ g:[["Filling",[
+   ["Medium-fat minced pork","600 g"],
+   ["Fresh water chestnuts, in 3 mm dice","6"],
+   ["Ginger, grated","2 tsp"],
+   ["Spring onion whites, chopped","3"],
+   ["Egg","1"],["Cornstarch","2 tbsp"],
+   ["Shaoxing wine","1 tbsp"],["Light soy sauce","1 tbsp"],
+   ["Sugar","1 tsp"],["Salt","1 tsp"],["White pepper","½ tsp"],
+   ["Iced water","100 ml"]]],
+  ["Braise",[
+   ["Chinese cabbage, in large pieces","1 kg"],
+   ["Dried shiitake mushrooms","6"],
+   ["Chicken stock","600 ml"],
+   ["Dark soy sauce","1 tsp"],
+   ["Neutral oil","3 tbsp"],["Jasmine rice","300 g"]]]],
+ s:["Soak the shiitake 30 minutes in warm water. Keep the soaking water, strained, it goes into the braise.",
+    "Chop the water chestnuts with a knife into 3 mm dice. Do not blitz them.|Their crunch is what lightens the meatball; pulverised, they serve no purpose at all",
+    "In a large bowl, the pork with the ginger, spring onion, egg, cornstarch, Shaoxing, soy sauce, sugar, salt and white pepper. Stir with chopsticks in one direction only, 2 minutes.|Changing direction breaks the fibres that are busy aligning, and it is those fibres that hold the meatball together",
+    "Pour in the iced water in three goes, still turning the same way, waiting for full absorption before adding more.|This water is what makes the meatballs tender; without it they are as dense as a burger patty",
+    "Work in the water chestnuts. Then take the whole mass in your hand and throw it hard back into the bowl, about fifteen times.|The step nobody does and the one that decides everything: unslapped filling falls apart during the braise",
+    "Shape 6 meatballs the size of a tennis ball, smooth them between two wet palms, chill 20 minutes.",
+    "Line the bottom of the casserole with the white ribs of the cabbage, then the leaves on top.|The meatballs must never touch the metal: they catch and break when you try to lift them",
+    "Oil in a frying pan over medium heat. Brown the meatballs 2 minutes per side without moving them, three at a time.|Until the crust has formed they are fragile; turning them too soon splits them in two",
+    "Set them gently on the cabbage. Add the shiitake, the stock, the strained soaking water and the dark soy sauce. The liquid should reach two thirds up the meatballs, not cover them.",
+    "Cover and simmer 50 minutes at the smallest possible bubble. Never stir.|A proper boil breaks them up within half an hour",
+    "Serve with the rice, spooning broth and cabbage over each bowl."],
+ no:[["Medium-fat, definitely not lean.","You need at least 30% fat. At the wet market, ask for 三七肥瘦, seven parts lean to three parts fat. Lean pork gives a dry, rubbery meatball, and no technique makes up for it."],
+    ["Stir one way, then slap.","Both gestures do the same thing, aligning the proteins into a network. That network is what holds the meatball together through fifty minutes of braising."],
+    ["The cabbage is not a garnish.","It is a mattress, it flavours the broth and it absorbs the rendered fat. By the end it is meltingly soft and it is often what children prefer."],
+    ["For Chloé","Nothing spicy, nothing to remove. The meatball is soft and cuts with a spoon, and the braised cabbage is sweet. Give her half a meatball with plenty of cabbage and rice.",1]],
+ p:"Rice and nothing else, the cabbage is the vegetable. Double the quantities without hesitation: reheated the next day in a clear broth with noodles and a green, the leftover meatballs make a complete dinner in fifteen minutes."},
+
+boeufpdt:{n:"Braised beef with potatoes",cjk:"土豆燒牛肉",c:"China",y:"serves 3 + leftovers",prep:"20 min",cook:"1 h 45",
+ g:[["Ingredients",[
+   ["Beef brisket, in 4 cm cubes","700 g",{h:"牛腩",t:"The cut to ask for at the wet market. Fat and sinew included, they are what melt into gelatine and make the sauce. A lean grilling cut will give dry, stringy meat."}],
+   ["Waxy potatoes","500 g",{t:"Roll-cut, in irregular 4 cm pieces: the edges catch the sauce."}],
+   ["Carrot, cut on the bias","1 large"],
+   ["Ginger, sliced","6 slices",{t:"Three go into the blanching water, three into the braise."}],
+   ["Spring onion","3 stalks",{t:"Two whole for the blanching, the third chopped for the finish."}],
+   ["Garlic, crushed","4 cloves"]]],
+  ["Braising aromatics",[
+   ["Star anise","2",{h:"八角"}],
+   ["Cassia bark, 5 cm stick","1",{h:"桂皮",t:"Thicker and darker than Ceylon cinnamon, in the loose spice section."}],
+   ["Bay leaf","1"],
+   ["Whole dried chillies","3",{h:"乾辣椒",t:"Optional. Left whole they perfume without real heat, and lift out before serving."}]]],
+  ["Sauce",[
+   ["Shaoxing wine","4 tbsp",{h:"紹興酒",t:"Two tablespoons for the blanching water, two for the braise."}],
+   ["Light soy sauce","3 tbsp"],
+   ["Dark soy sauce","1 tbsp",{h:"老抽",t:"For the mahogany colour, not for salt."}],
+   ["Rock sugar","20 g",{h:"冰糖",t:"The large amber crystals. Failing that, 2 tsp of caster sugar."}],
+   ["Boiling water","700 ml"],
+   ["Salt","to taste"]]],
+  ["Everything else",[
+   ["Neutral oil","2 tbsp"],["Jasmine rice","300 g"]]]],
+ s:["Put the beef in a pan, cover with cold water, add 3 slices of ginger, 2 whole spring onions and 2 tbsp Shaoxing. Bring to the boil.|Starting cold draws out the blood and impurities; dropped into boiling water the meat seals and keeps them inside",
+    "Skim the grey foam for 3 to 4 minutes, until no more rises. Drain and rinse in hot water. Dry the cubes well on kitchen paper.",
+    "Oil and rock sugar in a casserole over medium-low heat. Let it melt without stirring until it reaches the colour of maple syrup, about 3 minutes.|One second too long and the caramel turns dark brown: it becomes bitter and you have to start again. If you would rather not risk it, skip this step and add an extra ½ tbsp of dark soy sauce",
+    "Tip the beef into the caramel and turn it for 2 minutes to coat. It should gleam.",
+    "Add the remaining ginger, the garlic, star anise, cassia, bay and chillies. 30 seconds.",
+    "Pour the remaining Shaoxing around the hot sides, then both soy sauces. Cover with boiling water to 2 cm above the meat.|Cold water on hot meat contracts it and it will stay tough to the end",
+    "Cover and simmer 1 h to 1 h 15, at the smallest possible bubble, one breaking now and then.|A hard boil breaks down the outside of the cubes long before the centre gives",
+    "Test: a chopstick should pass through a cube with slight resistance. If it still resists, continue in 15-minute stretches.",
+    "Rinse the cut potatoes under cold water to remove surface starch, dry them, then add with the carrot. Taste the broth and salt now.",
+    "Continue uncovered for 25 to 30 minutes.|Added at the start, the potatoes disintegrate completely and their starch thickens the sauce far too early, so it catches on the bottom",
+    "Never stir with a spoon: take the casserole by the handles and shake it back and forth. The potatoes are fragile and a stirred sauce turns cloudy.",
+    "The sauce thickens on its own from the potato starch, no cornstarch is needed. Too thin, continue 5 minutes uncovered. Too thick or catching, a ladle of boiling water.",
+    "Remove the star anise, cassia, bay and chillies. Scatter with chopped spring onion."],
+ no:[["The cut makes the dish.","You need 牛腩, brisket, with its fat and sinew. It is the collagen melting into gelatine that gives the sauce its glossy body. A lean cut sold for the pan has nothing to melt: after two hours it will be dry and stringy."],
+    ["Blanch, and start from cold.","The step everybody skips, and the one that decides how clear the broth is. Start cold so the impurities rise, skim until the grey foam stops."],
+    ["Potatoes last, 25 minutes.","The one real way to ruin this dish. Added at the start they end up as purée and their starch thickens the braise for an hour, the bottom of the pot catches and takes on a burnt taste."],
+    ["Shake, do not stir.","Once the potatoes are in, a spoon breaks the pieces and clouds the sauce. You lift the casserole and shake it."],
+    ["For Chloé","The dish is naturally mild, the star anise and cassia are aromatic but not hot. Leave the chillies whole and lift them out before serving, or leave them out entirely. The soft potatoes and the meat that shreds apart are easy to eat with a spoon.",1]],
+ p:"Rice and a bright green vegetable to cut through the braise: garlic cauliflower or stir-fried kale. The leftovers are better the next day, once the sauce has finished penetrating the meat."},
+
+choufleur:{n:"Garlic stir-fried cauliflower",cjk:"蒜蓉花菜",c:"China",prep:"5 min",cook:"12 min",
+ g:[["Ingredients",[
+   ["Cauliflower, in small florets","600 g",{h:"松花菜",t:"The loose, long-stemmed variety stir-fries far better than the tight European cauliflower."}],
+   ["Garlic, chopped","6 cloves"],
+   ["Oyster sauce","1 tbsp"],
+   ["Light soy sauce","1 tsp"],
+   ["Sugar","1 pinch"],
+   ["Water","4 tbsp"],
+   ["Neutral oil","2 tbsp"],
+   ["Salt, white pepper","to taste"]]]],
+ s:["Break the cauliflower into bite-sized florets. Dry them well.",
+    "Wok over high heat with the oil. Add the cauliflower and leave it untouched for 2 minutes so it colours.",
+    "Toss for another 2 minutes. Brown patches should appear.",
+    "Pour the water around the rim of the wok, cover immediately, 3 minutes. The steam cooks the centre.",
+    "Uncover, add the chopped garlic, 30 seconds.",
+    "Oyster sauce, soy sauce, sugar, salt and white pepper. Toss 1 minute uncovered until the liquid has gone."],
+ no:[["Colour it before you cook it.","White, boiled cauliflower has no flavour at all. The first two minutes untouched over high heat create the brown patches that make the whole dish."]]},
+
+bpbeef:{n:"Black pepper beef",cjk:"",c:"China",prep:"20 min",cook:"12 min",
+ g:[["Marinade",[
+   ["Fillet or rump steak, in 5 mm slices","500 g",{t:"Against the grain."}],
+   ["Light soy sauce","1 tbsp"],
+   ["Shaoxing wine","1 tbsp"],
+   ["Cornstarch","1 tbsp"],
+   ["Neutral oil","1 tbsp"],
+   ["Baking soda","¼ tsp",{t:"The secret behind restaurant-tender beef. No more than that, or it tastes soapy."}]]],
+  ["Vegetables",[
+   ["Red and green peppers, in strips","1 + 1"],
+   ["Celery, on the bias","3 stalks"],
+   ["Garlic, chopped","4 cloves"],
+   ["Ginger, grated","2 cm"]]],
+  ["Sauce, mixed in a bowl",[
+   ["Oyster sauce","2 tbsp"],
+   ["Light soy sauce","1 tbsp"],
+   ["Dark soy sauce","1 tsp",{h:"老抽",t:"Black and syrupy. It is there for colour, not salt."}],
+   ["Sugar","1 tsp"],
+   ["Stock","100 ml"],
+   ["Cornstarch","1 tsp"]]],
+  ["Finish",[
+   ["Black peppercorns","2 tbsp",{t:"Whole, without exception. Ready-ground is flat."}],
+   ["Butter","20 g"],
+   ["Neutral oil","3 tbsp"],
+   ["Jasmine rice","300 g"]]]],
+ s:["Mix the beef with the marinade, working it for a minute until the meat turns tacky. Leave 20 minutes.",
+    "Crush the peppercorns in a mortar into coarse shards. Divide into two halves.",
+    "Mix the sauce in a bowl.",
+    "Smoking oil in the wok. Sear the beef in two batches, 1 minute per side untouched. Still pink in the middle. Set aside.",
+    "Remaining oil, the first half of the pepper, 20 seconds. Garlic and ginger, 20 seconds.",
+    "Celery 1 minute, then peppers 2 minutes. They stay crunchy.",
+    "Stir the bowl of sauce then pour it in. Let it thicken for 1 minute at a hard boil.|Serve Chloé's portion now",
+    "Return the beef, 30 seconds. Off the heat, the butter and the second half of the pepper."],
+ no:[["Pepper in two stages.","The first half cooks in the oil and gives depth, the second goes in off the heat and gives aroma. Putting it all in at the start leaves only bitterness."],
+    ["No onion.","Onion is normally the star alongside the peppers. Celery brings the same crunch plus a vegetal bitterness that stands up to the pepper."],
+    ["For Chloé","Serve her portion after step 7, before the last half of the pepper.",1]],
+ p:"Served with the hand-torn cabbage with pork: the cabbage first, the beef last."},
+
+chouporc:{n:"Hand-torn cabbage with pork",cjk:"手撕包菜",c:"China",prep:"10 min",cook:"10 min",
+ g:[["Ingredients",[
+   ["Taiwanese cabbage","600 g",{h:"高麗菜",t:"A loose head with pale, supple leaves. Not the hard green cabbage."}],
+   ["Fresh pork belly, in 3 cm slices","100 g",{h:"五花肉",t:"With well-alternated layers of fat and lean."}],
+   ["Garlic, sliced","5 cloves"],
+   ["Dried red chillies, halved","3"],
+   ["Light soy sauce","1½ tbsp"],
+   ["Dark soy sauce","½ tsp"],
+   ["Chinkiang vinegar","1½ tbsp"],
+   ["Sugar","1 tsp"],
+   ["Neutral oil","1 tbsp"],
+   ["Salt","to taste"]]]],
+ s:["Tear the cabbage by hand into palm-sized pieces. Never with a knife.",
+    "Wash and dry it really thoroughly, in a salad spinner if you have one.",
+    "Wok over medium heat, one single tablespoon of oil. Pork belly 4 minutes without disturbing it, the edges brown and curl.",
+    "If there is more than 2 tablespoons of fat, pour off the excess. Keep the meat in the wok.",
+    "Raise to maximum heat. Chillies and garlic, 15 seconds.",
+    "All the cabbage at once, 2 minutes, turning constantly. The edges should brown in places.",
+    "Light soy sauce, dark soy sauce, sugar, a pinch of salt. Another 1 minute.",
+    "Vinegar poured onto the hot side of the wok, never into the middle. Toss 20 seconds and serve."],
+ no:[["The pork fat replaces the oil.","Hence the single tablespoon at the start. Medium heat for the pork, maximum heat the moment the cabbage goes in. Never a lid, and salt only at step 7."],
+    ["Vinegar on the side of the wok.","In the middle it dilutes; on the hot side it vaporises and perfumes everything. That is the move that separates a decent cabbage from the one you get in small restaurants."],
+    ["For Chloé","Whole chillies rather than halved, lifted out before serving. They perfume the oil without releasing their heat.",1]]},
+
+mapo:{n:"Mapo tofu",cjk:"麻婆豆腐",c:"China",prep:"20 min",cook:"20 min",
+ g:[["Base",[
+   ["Soft or silken tofu, in 3 cm cubes","600 g",{t:"Definitely not firm. Good mapo has tofu that wobbles."}],
+   ["Minced beef","200 g"],
+   ["Pixian doubanjiang","1½ tbsp",{h:"郫縣豆瓣醬",t:"The soul of the dish. Look for 郫縣 on the label, not a generic chilli sauce."}],
+   ["Douchi, rinsed and chopped","1 tbsp",{h:"豆豉",t:"Wrinkled dry black beans, not the canned ones sitting in their liquid."}],
+   ["Garlic, chopped","4 cloves"],
+   ["Ginger, grated","2 cm"],
+   ["Shaoxing wine","1 tbsp"],
+   ["Light soy sauce","1 tbsp"],
+   ["Chicken stock","150 ml",{t:"Not 250. The tofu already releases plenty of water."}],
+   ["Cornstarch slaked in 4 tbsp cold water","2 tbsp"],
+   ["Neutral oil","4 tbsp"],
+   ["Jasmine rice","300 g"]]],
+  ["At the end",[
+   ["Garlic shoots or spring onion, in lengths","3",{h:"蒜苗"}],
+   ["Sichuan peppercorns","1 tsp",{h:"花椒"}],
+   ["Chilli oil","served separately"]]]],
+ s:["Toast the Sichuan peppercorns in a dry pan for 2 minutes, crush them in a mortar. Set aside in a bowl, they do not go into the pan.",
+    "Salted water at a simmer, not a boil. Slide in the tofu, 3 minutes. Drain and leave to drain a good 5 minutes in the colander.",
+    "Start the rice.",
+    "Oil in the wok over high heat. Brown the beef 5 minutes, crushing it, until it is brown and dry.",
+    "Lower to medium heat. Doubanjiang, 1 minute 30, the oil should turn deep red. Then douchi, garlic and ginger, 30 seconds.",
+    "Deglaze with the Shaoxing, pour in the stock and the soy sauce. Bring to a simmer.",
+    "Slide in the tofu. From here on do not stir with a spatula, push the wok back and forth.",
+    "Simmer 4 to 5 minutes. Watch the level: if it has risen, let it reduce 2 to 3 minutes uncovered.|Never thicken before the tofu has finished releasing its water",
+    "Pour in a third of the cornstarch, wait for a proper rolling boil, repeat twice.",
+    "Garlic shoots, one last push of the wok, serve. Everyone grinds their own Sichuan pepper and adds chilli oil at the table."],
+ no:[["Cornstarch in three goes, at a full boil.","It only sets at a rolling boil. At a simmer it stays in suspension and the sauce turns liquid again as it cools. Whisk the bowl each time, it settles to the bottom within a minute."],
+    ["For Chloé","The doubanjiang is already down to 1½ tablespoons and the Sichuan pepper stays out of the cooking. You make up for it in your own bowl with the chilli oil. That is how it is served in many Chengdu restaurants.",1],
+    ["Adults-only version","Go up to 3 tablespoons of doubanjiang and add 1 teaspoon of chilli flakes with the garlic."]]},
+
+dandan:{n:"Dan dan noodles",cjk:"擔擔麵",c:"China",prep:"15 min",cook:"25 min",
+ g:[["The meat",[
+   ["Minced pork","300 g"],
+   ["Ya cai, rinsed and squeezed dry","80 g",{h:"宜賓芽菜",t:"A small soft packet, usually in the dry goods aisle. It is what makes the difference."}],
+   ["Shaoxing wine","1 tbsp"],
+   ["Dark soy sauce","1 tsp"],
+   ["Neutral oil","2 tbsp"]]],
+  ["Sauce, per bowl (×3)",[
+   ["Chinese sesame paste","1 tbsp",{h:"芝麻醬",t:"Not tahini. Darker, from toasted seeds, and it separates in the jar."}],
+   ["Light soy sauce","1 generous tbsp"],
+   ["Chinkiang vinegar","2 tsp"],
+   ["Chilli oil with its sediment","1½ to 2 tbsp"],
+   ["Ground Sichuan pepper","1 pinch"],
+   ["Sugar","1 pinch"],
+   ["Garlic, grated","1 clove"],
+   ["Hot chicken stock","50 ml"]]],
+  ["Everything else",[
+   ["Fresh thin wheat noodles","450 g"],
+   ["Spring onion, chopped","4 stalks"],
+   ["Roasted unsalted peanuts, crushed","60 g"],
+   ["Choy sum or bok choy","300 g"]]]],
+ s:["Toast the Sichuan peppercorns in a dry pan for 2 minutes, crush them in a mortar.",
+    "Wok over high heat. Minced pork crushed with the spatula, 8 to 10 minutes. It must lose all its water, brown and turn almost crisp.",
+    "Add the ya cai, the Shaoxing and the dark soy sauce. Toss 3 minutes. Keep warm.",
+    "Build the sauce directly in the three serving bowls. Whisk with a fork to loosen the sesame paste with the hot stock.",
+    "Blanch the choy sum 2 minutes, lift it out. Cook the noodles in the same water.",
+    "Drain the noodles without rinsing and lay them on the sauce. Add pork, choy sum, spring onion, peanuts.",
+    "Serve in layers and mix at the table."],
+ no:[["The sauce waits at the bottom of the bowl.","It never cooks and it is never tossed with the noodles in a pan. The diner does the mixing. If building three bowls feels fussy, mix everything in a large bowl and divide it, the result is identical."],
+    ["The meat really has to dry out.","Those 8 to 10 minutes are the step everyone cuts short, and the one that counts."],
+    ["For Chloé","Build her bowl with no chilli oil and only a pinch of Sichuan pepper. Make up for it with half a tablespoon of sesame paste and a splash of stock.",1]]},
+
+charsiu:{n:"Homemade char siu",cjk:"叉燒",c:"China",prep:"15 min + 4 h",cook:"35 min",
+ g:[["Ingredients",[
+   ["Pork collar, in strips","700 g",{t:"One lengthways cut per piece, strips of 4 to 5 cm. Keep the fat."}],
+   ["Hoisin sauce","3 tbsp"],
+   ["Light soy sauce","3 tbsp"],
+   ["Honey","3 tbsp"],
+   ["Shaoxing wine","2 tbsp"],
+   ["Garlic, grated","4 cloves"],
+   ["Five-spice","1 tsp"],
+   ["Bok choy","500 g"],
+   ["Neutral oil","2 tbsp"],
+   ["Jasmine rice","300 g"]]]],
+ s:["Cut the pork into 4 to 5 cm strips, lengthways. Score diagonally every 2 cm without cutting all the way through.",
+    "Marinade: hoisin, soy sauce, 2 tbsp of the honey, Shaoxing, grated garlic, five-spice.",
+    "Coat the pork, cover, 4 hours in the fridge, ideally overnight.",
+    "Oven at 200°C, 30 minutes, turning and basting every 10 minutes. Without an oven: covered pan, 25 minutes over medium heat, turning often.",
+    "Brush with the remaining honey, let it caramelise 5 minutes.",
+    "Blanch the bok choy 3 minutes, then stir-fry 2 minutes with garlic and a drizzle of oil.",
+    "Rest the meat 5 minutes before slicing it thinly."],
+ no:[["The diagonal scoring.","The marinade penetrates far better and the honey catches in the cuts."],
+    ["If the marinade burns before the end.","Lower the heat and cover. Char siu should be lacquered, not charred."]]},
+
+kale:{n:"Garlic stir-fried kale",cjk:"",c:"China",prep:"5 min",cook:"5 min",
+ g:[["Ingredients",[
+   ["Kale","500 g",{t:"The central rib stays tough whatever you do; strip the leaves by pulling along the stem."}],
+   ["Garlic, sliced","5 cloves"],
+   ["Shaoxing wine","2 tbsp"],
+   ["Oyster sauce","1 tbsp"],
+   ["Sugar","1 pinch"],
+   ["Neutral oil","2 tbsp"],
+   ["Sesame oil","a drizzle"],
+   ["Salt","to taste"]]]],
+ s:["Strip the leaves from the central rib, tear them into large pieces.",
+    "Wok over very high heat with the neutral oil. Garlic 20 seconds, no more.",
+    "All the kale at once. Salt and toss for 1 minute.",
+    "Pour the Shaoxing onto the hot sides, cover immediately, 1 minute.",
+    "Uncover, oyster sauce and sugar, 1 minute. The leaves should be bright green and firm.",
+    "Off the heat, a drizzle of sesame oil."],
+ no:[["Fermented bean curd variation.","Crush one cube of red fermented bean curd with a teaspoon of its liquid, in place of the oyster sauce. That is the classic Hong Kong treatment for leafy greens."],
+    ["For Chloé","Kale is distinctly bitter. Blanching the leaves for 1 minute before stir-frying removes a good part of the bitterness, at the cost of a little crunch.",1]]},
+
+pouletcaramel:{n:"Caramel chicken",cjk:"",c:"Vietnam",prep:"20 min",cook:"30 min",
+ g:[["The chicken",[
+   ["Bone-in chicken thighs","3",{t:"You bone them yourself: the bones go into the stock and the stock makes the sauce. Keep the skin aside."}],
+   ["Fine salt","¾ tsp"],
+   ["Cornstarch","3 tbsp",{h:"生粉",t:"Potato starch 馬鈴薯澱粉 gives an even crisper shell, both are in the same aisle."}],
+   ["Neutral oil","3 tbsp"],
+   ["Butter","15 g",{t:"Not orthodox for a Vietnamese dish, but it is what the original recipe does and it works."}]]],
+  ["The bone stock",[
+   ["The bones from the 3 thighs, chopped","all of them"],
+   ["Garlic","1 clove"],
+   ["Water","400 ml"]]],
+  ["Caramel and sauce",[
+   ["Sugar","60 g"],
+   ["Water","2 tbsp"],
+   ["Light soy sauce","2 tbsp"],
+   ["Rice vinegar or mirin","1 tbsp"],
+   ["Garlic, chopped","2 cloves"],
+   ["Spring onion, whites and greens separated","3 stalks"],
+   ["Lemon","½"],
+   ["Freshly ground black pepper","to taste"]]],
+  ["To serve",[
+   ["Jasmine rice","300 g"]]]],
+ s:["Bone the thighs and remove the skin. Chop the bones with a heavy knife.|Chopped bones release their marrow and gelatine; left whole they will give nothing but warm water in twenty minutes",
+    "Bones, garlic clove and 400 ml water in a pan. Bring to the boil and let it boil uncovered while you prepare everything else.|This express stock is the only real advance work in the recipe, so start it first",
+    "Cut each thigh into four pieces.",
+    "Dry the pieces on kitchen paper, salt them, then roll them in the cornstarch at the last moment. Tap off the excess.|Floured in advance, the chicken sweats and the cornstarch turns into a sticky paste that will never crisp",
+    "Oil and butter in a large pan over medium-high heat. Lay the pieces in a single layer and do not touch them for 2 minutes.|The starch shell takes two minutes to set; stir before that and it comes away and stays on the bottom of the pan",
+    "Colour them on all sides, 6 to 8 minutes in total. They should be golden and already crisp.|And they are, without the skin, which is the whole point of the starch: chicken skin takes much longer to dry out and render its fat",
+    "Add the chopped garlic then the spring onion whites. Let them release their water and wait for the pan to go dry again.|If you add the sugar while there is still water, it dissolves instead of caramelising and you get a pale syrup",
+    "Add the sugar and the 2 tbsp of water. Let it melt and take colour without stirring, to a deep amber.|If it catches a little on the bottom that is fine, deglazing will lift it all. A caramel that turns dark brown, on the other hand, is bitter and beyond rescue",
+    "Lower the heat, then deglaze with the rice vinegar and the soy sauce, scraping the bottom with a spatula.|Poured onto a caramel at full heat, liquid spits violently: move your face back and lower the heat first",
+    "Add a ladle of strained stock, then a second if needed. The cornstarch that came off the chicken thickens the sauce by itself.|No extra thickening is useful, and the sauce thickens fast: go one ladle at a time",
+    "Let it reduce 2 to 3 minutes until the sauce coats the pieces and gleams.",
+    "Off the heat, pepper generously, squeeze in the half lemon and scatter the spring onion greens.|Acidity at the end is what stops the dish being merely sweet and salty"],
+ no:[["Where this recipe comes from.","It is Eloy Spinnler's caramel chicken, his \"lazy dish\", adapted from 4 to 3 servings. Caramel chicken is Vietnamese in origin, and the knob of butter in the pan is a liberty the author takes himself."],
+    ["The starch replaces the skin.","The central idea of the dish. You remove the skin, which would need a long drying time to crisp, and replace it with a cornstarch shell that crisps in two minutes. Bonus: what comes off it thickens the sauce at the end, with nothing added."],
+    ["No onion.","The original recipe has a shallot alongside the garlic and spring onion whites. I took it out and raised the garlic to two cloves. The dish loses nothing, the caramel and the soy sauce already carry plenty."],
+    ["A bone stock in twenty minutes.","It looks superfluous and it is the difference between a caramel-soy sauce and a real sauce. You have the bones to hand, the water boils while you cut everything up, it costs nothing."],
+    ["For Chloé","No chilli, a sweet-salty dish children eat very happily. Boned and cut into four, the pieces are already her size. Go easy on the pepper in her portion, and serve the lemon on the side rather than over the top.",1]],
+ p:"Plain rice, and if you want to do it properly, crispy rice: spread day-old cooked rice in a thin layer in an oiled pan and leave it untouched for 6 to 8 minutes."},
+
+fondboeuf:{n:"Homemade beef stock",cjk:"",c:"France",y:"about 1.5 litres",prep:"20 min",cook:"7 h, 6 of them unattended",
+ g:[["Bones and meat",[
+   ["Beef bones, sawn into lengths","1 kg",{h:"牛骨",t:"At the wet market, for a few dollars. Ask for a mix of marrow bones and shin bones: the marrow gives fat and flavour, the shin gives gelatine."}],
+   ["Beef trimmings, shin or chuck","1 kg",{h:"牛筋",t:"The sinewy offcuts butchers sell very cheaply. They are what give the stock body."}],
+   ["Neutral oil","2 tbsp"]]],
+  ["The vegetables",[
+   ["Carrots, in large chunks","4"],
+   ["Celery","2 stalks"],
+   ["Whole leek, split and well washed","1"],
+   ["Head of garlic, halved","1"],
+   ["Tomato paste","2 tbsp",{t:"It is not there to make the stock tomatoey but to replace the colour and sweet base that onions would bring. See the notes."}]]],
+  ["Aromatics and liquid",[
+   ["Fresh thyme","4 sprigs"],["Bay leaves","2"],
+   ["Parsley stalks","1 handful"],
+   ["Black peppercorns","1 tsp"],
+   ["Cold water","3 litres"]]]],
+ s:["Preheat the oven to 220°C. Spread the bones and trimmings on a tray, in a single layer, with a drizzle of oil.|Piled up they steam and stay pale. Every piece needs to touch the metal",
+    "Roast 45 to 50 minutes, turning halfway. They should be deep brown, close to mahogany.|This is where the colour of the final stock is decided, and nowhere else. Pale bones will give grey water however long you cook them afterwards",
+    "Add the vegetables and the tomato paste to the tray for the last 15 minutes only.|Added at the start they blacken and the stock turns bitter. A quarter of an hour is enough to colour them",
+    "Transfer the bones, trimmings and vegetables to a pot of at least 8 litres.",
+    "Set the empty tray over the heat, pour in 250 ml of water and scrape up every stuck-on bit with a spatula. Pour that into the pot.|Those browned bits are an enormous share of the flavour. A tray sent to the sink without being deglazed means a bland stock",
+    "Cover with the 3 litres of cold water, add the thyme, bay, parsley stalks and peppercorns.|Starting from cold: the impurities rise instead of setting into the meat",
+    "Bring up slowly, uncovered, and skim the grey foam relentlessly for the first 30 minutes.",
+    "Adjust the heat to the barest tremble, one bubble breaking now and then, around 85 to 90°C.|The point that decides everything. At the slightest boil the fat emulsifies into the liquid: the stock turns cloudy and greasy, and it will never be clear again",
+    "Leave 6 hours without stirring. Top up with hot water if the bones become exposed.",
+    "Strain through a fine sieve lined with a cloth, never pressing the solids.|Pressing forces fine particles through the cloth and clouds the stock permanently. You let it drip",
+    "Cool quickly, then a night in the fridge. The fat sets into a disc and lifts off in one piece.",
+    "Do not salt it.|The author's advice, and it is right: the stock will reduce in whatever you use it for, and salt added now would become impossible to control",
+    "For a more concentrated fond, reduce by half or by two thirds, uncovered, after straining."],
+ no:[["Never a boil, for six hours.","That is the only real rule. A cloudy stock is not a badly seasoned stock, it is a stock that boiled: the agitation breaks the fat into droplets that stay in suspension. If your hob will not go low enough, move the pot half off the burner."],
+    ["No onion, and what replaces it.","The original recipe calls for three onions, three shallots and a leek. I kept the leek, which has neither the taste nor the texture of onion, and removed the rest. What was missing is the brown colour and sweet base that roasted onion brings: the two tablespoons of tomato paste caramelised on the tray supply both, and it is a classic brown-stock move anyway."],
+    ["Where to find bones in Hong Kong.","At the wet market, for almost nothing. Ask for sawn 牛骨, specifying a mix of marrow and shin bones, plus 牛筋 for the trimmings. Hong Kong butchers sell them routinely, bone soups being part of the local cooking."],
+    ["Stock or fond?","Both words mean the same thing here. Roasting the bones before wetting them technically makes it a brown fond; without roasting you get a white stock, milder, which suits poultry and pale sauces. For a bourguignon, a navarin or an osso buco, the roasted version is the one you want."],
+    ["Keeping it.","Five days in the fridge under its layer of fat, which protects it. Three months in the freezer: freeze part of it in ice cube trays so you have 30 ml doses to hand, and the rest in 250 ml portions. Reduced to a glace, it keeps far longer still."],
+    ["For Chloé","A ladle of hot stock with vermicelli and a little soft carrot, and you have her dinner on the evenings she does not want anything.",1]],
+ p:"It is a base, not a dish. It transforms the beef bourguignon, the navarin, the osso buco and every brown sauce in the book. Wherever a recipe says \"beef stock\", this is what it wants."},
+
+armoricaine:{n:"Prawns à l'armoricaine",cjk:"",c:"France",prep:"20 min",cook:"50 min",
+ g:[["Prawns",[
+   ["Large whole prawns, heads on","900 g",{t:"Whole, not peeled. The heads and shells make the entire sauce."}],
+   ["Butter","40 g"],
+   ["Olive oil","3 tbsp"]]],
+  ["The sauce",[
+   ["Carrot, in small dice","1"],
+   ["Fennel, in small dice","½ bulb"],
+   ["Garlic, crushed","4 cloves"],
+   ["Tomato paste","2 tbsp"],
+   ["Chopped tomatoes","400 g"],
+   ["Cognac or brandy","50 ml"],
+   ["Dry white wine","150 ml"],
+   ["Water","300 ml"],
+   ["Tarragon","1 tsp dried"],
+   ["Cayenne pepper","1 pinch"],
+   ["Jasmine rice","300 g"],
+   ["Salt, pepper","to taste"]]]],
+ s:["Peel the prawns. Keep the heads and shells, chill the meat.",
+    "Oil in a sauté pan over high heat. Heads and shells 5 minutes, crushing them with the spatula to squeeze the juices out of the heads. They turn a deep orange-red.",
+    "Pour in the cognac and flambé, or let it evaporate for 1 minute.",
+    "Carrot, fennel and garlic, 5 minutes. Then the tomato paste, 2 minutes, it should darken slightly.",
+    "White wine, reduce by half. Add the chopped tomatoes, water, tarragon, cayenne. Season.",
+    "Simmer 25 minutes covered.",
+    "Pass through a fine sieve, pressing hard with a ladle. Discard the shells. Reduce uncovered for 10 minutes until the sauce coats.",
+    "Butter and oil in a very hot pan. Sear the prawns 1 minute 30 per side.",
+    "Pour the hot sauce over the prawns, toss 30 seconds off the heat, serve."],
+ no:[["The prawns finish in the sauce, they do not cook in it.","Thirty seconds too long and they turn rubbery. The sauce must be completely finished before you touch the pan."],
+    ["No onion or shallot.","The aromatic base is built on carrot, fennel and garlic. The fennel supplies the sweetness the onion used to give, so do not skip it."],
+    ["Tarragon in Hong Kong.","Hard to find fresh at the wet market. Dried does the job perfectly well, and city'super and Oliver's carry it fresh."]]},
+
+bourguignon:{n:"Beef bourguignon",cjk:"",c:"France",prep:"20 min",cook:"2 h 30",
+ g:[["Meat and base",[
+   ["Chuck or shoulder, in 5 cm cubes","900 g"],
+   ["Smoked belly, in thick lardons","150 g",{t:"French lardons are rare in HK. Buy thick-sliced smoked belly and cut them yourself."}],
+   ["Carrots, in large chunks","4"],
+   ["Celery, diced","2 stalks"],
+   ["Garlic, crushed","5 cloves"],
+   ["Flour","2 tbsp"],
+   ["Tomato paste","1 tbsp"],
+   ["Dry red wine","1 bottle"],
+   ["Beef stock","300 ml"],
+   ["Thyme","4 sprigs"],
+   ["Bay leaves","2"],
+   ["Neutral oil","3 tbsp"],
+   ["Salt, pepper","to taste"]]],
+  ["Garnish, cooked separately",[
+   ["Button mushrooms","400 g"],
+   ["Butter","40 g"],
+   ["Flat-leaf parsley","a few leaves"],
+   ["Steamed potatoes","700 g"]]]],
+ s:["Take the meat out an hour ahead. Dry each cube on kitchen paper, genuinely dry, then salt it.",
+    "Render the lardons in a dry casserole, 5 minutes. Lift them out, keep the fat.",
+    "Oil and high heat. Brown the meat in three batches, never more than six or seven cubes at a time, 2 minutes per side to a deep brown. Set aside.",
+    "Medium heat. Carrots, celery and garlic, 6 minutes in the browned juices.",
+    "Return the meat and lardons. Dust over the flour, 2 minutes. Tomato paste, 1 minute.",
+    "Pour in the wine, scrape the bottom with a wooden spoon. Boil 3 minutes.",
+    "Stock, thyme, bay. The liquid should come level with the meat without drowning it.",
+    "Cover, simmer 2 h 30 over very low heat. The surface should barely tremble.|If it boils, the meat turns stringy",
+    "Twenty minutes before the end, fry the halved mushrooms in the butter over high heat, 6 minutes. Salt at the end. Add them to the casserole.",
+    "If the sauce is too thin, uncover and reduce 15 minutes. Parsley as you serve."],
+ no:[["Dry the meat and brown it in three batches.","Wet meat does not colour, it boils. All the flavour is decided in those first ten minutes."],
+    ["The mushrooms are cooked separately.","Thrown in raw they release their water, go grey and wash out the sauce."],
+    ["No onion.","The base is built on carrot, celery and garlic, and the garnish makes up for it with more mushrooms, 400 g instead of 250."],
+    ["The wine.","You do not need a burgundy in Hong Kong. A dry, full-bodied red is enough. Avoid sweet or heavily oaked wines."],
+    ["Better the next day.","Do not hesitate to make it the day before."]]},
+
+panga:{n:"Panga fillet with a herb crust",cjk:"",c:"France",prep:"20 min + 20 min pressing",cook:"14 min",
+ g:[["The fish",[
+   ["Panga fillets","3, about 550 g",{h:"越南鯰魚柳",t:"In chilled trays at AEON under this name, or frozen elsewhere as cream dory 多利魚. Chilled trays are almost always thawed: treat them as frozen."}],
+   ["Fine salt","1 tsp"],
+   ["Dijon mustard","2 tsp",{t:"It is not a seasoning, it is the glue for the crust. In a thin layer you will not taste it."}]]],
+  ["The crust",[
+   ["Panko","80 g",{h:"日式麵包糠"}],
+   ["Flat-leaf parsley","½ bunch"],
+   ["Chives","½ bunch"],
+   ["Garlic","2 cloves"],
+   ["Lemon zest","1"],
+   ["Grated parmesan","40 g"],
+   ["Melted butter","50 g"],
+   ["Salt, pepper","to taste"]]],
+  ["To serve",[
+   ["Lemon wedges","1"],
+   ["New potatoes","600 g"],
+   ["Olive oil","2 tbsp"]]]],
+ s:["If the fillets are frozen, thaw them in the fridge on a rack overnight, never in water or the microwave. If they are fresh, go straight to the next step.|Fast thawing bursts the fibres: the fillet releases even more water and the flesh turns woolly",
+    "If a brown-red strip runs along the flank, cut it away on a slant, 2 or 3 mm deep. Supermarket trays are already trimmed, whole wet-market fillets never are.|That strip is what carries the muddy taste people hold against panga",
+    "Set the fillets on a double layer of kitchen paper, salt both sides, cover with another double layer and rest a light board on top. 20 minutes in the fridge for frozen, 10 minutes is enough for fresh.|The step that decides everything with frozen fish, which is waterlogged, often with water added at freezing. Without pressing it comes back out during cooking, soaks the crust from below and the fish boils in its own juices. On a fresh fillet the salt mainly firms the flesh",
+    "Change the paper and dry one last time. The surface should be matt, not shiny.",
+    "Look at the thickness of the fillet: it is always thick at one end and very thin at the other. Fold the thin part under the fillet to get a roughly even thickness.|Without that fold, the tail is dry and woolly by the time the back is just cooked. It is the shape of the fish, not a cooking fault",
+    "Preheat the oven to 210°C, fan. Set a rack on a tray, or failing that use baking paper.|Flat on the metal, the underside of the fillet sits in the little water that still comes out",
+    "Finely chop the parsley, chives and garlic, mix them with the panko, parmesan and lemon zest.",
+    "Pour in the melted butter and mix with your fingertips to the texture of damp sand.|Too much butter and the crumb clumps into a paste that will not crisp; too little and it burns as dry powder",
+    "Brush the tops of the fillets with a thin layer of mustard.|It is what holds the crust on. Without mustard the crust slides straight off the fillet as you serve it",
+    "Press the crust onto the top only, firmly, 5 mm thick. Nothing on the sides or underneath.",
+    "Bake 12 to 14 minutes depending on thickness, 14 to 16 for a fresh fillet, which is often thicker and less watery.",
+    "It is done when the flesh separates into large flakes under a fork tip but stays slightly pearly at the core.|Panga goes from cooked to cotton wool in two minutes. Take it out when the centre still looks barely translucent, it will finish outside the oven",
+    "If the crust is not golden enough while the fish is cooked, 60 to 90 seconds under the grill without taking your eyes off it.",
+    "Rest 2 minutes. Serve the lemon in wedges on the side.|Lemon juice poured over the crust softens it within seconds. Everyone squeezes their own",
+    "New potatoes: halved, olive oil, salt, 30 minutes at 210°C. They go into the oven before the fish."],
+ no:[["The \"fresh\" in Hong Kong supermarkets.","The chilled trays at AEON or Wellcome, labelled 越南鯰魚柳, are thawed fish, not fresh fish: the use-by date two days after the packing date says so. Milky liquid in the bottom of the tray confirms it. Treat them as frozen, twenty minutes of pressing, even though they are sold in the chilled aisle. The genuinely fresh option is a whole fillet from the wet market."],
+    ["Fresh or frozen, it is not the same fish.","Frozen, panga is waterlogged, often with water added at packing: twenty minutes of pressing under a weight, no argument, otherwise the crust soaks from below. Fresh, it releases far less: ten minutes of salt is enough, and it mainly firms the flesh. On the other hand a fresh fillet arrives whole, with its brown strip along the flank, which has to come off. Supermarket frozen fillets are already trimmed."],
+    ["The brown strip, on a fresh fillet.","It is the red muscle and the fat running along the flank. They concentrate the muddy taste people hold against panga, and they come off in twenty seconds with a knife. It is the difference between a neutral fish and one with an aftertaste."],
+    ["The mustard is glue.","A thin layer on top, and the crust holds all the way to the plate. Same principle as the double breading on the cordon bleu: the crumb needs something to grip."],
+    ["If you want to trade up.","The method is exactly the same with cod, hake or pollock, which have more flavour and firmer flesh. Simply allow 2 minutes less cooking and a shorter press, those fish are far less watery."],
+    ["For Chloé","No bones, a very mild flavour, and the golden parmesan crust is what wins her over. Let her press the crumb onto the fillets, it is messy and easy. Her lemon on the side.",1]],
+ p:"The roast new potatoes, which cook in the same oven, and a green salad. A drizzle of raw olive oil over the fish as you serve does no harm."},
+
+cordonbleu:{n:"Homemade cordon bleu",cjk:"",c:"France",y:"3 pieces",prep:"30 min + 30 min chilling",cook:"20 min",
+ g:[["The cordons bleus",[
+   ["Chicken breasts","3, about 180 g each",{t:"Thick and even. A thin, tapered breast will not butterfly."}],
+   ["Thin-sliced cooked ham","6"],
+   ["Gruyère, comté or emmental, sliced","6, about 150 g"],
+   ["Dijon mustard","1 tsp"],
+   ["Salt, pepper","to taste"]]],
+  ["Breading",[
+   ["Flour","60 g"],
+   ["Eggs","2"],
+   ["Panko","150 g",{h:"日式麵包糠",t:"In the Japanese aisle of any Hong Kong supermarket, and cheaper than imported breadcrumbs. Lighter, crisper, and it drinks less oil."}]]],
+  ["Cooking and serving",[
+   ["Neutral oil","4 tbsp"],["Butter","40 g"],
+   ["Lemon","1"],["Green salad","1"]]]],
+ s:["Lay a breast flat, palm flat on top, and cut it horizontally with a thin knife without going through the far edge. Open it like a book.",
+    "Slide the opened escalope into a freezer bag and flatten it to 5 mm with a rolling pin or the base of a pan, working from the centre outwards.|Below 5 mm the meat tears and the cheese will escape through the hole; above it, the centre is raw by the time the crust is golden",
+    "Season the inside with salt and pepper, spread a thin layer of mustard.",
+    "Lay on a slice of ham, the cheese on top, then a second slice of ham, leaving 2 cm of bare chicken all the way round.|The ham wraps the cheese, and that is what holds the leak back. Cheese touching the edge will always find a way out",
+    "Fold over and seal the edges by pressing firmly with your fingertips all the way round.",
+    "Three shallow bowls: flour, beaten eggs, panko. Through the flour, tapping off the excess, then the egg, then the panko, pressing it on well.",
+    "Go through the egg and the panko a second time, paying particular attention to the edge.|The double breading is the anti-leak insurance; it is always the side that gives way",
+    "Chill 30 minutes, uncovered, on a rack or a plate.|The step everyone skips and the one that decides everything: the breading dries, hardens and bonds to the meat. Without that rest it comes away in the pan and the cheese goes with it",
+    "Preheat the oven to 180°C. Oil and butter in a large pan over medium heat.|Too hot and the breading is black in three minutes while the centre is still cold",
+    "Check the temperature by dropping in a crumb of panko: it should turn golden in 3 or 4 seconds, sizzling gently, not crackling violently.",
+    "4 to 5 minutes per side, to an even golden brown. Turn once only.|Turning repeatedly lifts the still-fragile breading",
+    "Transfer to a rack set over a tray and finish in the oven for 8 minutes.|The rack stops the underside going soft in its own steam, and the oven cooks the centre without pushing the colour further",
+    "Rest 3 minutes before cutting, or the melted cheese squirts out. Serve with the lemon and the salad."],
+ no:[["Why the cheese escapes.","There is never one reason, there are four, and they add up: an escalope flattened too thin and pierced, cheese touching the edge, single instead of double breading, and above all no chilling. Do all four properly and nothing comes out."],
+    ["Panko, not breadcrumbs.","It is the best accident of cooking in Hong Kong: panko is everywhere, for almost nothing, while French breadcrumbs are an imported product. And it gives a frankly better crust, airier and less greasy."],
+    ["Prepare them ahead.","Breaded and wrapped they keep 24 hours in the fridge, which actually improves how the breading holds. Raw and breaded they freeze very well separated by baking paper, and cook from frozen with 5 extra minutes in the oven."],
+    ["For Chloé","One of the few dishes a six-year-old can make almost entirely. Give her the three breading bowls, she dips and turns, it is messy and that is exactly the point. Make hers smaller, with half a breast, and it will cook in 3 minutes a side.",1]],
+ p:"Green salad and a lemon wedge are enough. If you want something more substantial, sautéed potatoes or mash, but not both, the cordon bleu is rich already."},
+
+cookies:{n:"Chocolate chip cookies",cjk:"",c:"Dessert",y:"18 cookies",prep:"20 min + 24 h resting",cook:"11 min",
+ g:[["Dough",[
+   ["Unsalted butter","170 g",{t:"無鹽牛油. Out of the fridge an hour ahead, it should give under a finger without being melted."}],
+   ["Brown sugar","150 g"],
+   ["White sugar","100 g"],
+   ["Whole egg","1"],
+   ["Egg yolk","1",{t:"The extra yolk is what gives the soft centre."}],
+   ["Vanilla extract","2 tsp"],
+   ["Plain or all-purpose flour","250 g",{t:"Weigh it, never measure by volume. Hong Kong is humid, flour packs down and a measuring cup can have you adding a third too much."}],
+   ["Baking soda","1 tsp"],
+   ["Fine salt","1 tsp"]]],
+  ["Chocolate and finish",[
+   ["Dark chocolate 60 to 70%, chopped with a knife","200 g",{t:"A chopped bar, not chips. The irregular pieces make molten pools and the fine dust marbles the dough."}],
+   ["Flaky salt","for the top"]]]],
+ s:["Beat the soft butter with both sugars for 3 minutes, until the mixture pales and turns fluffy.",
+    "Add the whole egg, then the yolk, then the vanilla, mixing after each addition.",
+    "Mix the flour, baking soda and salt separately, then tip them onto the butter all at once.",
+    "Mix only until the flour disappears, not a second longer.|Overworked dough gives hard cookies",
+    "Fold in the chopped chocolate with a spatula.",
+    "Cover and rest in the fridge for 24 hours, 48 if you can. An hour is already better than nothing.",
+    "Preheat the oven to 180°C. Line the tray with baking paper.|Straight on the metal, the undersides brown long before the rest is cooked",
+    "Shape balls of about 55 g, the size of a golf ball, six per tray at most and well spaced.",
+    "Flatten each ball with your palm into a puck 2.5 cm thick, then leave the tray 15 minutes at room temperature while the oven heats.|A tall, chilled ball straight out of 24 h in the fridge has no time to spread: it bakes into a dome",
+    "Bake in the upper half of the oven, 10 to 12 minutes.",
+    "At 7 minutes, look. The pucks should have slumped and widened, the edges starting to set. If they are still domed, take the tray out and drop it flat onto the worktop from about twenty centimetres: the domes collapse at once. Return to the oven.|That is the rescue, and it works every time",
+    "Take them out when the edges are set and golden and the centre is still pale and visibly undercooked.|Take them out when they look raw in the middle",
+    "Scatter with flaky salt and leave 10 minutes on the hot tray without touching them. That is when they finish cooking and the centre sets."],
+ no:[["The fridge rest changes everything.","Over 24 hours the flour hydrates completely and the sugars dissolve. The flavour moves from flat-sweet to caramel and toffee, and the cookie spreads less in the oven. The same dough baked immediately and baked the next day gives two different biscuits."],
+    ["Take them out undercooked.","That is mistake number one. The hot tray goes on cooking them for a good five minutes. A cookie already golden in the centre in the oven will be dry once cold."],
+    ["If they do not spread.","The downside of the 24-hour rest: the dough comes out of the fridge hard and cold, and a tall ball takes longer to melt than the oven takes to seize it. It then bakes into a pale dome with the underside browning on its own. Hence the 2.5 cm puck and the 15 minutes at room temperature before baking. And if it happens anyway, dropping the tray on the worktop at 7 minutes flattens them."],
+    ["Small countertop oven.","In Hong Kong's small ovens the bottom element is very close to the tray. Baking paper is compulsory, rack in the upper half, and if the undersides darken too fast, a second cold tray slid underneath acts as a shield."],
+    ["Chips or a bar.","Chips contain stabilisers that stop them melting, so they stay as hard dots. A bar chopped with a knife gives molten pools of chocolate and dust that colours the dough."],
+    ["For Chloé","She can roll the balls, press a few chunks of chocolate on top before baking, and scatter the flaky salt as they come out. Rested dough rolls very well by hand and does not stick.",1]],
+ p:"The raw dough keeps 3 days in the fridge and 3 months in the freezer as pre-rolled balls. Bake them straight from frozen, 2 minutes longer."},
+
+donuts:{n:"Raised doughnuts",cjk:"",c:"Dessert",y:"12 doughnuts",prep:"30 min + 2 h rising",cook:"20 min",
+ g:[["Dough",[
+   ["Bread flour","500 g",{h:"高筋麵粉",t:"The high-gluten flour, in bags in every supermarket. It is what gives the doughnut its stringy crumb."}],
+   ["Warm milk","240 ml",{t:"Between 35 and 38°C, warm to the finger. Above 50°C it kills the yeast."}],
+   ["Dried yeast","7 g"],
+   ["Sugar","60 g"],["Eggs","2"],
+   ["Soft butter, in pieces","60 g"],
+   ["Fine salt","8 g"],["Vanilla extract","1 tsp"]]],
+  ["Frying",[
+   ["Neutral oil","1.5 to 2 litres",{t:"Groundnut or sunflower. You need 6 cm of depth in a tall pan, not a frying pan."}]]],
+  ["Finishes, your choice",[
+   ["Icing sugar","250 g",{t:"For the white glaze."}],
+   ["Milk","4 to 5 tbsp",{t:"For the glaze, added a spoonful at a time."}],
+   ["Caster sugar","150 g",{t:"For the cinnamon-sugar version."}],
+   ["Ground cinnamon","2 tsp"]]]],
+ s:["Dissolve the yeast and 1 tsp of the sugar in the warm milk. Leave 10 minutes: a foam should form on the surface.|If nothing foams, the yeast is dead and nothing will rescue the dough. Start again with a fresh sachet rather than carrying on",
+    "Mix the flour, remaining sugar and salt in a large bowl.",
+    "Pour in the yeasted milk, the eggs and the vanilla. Knead 5 minutes.",
+    "Add the soft butter piece by piece and knead another 8 to 10 minutes, until the dough is smooth and pulls away from the sides while still being tacky to the finger.|Do not add flour to make it less sticky: an enriched dough has to stay supple and slightly tacky, and that is exactly what makes it tender. More flour gives a dry, tight doughnut",
+    "Shape into a ball in an oiled bowl, cover, and leave to rise until doubled in volume.|In Hong Kong in November allow 1 h to 1 h 15, but keep watching: in a flat at 28°C it will be done in 45 minutes. Trust the volume, never the clock",
+    "Knock back with the flat of your hand and roll the dough out to 1.5 cm thick.|Thinner, it will not puff enough and the doughnut will be dry",
+    "Cut 8 cm discs, then punch out the centre with a 3 cm cutter. Keep the holes, they fry too.",
+    "Set each doughnut on its own square of baking paper.|That is what lets you slide it into the oil without deforming it: a risen doughnut lifted by hand collapses and never recovers its shape",
+    "Cover and leave to rise 30 to 45 minutes.",
+    "Test with a floured fingertip: the dent should come back slowly and incompletely. If it springs back at once, wait longer. If it does not come back at all, it is too late and the doughnut will collapse in the oil.",
+    "Heat the oil to 175°C, 6 cm deep. Without a thermometer, a cube of bread should turn golden in 45 to 50 seconds.|The point that decides everything: below 165°C the doughnut drinks the oil and comes out greasy, above 190°C it is brown outside and raw inside",
+    "Lower in 3 doughnuts at a time, paper and all. The paper peels away by itself after a few seconds, lift it out with tongs.|More than three at once drops the oil temperature by twenty degrees, and everything else follows",
+    "75 to 90 seconds per side, turning once only.",
+    "Look for the pale ring around the equator: that is the signature of a well-risen, well-fried doughnut.|No white ring means either over-risen dough or oil that was too hot",
+    "Drain on a rack, never on kitchen paper.|Flat on paper, the underside cooks in its own steam and goes soft within two minutes",
+    "Cinnamon sugar: roll the doughnuts in the mixture while still hot. Glaze: mix the icing sugar and milk a spoonful at a time to the texture of thick cream, and dip the doughnuts while warm.|Glazed piping hot, the glaze melts and runs straight off; glazed cold, it will not stick"],
+ no:[["Oil temperature is the whole subject.","A greasy doughnut is not a badly cooked doughnut, it is one fried too cold: it stays in the oil too long and absorbs it. A cooking thermometer at 60 HKD solves the problem for good. And the oil drops with every batch, so let it come back up in between."],
+    ["The white ring.","Look at any photograph of a bakery doughnut: there is always a pale band all the way round, where the dough floated clear of the oil. That is your visual quality check, and it does not lie."],
+    ["Hong Kong's humidity works in your favour.","The rising times in European recipes are consistently too long here. In summer the dough can double in 35 minutes. Judge by volume and by the fingertip dent, not by the timer."],
+    ["Eat them the same day.","A raised doughnut peaks an hour after frying and is already disappointing the next day. That is the nature of the thing, no airtight box changes it. Make half a batch rather than keeping any."],
+    ["For Chloé","The cutter is hers. She can also roll the hot doughnuts in the cinnamon sugar. Keep her away from the pan of oil, though, and fry the holes first: they are done in 40 seconds a side and they are her reward while the rest cooks.",1]],
+ p:"The dough scraps re-form into a ball, rest 20 minutes and fry again. Only rework them once: beyond that the dough turns elastic and the doughnuts rubbery."}
+
+};
+
+var ORDER_EN=[["China",["gongbao","yuxiang","suanla","tofubraise","boulettes","boeufpdt","choufleur","bpbeef","chouporc","mapo","dandan","charsiu","kale"]],
+              ["Vietnam",["pouletcaramel"]],
+              ["France",["fondboeuf","armoricaine","bourguignon","panga","cordonbleu"]],
+              ["Sweet",["cookies","donuts"]]];
+
+var UI={
+ fr:{brand:"Carnet de cuisine",count:"recettes",tabs:["Ingrédients","Préparation"],
+     serves:"3 pers.",prep:"Prep",cook:"Cuisson",method:"Préparation",steps:"étapes",
+     resetC:"Tout décocher",resetS:"Décocher toutes les étapes",
+     photo:"photo",pick:"Choisir une recette",other:"EN"},
+ en:{brand:"Recipe book",count:"recipes",tabs:["Ingredients","Method"],
+     serves:"serves 3",prep:"Prep",cook:"Cook",method:"Method",steps:"steps",
+     resetC:"Clear all",resetS:"Clear all steps",
+     photo:"photo",pick:"Choose a recipe",other:"FR"}
+};
+
+var LANG='fr';
+try{var _l=localStorage.getItem('carnet-lang'); if(_l==='en'||_l==='fr') LANG=_l;}catch(e){}
+var R,ORDER,U;
+function applyLang(){
+  U = UI[LANG];
+  R = LANG==='en' ? R_EN : R_FR;
+  ORDER = LANG==='en' ? ORDER_EN : ORDER_FR;
+  document.documentElement.lang = LANG;
+  document.getElementById('lang').textContent = U.other;
+  document.querySelectorAll('.tab').forEach(function(t,i){ t.textContent = U.tabs[i]; });
+  document.getElementById('pick').setAttribute('aria-label', U.pick);
+}
+
 function key(id,kind,i){return 'ck-'+id+'-'+kind+'-'+i;}
 function get(k){try{return localStorage.getItem(k)==='1';}catch(e){return false;}}
 function set(k,v){try{localStorage.setItem(k,v?'1':'0');}catch(e){}}
@@ -775,8 +1517,8 @@ function render(id){
   cur=id;
   var r=R[id];
 
-  var m='<span class="pill">'+r.c+'</span><span class="pill">'+(r.y||'3 pers.')+'</span>'+
-        '<span class="pill">Prep '+r.prep+'</span><span class="pill">Cuisson '+r.cook+'</span>';
+  var m='<span class="pill">'+r.c+'</span><span class="pill">'+(r.y||U.serves)+'</span>'+
+        '<span class="pill">'+U.prep+' '+r.prep+'</span><span class="pill">'+U.cook+' '+r.cook+'</span>';
   if(r.cjk) m+='<span class="pill cjk">'+r.cjk+'</span>';
   document.getElementById('meta').innerHTML=pin(m);
 
@@ -787,7 +1529,7 @@ function render(id){
       var o=it[2]||{}, k=key(id,'i',n);
       ing+='<div class="item'+(get(k)?' on':'')+'" data-k="'+k+'" data-grp="'+gi+'">'+CHECK+
            '<div class="item-body"><div class="item-n">'+it[0]+'</div>'+
-           (o.h?'<a class="hanzi" href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(o.h)+'" target="_blank" rel="noopener">'+o.h+' <span class="ar">photo</span></a>':'')+
+           (o.h?'<a class="hanzi" href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(o.h)+'" target="_blank" rel="noopener">'+o.h+' <span class="ar">'+U.photo+'</span></a>':'')+
            (o.t?'<div class="tip">'+o.t+'</div>':'')+
            '</div><span class="qty">'+it[1]+'</span></div>';
       n++;
@@ -795,10 +1537,10 @@ function render(id){
     ing+='</div>';
     gi++;
   });
-  ing+='<button class="reset" id="r-i">Tout décocher</button>';
+  ing+='<button class="reset" id="r-i">'+U.resetC+'</button>';
   document.getElementById('ing').innerHTML=pin(ing);
 
-  var prep='<div class="sec"><div class="sec-h"><span class="sec-t">Préparation</span><span class="sec-n">'+r.s.length+' étapes</span></div>';
+  var prep='<div class="sec"><div class="sec-h"><span class="sec-t">'+U.method+'</span><span class="sec-n">'+r.s.length+' '+U.steps+'</span></div>';
   r.s.forEach(function(t,i){
     var parts=t.split('|'), k=key(id,'s',i);
     prep+='<div class="step'+(get(k)?' on':'')+'" data-k="'+k+'"><span class="num">'+(i+1)+'</span><div class="step-t">'+parts[0]+
@@ -809,7 +1551,7 @@ function render(id){
     prep+='<div class="note'+(nt[2]?' kid':'')+'"><b>'+nt[0]+'</b> '+nt[1]+'</div>';
   });
   if(r.p) prep+='<div class="note pair"><b>Avec quoi le servir.</b> '+r.p+'</div>';
-  prep+='<button class="reset" id="r-s">Décocher toutes les étapes</button>';
+  prep+='<button class="reset" id="r-s">'+U.resetS+'</button>';
   document.getElementById('prep').innerHTML=pin(prep);
 
   wire();
@@ -873,8 +1615,8 @@ function boot(keep){
   if(!start) start=ORDER[0][1][0];
   document.getElementById('pick').value=start;
   render(start);
-  var c=document.getElementById('count');
-  if(c) c.textContent=Object.keys(R).length+' recettes';
+  document.getElementById('u-brand').textContent =
+    U.brand+' · '+Object.keys(R).length+' '+U.count;
 }
 
 document.getElementById('pick').addEventListener('change',function(e){
@@ -884,7 +1626,18 @@ document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click',function(){ showTab(t.dataset.p); });
 });
 
-boot(null);
+function bootLang(keep){ applyLang(); boot(keep); }
+
+document.getElementById('lang').addEventListener('click',function(){
+  var tab = document.getElementById('prep').hidden ? 'ing' : 'prep';
+  var keep = document.getElementById('pick').value;
+  LANG = LANG==='fr' ? 'en' : 'fr';
+  try{localStorage.setItem('carnet-lang',LANG);}catch(e){}
+  bootLang(keep);
+  showTab(tab);
+});
+
+bootLang(null);
 
 /* Les recettes embarquées ci-dessus servent de secours hors ligne.
    Quand le réseau répond, recipes.json fait autorité, ce qui évite
@@ -893,10 +1646,13 @@ fetch('recipes.json?t='+Date.now(),{cache:'no-store'})
   .then(function(res){ return res.ok ? res.json() : null; })
   .then(function(d){
     if(!d || !d.R || !d.ORDER) return;
-    if(JSON.stringify(d.R)===JSON.stringify(R) && JSON.stringify(d.ORDER)===JSON.stringify(ORDER)) return;
+    var sameFR = JSON.stringify(d.R)===JSON.stringify(R_FR) && JSON.stringify(d.ORDER)===JSON.stringify(ORDER_FR);
+    var sameEN = !d.R_EN || (JSON.stringify(d.R_EN)===JSON.stringify(R_EN) && JSON.stringify(d.ORDER_EN)===JSON.stringify(ORDER_EN));
+    if(sameFR && sameEN) return;
     var keep=document.getElementById('pick').value;
-    R=d.R; ORDER=d.ORDER;
-    boot(keep);
+    R_FR=d.R; ORDER_FR=d.ORDER;
+    if(d.R_EN && d.ORDER_EN){ R_EN=d.R_EN; ORDER_EN=d.ORDER_EN; }
+    bootLang(keep);
   })
   .catch(function(){});
 </script>
