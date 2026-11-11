@@ -34,7 +34,8 @@ kale sauté.
 Vietnam : poulet au caramel.
 
 France : bouillon de bœuf maison, crevettes à l'armoricaine, bœuf
-bourguignon, filet de panga en croûte d'herbes, cordon bleu maison.
+bourguignon, poulet à la crème et aux champignons, filet de panga en
+croûte d'herbes, cordon bleu maison.
 
 Sucré : cookies au chocolat, donuts levés.
 
