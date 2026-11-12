@@ -95,6 +95,8 @@ main{padding-block:18px 56px}
 .cart:hover{color:var(--accent);border-color:var(--accent)}
 .cart.on{color:#fff;background:var(--accent);border-color:var(--accent)}
 .item.on .cart{opacity:.45}
+.zh{font-size:15px;margin-top:2px;color:var(--ink)}
+.zh .py{margin-left:5px}
 .cart.rm{border:0;background:none;color:var(--ink-3);font-size:19px;line-height:1;width:28px;height:28px}
 .cart.rm:hover{color:var(--accent);background:var(--accent-soft);border-radius:5px}
 .qty{flex:0 0 auto;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;padding-top:1px;text-align:right;max-width:38%}
@@ -1938,6 +1940,144 @@ var SHOP_CANON = {
 };
 
 /* nom dans la recette -> nom canonique */
+/* Chinois pour la liste de courses.
+   Traditionnel, et les mots du marché de Hong Kong quand ils s'écartent
+   du mandarin standard : 薯仔 et non 土豆, 紹菜 et non 大白菜, 麻油 et
+   non 香油. Le pinyin reste le mandarin, comme partout dans le carnet. */
+var SHOP_ZH = {
+  /* viandes et poissons */
+  "Bavette ou hampe": ["牛柳","niúliǔ"],
+  "Filet de bœuf": ["牛柳","niúliǔ"],
+  "Poitrine de bœuf": ["牛腩","niúnǎn"],
+  "Paleron ou macreuse": ["牛肩胛肉","niú jiānjiǎ ròu"],
+  "Bœuf haché": ["免治牛肉","miǎnzhì niúròu"],
+  "Os de bœuf": ["牛骨","niúgǔ"],
+  "Parures de bœuf": ["牛碎肉","niú suìròu"],
+  "Cuisse de poulet désossée": ["去骨雞髀","qùgǔ jībì"],
+  "Hauts de cuisse de poulet avec os": ["雞髀（連骨）","jībì liángǔ"],
+  "Blancs de poulet": ["雞胸肉","jī xiōngròu"],
+  "Échine de porc": ["豬梅頭肉","zhū méitóu ròu"],
+  "Filet mignon ou échine de porc": ["豬柳或梅頭","zhūliǔ huò méitóu"],
+  "Porc en lanières": ["豬肉絲","zhūròusī"],
+  "Porc haché": ["免治豬肉","miǎnzhì zhūròu"],
+  "Porc haché mi-gras": ["免治豬肉（半肥瘦）","miǎnzhì zhūròu bànféishòu"],
+  "Poitrine de porc fraîche": ["五花腩","wǔhuānǎn"],
+  "Poitrine fumée": ["煙肉","yānròu"],
+  "Jambon blanc": ["火腿片","huǒtuǐpiàn"],
+  "Crevettes entières avec tête": ["鮮蝦（連頭）","xiānxiā liántóu"],
+  "Filets de panga": ["越南鯰魚柳","Yuènán niányú liǔ"],
+
+  /* légumes et fruits */
+  "Ail": ["蒜頭","suàntóu"],
+  "Tête d'ail": ["原個蒜頭","yuángè suàntóu"],
+  "Blanc de poireau": ["韭蔥白","jiǔcōng bái"],
+  "Poireau": ["韭蔥","jiǔcōng"],
+  "Ciboule": ["蔥","cōng"],
+  "Tiges d'ail ou ciboule": ["蒜心或蔥","suànxīn huò cōng"],
+  "Ciboulette": ["細香蔥","xì xiāngcōng"],
+  "Carottes": ["紅蘿蔔","hóng luóbo"],
+  "Céleri branche": ["西芹","xīqín"],
+  "Champignons de Paris": ["白蘑菇","bái mógū"],
+  "Shiitake frais": ["鮮冬菇","xiān dōnggū"],
+  "Châtaignes d'eau": ["馬蹄","mǎtí"],
+  "Chou chinois": ["紹菜","shàocài"],
+  "Chou de Taiwan": ["台灣椰菜","Táiwān yēcài"],
+  "Chou-fleur": ["椰菜花","yēcàihuā"],
+  "Choy sum ou bok choy": ["菜心或白菜","càixīn huò báicài"],
+  "Bok choy": ["白菜","báicài"],
+  "Pak choi": ["小白菜","xiǎo báicài"],
+  "Kale": ["羽衣甘藍","yǔyī gānlán"],
+  "Citrons": ["檸檬","níngméng"],
+  "Oranges": ["橙","chéng"],
+  "Fenouil": ["茴香頭","huíxiāng tóu"],
+  "Gingembre": ["薑","jiāng"],
+  "Persil plat": ["番茜","fānqiàn"],
+  "Coriandre fraîche": ["芫茜","yánsui"],
+  "Thym frais": ["百里香","bǎilǐxiāng"],
+  "Piments frais": ["鮮辣椒","xiān làjiāo"],
+  "Poivrons": ["燈籠椒","dēnglóngjiāo"],
+  "Pommes de terre à chair ferme": ["薯仔","shǔzǎi"],
+  "Pommes de terre grenaille": ["迷你薯仔","mínǐ shǔzǎi"],
+  "Pommes de terre": ["薯仔","shǔzǎi"],
+  "Salade verte": ["西生菜","xī shēngcài"],
+
+  /* crémerie et œufs */
+  "Beurre": ["牛油","niúyóu"],
+  "Crème liquide": ["淡忌廉","dàn jìlián"],
+  "Lait": ["牛奶","niúnǎi"],
+  "Œufs": ["雞蛋","jīdàn"],
+  "Parmesan ou gruyère râpé": ["巴馬臣芝士碎","Bāmǎchén zhīshì suì"],
+  "Gruyère ou comté en tranches": ["芝士片","zhīshìpiàn"],
+  "Tofu ferme": ["硬豆腐","yìng dòufu"],
+  "Tofu tendre ou soyeux": ["滑豆腐","huá dòufu"],
+
+  /* épicerie sèche */
+  "Riz jasmin": ["泰國香米","Tàiguó xiāngmǐ"],
+  "Nouilles de blé fraîches": ["鮮麵","xiānmiàn"],
+  "Panko": ["日式麵包糠","Rìshì miànbāokāng"],
+  "Farine": ["麵粉","miànfěn"],
+  "Farine à pain": ["高筋麵粉","gāojīn miànfěn"],
+  "Maïzena": ["粟粉","sùfěn"],
+  "Levure boulangère sèche": ["乾酵母","gān jiàomǔ"],
+  "Sucre": ["砂糖","shātáng"],
+  "Cassonade": ["黃糖","huángtáng"],
+  "Sucre glace": ["糖霜","tángshuāng"],
+  "Sucre candi": ["冰糖","bīngtáng"],
+  "Chocolat noir": ["黑朱古力","hēi zhūgǔlì"],
+  "Cacahuètes grillées non salées": ["原味花生","yuánwèi huāshēng"],
+  "Champignons noirs séchés": ["木耳","mù'ěr"],
+  "Shiitake séchés": ["冬菇","dōnggū"],
+  "Pousses de bambou": ["竹筍","zhúsǔn"],
+  "Ya cai": ["宜賓芽菜","Yíbīn yácài"],
+  "Douchi": ["豆豉","dòuchǐ"],
+  "Tomates concassées": ["罐頭番茄粒","guàntóu fānqié lì"],
+  "Concentré de tomate": ["茄膏","qiégāo"],
+  "Bouillon": ["上湯","shàngtāng"],
+  "Miel": ["蜂蜜","fēngmì"],
+  "Anis étoilé": ["八角","bājiǎo"],
+  "Casse": ["桂皮","guìpí"],
+  "Laurier": ["月桂葉","yuèguìyè"],
+  "Cannelle moulue": ["肉桂粉","ròuguìfěn"],
+  "Cinq-épices": ["五香粉","wǔxiāngfěn"],
+  "Paprika doux": ["甜椒粉","tiánjiāofěn"],
+  "Piment de Cayenne": ["辣椒粉","làjiāofěn"],
+  "Poivre du Sichuan": ["花椒","huājiāo"],
+  "Poivre blanc": ["白胡椒","bái hújiāo"],
+  "Poivre noir": ["黑胡椒","hēi hújiāo"],
+  "Piments rouges séchés": ["乾辣椒","gān làjiāo"],
+  "Estragon séché": ["乾龍蒿","gān lónghāo"],
+  "Extrait de vanille": ["雲呢拿香精","yúnnīná xiāngjīng"],
+  "Bicarbonate de soude": ["梳打粉","shūdǎfěn"],
+  "Sel": ["鹽","yán"],
+  "Fleur de sel": ["海鹽片","hǎiyánpiàn"],
+
+  /* sauces et condiments */
+  "Sauce soja claire": ["生抽","shēngchōu"],
+  "Sauce soja épaisse": ["老抽","lǎochōu"],
+  "Sauce d'huître": ["蠔油","háoyóu"],
+  "Sauce hoisin": ["海鮮醬","hǎixiānjiàng"],
+  "Doubanjiang de Pixian": ["郫縣豆瓣醬","Píxiàn dòubànjiàng"],
+  "Pâte de sésame chinoise": ["芝麻醬","zhīmajiàng"],
+  "Huile pimentée": ["辣椒油","làjiāoyóu"],
+  "Piments marinés": ["泡椒","pàojiāo"],
+  "Vinaigre de Chinkiang": ["鎮江香醋","Zhènjiāng xiāngcù"],
+  "Vinaigre de cidre": ["蘋果醋","píngguǒcù"],
+  "Vinaigre de riz blanc": ["白米醋","bái mǐcù"],
+  "Vinaigre de riz ou mirin": ["米醋或味醂","mǐcù huò wèilín"],
+  "Moutarde de Dijon": ["第戎芥末醬","Dìróng jièmòjiàng"],
+  "Shaoxing": ["紹興酒","Shàoxīng jiǔ"],
+  /* 白酒 veut dire alcool de grain en mandarin : à Hong Kong, le vin se
+     dit 餐酒, et c'est ce qu'il faut demander pour ne pas repartir avec
+     une bouteille de baijiu. */
+  "Vin blanc sec": ["白餐酒","bái cānjiǔ"],
+  "Vin rouge sec": ["紅餐酒","hóng cānjiǔ"],
+  "Cognac ou brandy": ["白蘭地","báilándì"],
+  "Huile neutre": ["食油","shíyóu"],
+  "Huile d'olive": ["橄欖油","gǎnlǎnyóu"],
+  "Huile de sésame": ["麻油","máyóu"],
+  "Huile de tournesol": ["葵花籽油","kuíhuāzǐyóu"]
+};
+
 var SHOP_ALIAS = {
   "Bavette ou hampe en lanières":"Bavette ou hampe",
   "Filet de bœuf en lamelles de 5 mm":"Filet de bœuf",
@@ -2389,7 +2529,8 @@ function buildList(){
       var e=acc[k], parts=[], sum=qtyMerge(e.sum);
       Object.keys(sum).forEach(function(u){ parts.push(qtyFormat({n:sum[u],u:u}, LANG)); });
       e.txt.forEach(function(t){ parts.push(t); });
-      return {name: LANG==='en' ? e.en : e.canon, qty: parts.join(' + '), src: e.src, keys: e.keys};
+      var z=SHOP_ZH[e.canon]||[];
+      return {name: LANG==='en' ? e.en : e.canon, qty: parts.join(' + '), src: e.src, keys: e.keys, zh: z[0]||''};
     });
     if(rows.length) out.push({cat:c, label:SHOP_CAT[c][LANG==='en'?1:0], rows:rows});
   });
@@ -2417,6 +2558,7 @@ function listText(){
     lines.push(''); lines.push(sec.label.toUpperCase());
     sec.rows.forEach(function(r){
       lines.push('- '+r.name+(r.qty?'  '+r.qty:''));
+      if(r.zh) lines.push('  '+r.zh+(PY[r.zh]?' '+PY[r.zh]:''));
     });
   });
   return lines.join('\n');
@@ -2448,6 +2590,7 @@ function renderCourses(){
       var k=key('shop',sec.cat,i);
       h+='<div class="item'+(get(k)?' on':'')+'" data-k="'+k+'" data-grp="'+sec.cat+'">'+CHECK+
          '<div class="item-body"><div class="item-n">'+r.name+'</div>'+
+         (r.zh?'<div class="zh">'+r.zh+'</div>':'')+
          '<div class="srcs">'+r.src.join(', ')+'</div></div>'+
          '<span class="qty">'+r.qty+'</span>'+
          '<button class="cart rm" data-rk="'+r.keys.join(';')+'" title="'+U.rmL+'" aria-label="'+U.rmL+'">\u00d7</button></div>';
@@ -2526,7 +2669,18 @@ function showTab(name){
   toTop();
 }
 
+/* Le carnet affiche le pinyin après toute suite de caractères chinois,
+   via la table PY. On y verse les termes de courses qui y manquent, sans
+   écraser ceux qui s'y trouvent déjà, avant le premier rendu. */
+function mergeShopPinyin(){
+  Object.keys(SHOP_ZH).forEach(function(k){
+    var z=SHOP_ZH[k];
+    if(!PY[z[0]]) PY[z[0]]=z[1];
+  });
+}
+
 function boot(keep){
+  mergeShopPinyin();
   buildSelect();
   var start=null;
   if(keep && R[keep]) start=keep;

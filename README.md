@@ -85,6 +85,13 @@ Trois tables dans le `<script>`, juste avant la logique du panier :
 - `SHOP_ALIAS` : chaque nom tel qu'il est écrit dans une recette, vers
   son nom canonique. Un ingrédient ajouté à une recette doit être
   ajouté ici, sinon il n'apparaîtra pas dans la liste.
+- `SHOP_ZH` : le nom chinois de chaque ingrédient canonique, pour le
+  marché. Chinois traditionnel et vocabulaire de Hong Kong, qui
+  s'écarte souvent du mandarin standard : 薯仔 et non 土豆, 紹菜 et non
+  大白菜, 麻油 et non 香油, 餐酒 pour le vin, 白酒 voulant dire
+  alcool de grain. `mergeShopPinyin` verse ces termes dans la table
+  `PY` au démarrage, pour que le pinyin s'affiche par le mécanisme
+  déjà en place, sans écraser les entrées existantes.
 
 `qtyParse` lit une quantité française et rend un nombre et une unité.
 `qtyMerge` additionne ce qui est additionnable : les grammes entre eux,
