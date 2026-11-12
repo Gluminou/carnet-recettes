@@ -47,6 +47,18 @@ select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .top .brand{margin-bottom:0}
 .lang{appearance:none;border:1px solid var(--line);background:var(--bg);font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.12em;color:var(--ink-2);padding:4px 9px;border-radius:999px;cursor:pointer;flex:none}
 .lang:hover{color:var(--accent);border-color:var(--accent)}
+.addbtn{appearance:none;width:100%;margin-top:9px;border:1px solid var(--line);background:var(--bg);font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);padding:8px;border-radius:4px;cursor:pointer}
+.addbtn:hover{color:var(--accent);border-color:var(--accent)}
+.addbtn.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.bask{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.chip{display:inline-flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:5px 7px 5px 11px;font-size:12.5px}
+.chip button{appearance:none;border:0;background:var(--line);color:var(--ink-2);width:17px;height:17px;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;padding:0}
+.chip button:hover{background:var(--accent);color:#fff}
+.srcs{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.empty{color:var(--ink-3);font-size:13.5px;line-height:1.6;padding:8px 0 20px}
+.acts{display:flex;gap:8px;margin-top:4px}
+.acts .reset{flex:1;margin-top:0}
+#copyout{width:100%;min-height:160px;margin-top:10px;font-family:var(--font-mono);font-size:11.5px;line-height:1.5;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--surface-2);color:var(--ink)}
 .tabs{display:flex;gap:2px}
 .tab{flex:1;appearance:none;border:0;background:none;font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--ink-3);padding:10px 4px;cursor:pointer;border-bottom:2px solid transparent}
 .tab[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
@@ -98,6 +110,7 @@ main{padding-block:18px 56px}
     <div class="top"><div class="brand" id="u-brand"></div><button class="lang" id="lang"></button></div>
     <select id="pick" aria-label="Choisir une recette"></select>
     <div class="meta-row" id="meta"></div>
+    <button class="addbtn" id="add"></button>
   </div>
 </header>
 
@@ -106,6 +119,7 @@ main{padding-block:18px 56px}
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" data-p="ing"></button>
       <button class="tab" role="tab" aria-selected="false" data-p="prep"></button>
+      <button class="tab" role="tab" aria-selected="false" data-p="courses"></button>
     </div>
   </div>
 </nav>
@@ -113,6 +127,7 @@ main{padding-block:18px 56px}
 <main class="wrap">
   <div id="ing"></div>
   <div id="prep" hidden></div>
+  <div id="courses" hidden></div>
 </main>
 
 <script>
@@ -1741,12 +1756,406 @@ var UI={
  fr:{brand:"Carnet de cuisine",count:"recettes",tabs:["Ingrédients","Préparation"],
      serves:"3 pers.",prep:"Prep",cook:"Cuisson",method:"Préparation",steps:"étapes",
      resetC:"Tout décocher",resetS:"Décocher toutes les étapes",
-     photo:"photo",pick:"Choisir une recette",other:"EN"},
+     photo:"photo",pick:"Choisir une recette",other:"EN",
+     tabC:"Courses",add:"Ajouter aux courses",added:"Retirer des courses",
+     listTitle:"LISTE DE COURSES",copy:"Copier la liste",copied:"Copié",
+     clear:"Vider",manual:"Copie refusée par le navigateur. Sélectionnez le texte ci-dessous.",
+     emptyC:"Aucune recette sélectionnée. Ouvrez une recette et appuyez sur « Ajouter aux courses » pour la faire entrer dans la liste du jour."},
  en:{brand:"Recipe book",count:"recipes",tabs:["Ingredients","Method"],
      serves:"serves 3",prep:"Prep",cook:"Cook",method:"Method",steps:"steps",
      resetC:"Clear all",resetS:"Clear all steps",
-     photo:"photo",pick:"Choose a recipe",other:"FR"}
+     photo:"photo",pick:"Choose a recipe",other:"FR",
+     tabC:"Shopping",add:"Add to shopping list",added:"Remove from list",
+     listTitle:"SHOPPING LIST",copy:"Copy the list",copied:"Copied",
+     clear:"Clear",manual:"The browser refused to copy. Select the text below.",
+     emptyC:"No recipes selected. Open a recipe and tap \u201cAdd to shopping list\u201d to put it in today\u2019s list."}
 };
+
+/* Table de courses : chaque nom d'ingrédient tel qu'il apparaît dans les
+   recettes est ramené à un nom d'achat canonique, qui porte son rayon et
+   sa traduction. La catégorisation se fait toujours depuis le français,
+   les deux jeux de données étant superposables par position. */
+var SHOP_SKIP = ["Eau","Eau bouillante","Eau froide","Eau glacée",
+  "Les os des 3 cuisses, concassés","Riz, pâtes ou pommes vapeur"];
+
+var SHOP_CAT = {
+  vp:["Viandes et poissons","Meat and fish"],
+  lg:["Légumes et fruits","Fruit and vegetables"],
+  cr:["Crémerie et œufs","Dairy and eggs"],
+  ep:["Épicerie sèche","Dry goods"],
+  sc:["Sauces et condiments","Sauces and condiments"]
+};
+
+/* nom canonique -> [anglais, rayon] */
+var SHOP_CANON = {
+  "Bavette ou hampe":["Flank or skirt steak","vp"],
+  "Filet de bœuf":["Beef fillet","vp"],
+  "Poitrine de bœuf":["Beef brisket","vp"],
+  "Paleron ou macreuse":["Chuck or shoulder","vp"],
+  "Bœuf haché":["Minced beef","vp"],
+  "Os de bœuf":["Beef bones","vp"],
+  "Parures de bœuf":["Beef trimmings","vp"],
+  "Cuisse de poulet désossée":["Boneless chicken thigh","vp"],
+  "Hauts de cuisse de poulet avec os":["Bone-in chicken thighs","vp"],
+  "Blancs de poulet":["Chicken breasts","vp"],
+  "Échine de porc":["Pork collar","vp"],
+  "Filet mignon ou échine de porc":["Pork tenderloin or collar","vp"],
+  "Porc en lanières":["Pork, in strips","vp"],
+  "Porc haché":["Minced pork","vp"],
+  "Porc haché mi-gras":["Medium-fat minced pork","vp"],
+  "Poitrine de porc fraîche":["Fresh pork belly","vp"],
+  "Poitrine fumée":["Smoked belly","vp"],
+  "Jambon blanc":["Cooked ham","vp"],
+  "Crevettes entières avec tête":["Whole prawns, heads on","vp"],
+  "Filets de panga":["Panga fillets","vp"],
+
+  "Ail":["Garlic","lg"],
+  "Tête d'ail":["Head of garlic","lg"],
+  "Blanc de poireau":["Leek white","lg"],
+  "Poireau":["Leek","lg"],
+  "Ciboule":["Spring onion","lg"],
+  "Tiges d'ail ou ciboule":["Garlic shoots or spring onion","lg"],
+  "Ciboulette":["Chives","lg"],
+  "Carottes":["Carrots","lg"],
+  "Céleri branche":["Celery","lg"],
+  "Champignons de Paris":["Button mushrooms","lg"],
+  "Shiitake frais":["Fresh shiitake","lg"],
+  "Châtaignes d'eau":["Water chestnuts","lg"],
+  "Chou chinois":["Chinese cabbage","lg"],
+  "Chou de Taiwan":["Taiwanese cabbage","lg"],
+  "Chou-fleur":["Cauliflower","lg"],
+  "Choy sum ou bok choy":["Choy sum or bok choy","lg"],
+  "Bok choy":["Bok choy","lg"],
+  "Pak choi":["Pak choi","lg"],
+  "Kale":["Kale","lg"],
+  "Citrons":["Lemons","lg"],
+  "Oranges":["Oranges","lg"],
+  "Fenouil":["Fennel","lg"],
+  "Gingembre":["Ginger","lg"],
+  "Persil plat":["Flat-leaf parsley","lg"],
+  "Coriandre fraîche":["Fresh coriander","lg"],
+  "Thym frais":["Fresh thyme","lg"],
+  "Piments frais":["Fresh chillies","lg"],
+  "Poivrons":["Peppers","lg"],
+  "Pommes de terre à chair ferme":["Waxy potatoes","lg"],
+  "Pommes de terre grenaille":["New potatoes","lg"],
+  "Pommes de terre":["Potatoes","lg"],
+  "Salade verte":["Green salad","lg"],
+
+  "Beurre":["Butter","cr"],
+  "Crème liquide":["Single cream","cr"],
+  "Lait":["Milk","cr"],
+  "Œufs":["Eggs","cr"],
+  "Parmesan ou gruyère râpé":["Grated parmesan or gruyère","cr"],
+  "Gruyère ou comté en tranches":["Sliced gruyère or comté","cr"],
+  "Tofu ferme":["Firm tofu","cr"],
+  "Tofu tendre ou soyeux":["Soft or silken tofu","cr"],
+
+  "Riz jasmin":["Jasmine rice","ep"],
+  "Nouilles de blé fraîches":["Fresh wheat noodles","ep"],
+  "Panko":["Panko","ep"],
+  "Farine":["Flour","ep"],
+  "Farine à pain":["Bread flour","ep"],
+  "Maïzena":["Cornstarch","ep"],
+  "Levure boulangère sèche":["Dried yeast","ep"],
+  "Sucre":["Sugar","ep"],
+  "Cassonade":["Brown sugar","ep"],
+  "Sucre glace":["Icing sugar","ep"],
+  "Sucre candi":["Rock sugar","ep"],
+  "Chocolat noir":["Dark chocolate","ep"],
+  "Cacahuètes grillées non salées":["Roasted unsalted peanuts","ep"],
+  "Champignons noirs séchés":["Dried wood ear mushrooms","ep"],
+  "Shiitake séchés":["Dried shiitake","ep"],
+  "Pousses de bambou":["Bamboo shoots","ep"],
+  "Ya cai":["Ya cai","ep"],
+  "Douchi":["Douchi","ep"],
+  "Tomates concassées":["Chopped tomatoes","ep"],
+  "Concentré de tomate":["Tomato paste","ep"],
+  "Bouillon":["Stock","ep"],
+  "Miel":["Honey","ep"],
+  "Anis étoilé":["Star anise","ep"],
+  "Casse":["Cassia bark","ep"],
+  "Laurier":["Bay leaves","ep"],
+  "Cannelle moulue":["Ground cinnamon","ep"],
+  "Cinq-épices":["Five-spice","ep"],
+  "Paprika doux":["Sweet paprika","ep"],
+  "Piment de Cayenne":["Cayenne pepper","ep"],
+  "Poivre du Sichuan":["Sichuan pepper","ep"],
+  "Poivre blanc":["White pepper","ep"],
+  "Poivre noir":["Black pepper","ep"],
+  "Piments rouges séchés":["Dried red chillies","ep"],
+  "Estragon séché":["Dried tarragon","ep"],
+  "Extrait de vanille":["Vanilla extract","ep"],
+  "Bicarbonate de soude":["Baking soda","ep"],
+  "Sel":["Salt","ep"],
+  "Fleur de sel":["Flaky salt","ep"],
+
+  "Sauce soja claire":["Light soy sauce","sc"],
+  "Sauce soja épaisse":["Dark soy sauce","sc"],
+  "Sauce d'huître":["Oyster sauce","sc"],
+  "Sauce hoisin":["Hoisin sauce","sc"],
+  "Doubanjiang de Pixian":["Pixian doubanjiang","sc"],
+  "Pâte de sésame chinoise":["Chinese sesame paste","sc"],
+  "Huile pimentée":["Chilli oil","sc"],
+  "Piments marinés":["Pickled chillies","sc"],
+  "Vinaigre de Chinkiang":["Chinkiang vinegar","sc"],
+  "Vinaigre de cidre":["Cider vinegar","sc"],
+  "Vinaigre de riz blanc":["White rice vinegar","sc"],
+  "Vinaigre de riz ou mirin":["Rice vinegar or mirin","sc"],
+  "Moutarde de Dijon":["Dijon mustard","sc"],
+  "Shaoxing":["Shaoxing wine","sc"],
+  "Vin blanc sec":["Dry white wine","sc"],
+  "Vin rouge sec":["Dry red wine","sc"],
+  "Cognac ou brandy":["Cognac or brandy","sc"],
+  "Huile neutre":["Neutral oil","sc"],
+  "Huile d'olive":["Olive oil","sc"],
+  "Huile de sésame":["Sesame oil","sc"],
+  "Huile de tournesol":["Sunflower oil","sc"]
+};
+
+/* nom dans la recette -> nom canonique */
+var SHOP_ALIAS = {
+  "Bavette ou hampe en lanières":"Bavette ou hampe",
+  "Filet de bœuf en lamelles de 5 mm":"Filet de bœuf",
+  "Poitrine de bœuf en cubes de 4 cm":"Poitrine de bœuf",
+  "Paleron ou macreuse en cubes de 5 cm":"Paleron ou macreuse",
+  "Bœuf haché":"Bœuf haché",
+  "Os de bœuf sciés en tronçons":"Os de bœuf",
+  "Parures de bœuf, gîte ou jarret":"Parures de bœuf",
+  "Cuisse de poulet désossée, en dés de 1,5 cm":"Cuisse de poulet désossée",
+  "Hauts de cuisse de poulet avec os":"Hauts de cuisse de poulet avec os",
+  "Blancs de poulet":"Blancs de poulet",
+  "Blancs de poulet entiers":"Blancs de poulet",
+  "Échine de porc en bandes":"Échine de porc",
+  "Filet mignon ou échine de porc en lanières de 5 mm":"Filet mignon ou échine de porc",
+  "Porc en fines lanières":"Porc en lanières",
+  "Porc haché":"Porc haché",
+  "Porc haché mi-gras":"Porc haché mi-gras",
+  "Poitrine de porc fraîche en lamelles de 3 cm":"Poitrine de porc fraîche",
+  "Poitrine fumée en lardons épais":"Poitrine fumée",
+  "Jambon blanc en tranches fines":"Jambon blanc",
+  "Grosses crevettes entières avec tête":"Crevettes entières avec tête",
+  "Filets de panga":"Filets de panga",
+
+  "Ail":"Ail","Ail écrasé":"Ail","Ail émincé":"Ail","Ail en lamelles":"Ail",
+  "Ail haché":"Ail","Ail pressé":"Ail","Ail râpé":"Ail",
+  "Tête d'ail coupée en deux":"Tête d'ail",
+  "Blanc de poireau finement émincé":"Blanc de poireau",
+  "Poireau entier, fendu et bien lavé":"Poireau",
+  "Ciboule":"Ciboule","Ciboule ciselée":"Ciboule","Ciboule, blancs et verts séparés":"Ciboule",
+  "Blancs de ciboule ciselés":"Ciboule","Blancs de ciboule en biseau":"Ciboule",
+  "Blancs de ciboule en tronçons de 1,5 cm":"Ciboule",
+  "Tiges d'ail ou ciboule en tronçons":"Tiges d'ail ou ciboule",
+  "Ciboulette":"Ciboulette",
+  "Carotte en biseau":"Carottes","Carotte en fines lanières":"Carottes",
+  "Carotte en petits dés":"Carottes","Carottes en gros tronçons":"Carottes",
+  "Céleri branche":"Céleri branche","Céleri branche en biseau":"Céleri branche",
+  "Céleri branche en dés":"Céleri branche",
+  "Champignons de Paris":"Champignons de Paris",
+  "Champignons shiitake frais émincés":"Shiitake frais",
+  "Châtaignes d'eau fraîches, en dés de 3 mm":"Châtaignes d'eau",
+  "Chou chinois en larges morceaux":"Chou chinois",
+  "Chou de Taiwan":"Chou de Taiwan",
+  "Chou-fleur en petits bouquets":"Chou-fleur",
+  "Choy sum ou bok choy":"Choy sum ou bok choy",
+  "Bok choy":"Bok choy",
+  "Pak choi coupé en deux":"Pak choi",
+  "Kale":"Kale",
+  "Citron":"Citrons","Citron en quartiers":"Citrons","Citron, le zeste":"Citrons",
+  "Jus d'orange frais":"Oranges","Zeste d'orange en fine julienne":"Oranges",
+  "Fenouil en petits dés":"Fenouil",
+  "Gingembre en lamelles":"Gingembre","Gingembre en tranches":"Gingembre",
+  "Gingembre haché":"Gingembre","Gingembre râpé":"Gingembre",
+  "Persil plat":"Persil plat","Queues de persil":"Persil plat",
+  "Coriandre fraîche":"Coriandre fraîche",
+  "Thym":"Thym frais","Thym frais":"Thym frais",
+  "Piments frais rouges et verts, hachés":"Piments frais",
+  "Poivron vert en fines lanières":"Poivrons","Poivrons rouge et vert en lanières":"Poivrons",
+  "Pommes de terre à chair ferme":"Pommes de terre à chair ferme",
+  "Pommes de terre grenaille":"Pommes de terre grenaille",
+  "Pommes de terre vapeur":"Pommes de terre",
+  "Salade verte":"Salade verte",
+
+  "Beurre":"Beurre","Beurre doux":"Beurre","Beurre fondu":"Beurre","Beurre mou en morceaux":"Beurre",
+  "Crème liquide":"Crème liquide",
+  "Lait":"Lait","Lait tiède":"Lait",
+  "Œuf":"Œufs","Œuf entier":"Œufs","Œufs":"Œufs","Œufs battus":"Œufs","Jaune d'œuf":"Œufs",
+  "Gruyère ou parmesan râpé":"Parmesan ou gruyère râpé","Parmesan râpé":"Parmesan ou gruyère râpé",
+  "Gruyère, comté ou emmental en tranches":"Gruyère ou comté en tranches",
+  "Tofu ferme en lanières":"Tofu ferme","Tofu ferme, barquette marquée 煎炸":"Tofu ferme",
+  "Tofu tendre ou soyeux en cubes de 3 cm":"Tofu tendre ou soyeux",
+
+  "Riz jasmin":"Riz jasmin",
+  "Nouilles de blé fraîches fines":"Nouilles de blé fraîches",
+  "Panko":"Panko",
+  "Farine":"Farine","Farine T55 ou all-purpose":"Farine",
+  "Farine à pain":"Farine à pain",
+  "Maïzena":"Maïzena",
+  "Maïzena délayée dans 4 c. à s. d'eau froide":"Maïzena",
+  "Maïzena délayée dans 6 c. à s. d'eau froide":"Maïzena",
+  "Levure boulangère sèche":"Levure boulangère sèche",
+  "Sucre":"Sucre","Sucre blanc":"Sucre","Sucre en poudre":"Sucre",
+  "Cassonade ou sucre roux":"Cassonade",
+  "Sucre glace":"Sucre glace",
+  "Sucre candi":"Sucre candi",
+  "Chocolat noir 60 à 70 %, haché au couteau":"Chocolat noir",
+  "Cacahuètes grillées non salées":"Cacahuètes grillées non salées",
+  "Cacahuètes grillées non salées, concassées":"Cacahuètes grillées non salées",
+  "Champignons noirs séchés":"Champignons noirs séchés",
+  "Champignons shiitake séchés":"Shiitake séchés",
+  "Pousses de bambou en lanières":"Pousses de bambou",
+  "Ya cai, rincé et essoré":"Ya cai",
+  "Douchi, rincés et hachés":"Douchi",
+  "Tomates concassées":"Tomates concassées",
+  "Concentré de tomate":"Concentré de tomate",
+  "Bouillon":"Bouillon","Bouillon de bœuf":"Bouillon","Bouillon de légumes":"Bouillon",
+  "Bouillon de volaille":"Bouillon","Bouillon de volaille chaud":"Bouillon",
+  "Bouillon de volaille ou de légumes":"Bouillon",
+  "Miel":"Miel",
+  "Anis étoilé":"Anis étoilé",
+  "Casse, bâton de 5 cm":"Casse",
+  "Laurier":"Laurier","Feuille de laurier":"Laurier",
+  "Cannelle moulue":"Cannelle moulue",
+  "Cinq-épices":"Cinq-épices",
+  "Paprika doux":"Paprika doux",
+  "Piment de Cayenne":"Piment de Cayenne",
+  "Poivre de Sichuan en grains":"Poivre du Sichuan","Poivre du Sichuan en grains":"Poivre du Sichuan",
+  "Poivre de Sichuan moulu":"Poivre du Sichuan","Poivre du Sichuan moulu":"Poivre du Sichuan",
+  "Poivre blanc":"Poivre blanc","Poivre blanc moulu":"Poivre blanc",
+  "Poivre moulu":"Poivre noir","Poivre noir du moulin":"Poivre noir",
+  "Poivre noir en grains":"Poivre noir","Grains de poivre noir":"Poivre noir",
+  "Piments rouges séchés, coupés en deux":"Piments rouges séchés",
+  "Piments rouges séchés, en deux":"Piments rouges séchés",
+  "Piments rouges séchés, épépinés, en deux":"Piments rouges séchés",
+  "Piments séchés entiers":"Piments rouges séchés",
+  "Estragon":"Estragon séché",
+  "Extrait de vanille":"Extrait de vanille",
+  "Bicarbonate de soude":"Bicarbonate de soude",
+  "Sel":"Sel","Sel fin":"Sel","Sel, poivre":"Sel","Sel, poivre blanc":"Sel",
+  "Fleur de sel":"Fleur de sel",
+
+  "Sauce soja claire":"Sauce soja claire",
+  "Sauce soja épaisse":"Sauce soja épaisse",
+  "Sauce d'huître":"Sauce d'huître",
+  "Sauce hoisin":"Sauce hoisin",
+  "Doubanjiang de Pixian":"Doubanjiang de Pixian",
+  "Pâte de sésame chinoise":"Pâte de sésame chinoise",
+  "Huile pimentée":"Huile pimentée","Huile pimentée avec son dépôt":"Huile pimentée",
+  "Piments marinés hachés":"Piments marinés",
+  "Vinaigre de Chinkiang":"Vinaigre de Chinkiang",
+  "Vinaigre de cidre":"Vinaigre de cidre",
+  "Vinaigre de riz blanc":"Vinaigre de riz blanc",
+  "Vinaigre de riz ou mirin":"Vinaigre de riz ou mirin",
+  "Moutarde de Dijon":"Moutarde de Dijon",
+  "Shaoxing":"Shaoxing",
+  "Vin blanc sec":"Vin blanc sec",
+  "Vin rouge sec":"Vin rouge sec",
+  "Cognac ou brandy":"Cognac ou brandy",
+  "Huile neutre":"Huile neutre",
+  "Huile d'olive":"Huile d'olive",
+  "Huile de sésame":"Huile de sésame",
+  "Huile de tournesol":"Huile de tournesol"
+};
+
+/* Analyse une quantité écrite en français. Rend {n, u} quand la ligne est
+   additionnable, null sinon : dans ce cas la liste affichera le texte
+   d'origine plutôt que d'inventer un total. */
+var QTY_UNITS = [
+  [/^(kg|kilos?)\b/, "g", 1000], [/^g\b/, "g", 1],
+  [/^(l|litres?)\b/, "ml", 1000], [/^cl\b/, "ml", 10], [/^ml\b/, "ml", 1],
+  [/^c\.\s*à\s*s\.?/, "cas", 1], [/^cuill[eè]res?\s+à\s+soupe/, "cas", 1],
+  [/^c\.\s*à\s*c\.?/, "cac", 1], [/^c\.\s*à\s*caf[ée]/, "cac", 1],
+  [/^cuill[eè]res?\s+à\s+caf[ée]/, "cac", 1],
+  [/^gousses?\b/, "gousse", 1], [/^tiges?\b/, "tige", 1],
+  [/^tranches?\b/, "tranche", 1], [/^branches?\b/, "branche", 1],
+  [/^feuilles?\b/, "feuille", 1], [/^bottes?\b/, "botte", 1],
+  [/^bouteilles?\b/, "bouteille", 1], [/^cm\b/, "cm", 1], [/^bulbes?\b/, "bulbe", 1]
+];
+
+function qtyParse(s){
+  if(!s) return null;
+  var t = String(s).trim()
+    .replace(/½/g,"+0.5").replace(/¼/g,"+0.25").replace(/¾/g,"+0.75")
+    .replace(/(\d)\s*\+/g,"$1+").replace(/^\+/,"");
+  /* ", environ 550 g" : c'est le poids qui compte pour les courses */
+  var env = t.match(/,\s*environ\s+(.+)$/);
+  if(env) t = env[1].replace(/\s+chacun[e]?$/,"").trim();
+  /* "1 + 1" : deux poivrons, donc deux */
+  var plus = t.match(/^(\d+(?:[.,]\d+)?)\s*\+\s*(\d+(?:[.,]\d+)?)\s*(.*)$/);
+  if(plus) t = (parseFloat(plus[1].replace(",",".")) + parseFloat(plus[2].replace(",","."))) + " " + plus[3];
+  /* une fourchette : on retient la borne haute, on préfère en avoir trop */
+  var protect = t.replace(/c\.\s*à\s*[sc]\.?/g,"\u0000").replace(/cuill[eè]res?\s+à\s+\w+/g,"\u0000");
+  var rng = protect.match(/^(\d+(?:[.,]\d+)?)\s+(?:à|ou)\s+(\d+(?:[.,]\d+)?)\s*(.*)$/);
+  if(rng) t = rng[1*1 && 2] + " " + rng[3].replace(/\u0000/g, t.indexOf("c. à c.")>=0 ? "c. à c." : "c. à s.");
+  var m = t.match(/^(\d+(?:[.,]\d+)?)(?:\+(\d+(?:\.\d+)?))?\s*(.*)$/);
+  if(!m) return null;
+  var n = parseFloat(m[1].replace(",", ".")) + (m[2] ? parseFloat(m[2]) : 0);
+  if(!isFinite(n)) return null;
+  var rest = (m[3] || "").trim().replace(/^(bonne?s?|petites?|grosses?|gros)\s+/,"");
+  for(var i=0;i<QTY_UNITS.length;i++){
+    if(QTY_UNITS[i][0].test(rest)) return {n: n*QTY_UNITS[i][2], u: QTY_UNITS[i][1]};
+  }
+  if(rest === "" || /^(gros|grosse|gros+e?s?|entiers?|enti[eè]res?)$/.test(rest)) return {n:n, u:""};
+  return null;
+}
+
+var QTY_NAMES = {
+  cas:["c. à s.","tbsp"], cac:["c. à c.","tsp"],
+  gousse:[["gousse","gousses"],["clove","cloves"]],
+  tige:[["tige","tiges"],["stalk","stalks"]],
+  tranche:[["tranche","tranches"],["slice","slices"]],
+  branche:[["branche","branches"],["sprig","sprigs"]],
+  feuille:[["feuille","feuilles"],["leaf","leaves"]],
+  botte:[["botte","bottes"],["bunch","bunches"]],
+  bouteille:[["bouteille","bouteilles"],["bottle","bottles"]],
+  cm:["cm","cm"], bulbe:[["bulbe","bulbes"],["bulb","bulbs"]]
+};
+
+function qtyNum(n, fr){
+  var w = Math.floor(n), f = +(n - w).toFixed(2), s;
+  var fr_ = {0.25:"¼",0.5:"½",0.75:"¾"}[f];
+  if(fr_) s = (w ? w : "") + fr_;
+  else s = String(+n.toFixed(2)).replace(".", fr ? "," : ".");
+  return s;
+}
+
+function qtyFormat(q, lang){
+  var fr = lang !== "en", n = q.n, u = q.u;
+  if(u === "g") return n >= 1000 ? qtyNum(n/1000, fr) + " kg" : qtyNum(n, fr) + " g";
+  if(u === "ml"){
+    if(n >= 1000) return qtyNum(n/1000, fr) + (fr ? " l" : " l");
+    if(fr && n >= 100 && n % 10 === 0) return qtyNum(n/10, fr) + " cl";
+    return qtyNum(n, fr) + " ml";
+  }
+  if(u === ""){ return qtyNum(n, fr); }
+  var d = QTY_NAMES[u];
+  if(!d) return qtyNum(n, fr);
+  var label = d[fr ? 0 : 1];
+  if(typeof label === "string") return qtyNum(n, fr) + " " + label;
+  return qtyNum(n, fr) + " " + label[n > 1 ? 1 : 0];
+}
+
+/* Fusionne les unités compatibles d'un même ingrédient : les cuillères
+   s'additionnent entre elles (1 c. à s. = 3 c. à c.) et un simple nombre se
+   range sous l'unité de comptage quand il n'y en a qu'une (6 ciboules +
+   1 tige = 7 tiges). Deux unités incompatibles restent séparées : mieux vaut
+   deux chiffres côte à côte qu'un faux total. */
+var QTY_COUNTED = ["gousse","tige","tranche","branche","feuille","botte","bulbe"];
+
+function qtyMerge(sum){
+  if(sum.cas != null && sum.cac != null){
+    var tsp = sum.cas * 3 + sum.cac;
+    delete sum.cas; delete sum.cac;
+    var tbsp = tsp / 3;
+    if(tsp >= 3 && Math.abs(tbsp*4 - Math.round(tbsp*4)) < 1e-9) sum.cas = tbsp;
+    else sum.cac = tsp;
+  }
+  if(sum[""] != null){
+    var c = QTY_COUNTED.filter(function(u){ return sum[u] != null; });
+    if(c.length === 1){ sum[c[0]] += sum[""]; delete sum[""]; }
+  }
+  return sum;
+}
 
 var LANG='fr';
 try{var _l=localStorage.getItem('carnet-lang'); if(_l==='en'||_l==='fr') LANG=_l;}catch(e){}
@@ -1757,7 +2166,7 @@ function applyLang(){
   ORDER = LANG==='en' ? ORDER_EN : ORDER_FR;
   document.documentElement.lang = LANG;
   document.getElementById('lang').textContent = U.other;
-  document.querySelectorAll('.tab').forEach(function(t,i){ t.textContent = U.tabs[i]; });
+  document.querySelectorAll('.tab').forEach(function(t,i){ t.textContent = i<2 ? U.tabs[i] : U.tabC; });
   document.getElementById('pick').setAttribute('aria-label', U.pick);
 }
 
@@ -1805,6 +2214,7 @@ function render(id){
   if(r.p) prep+='<div class="note pair"><b>Avec quoi le servir.</b> '+r.p+'</div>';
   prep+='<button class="reset" id="r-s">'+U.resetS+'</button>';
   document.getElementById('prep').innerHTML=pin(prep);
+  syncAdd();
 
   wire();
   counts();
@@ -1850,9 +2260,151 @@ function toTop(){
   try{document.documentElement.scrollTop=0;document.body.scrollTop=0;}catch(e){}
 }
 
+
+/* ---- Panier du jour ---- */
+var BASKET=[];
+try{var _b=JSON.parse(localStorage.getItem('carnet-basket')||'[]'); if(Array.isArray(_b)) BASKET=_b;}catch(e){}
+function saveBasket(){ try{localStorage.setItem('carnet-basket',JSON.stringify(BASKET));}catch(e){} }
+
+function syncAdd(){
+  var b=document.getElementById('add');
+  var on=BASKET.indexOf(cur)>=0;
+  b.textContent = on ? U.added : U.add;
+  b.classList.toggle('on', on);
+}
+
+/* Fusionne les ingrédients des recettes choisies. La catégorisation et
+   l'analyse des quantités partent toujours du français, les deux jeux de
+   données étant superposables par position. */
+function buildList(){
+  var acc={}, order=[];
+  BASKET.forEach(function(id){
+    var rf=R_FR[id], rl=R[id];
+    if(!rf) return;
+    rf.g.forEach(function(grp,gi){
+      grp[1].forEach(function(it,ii){
+        var raw=it[0];
+        if(SHOP_SKIP.indexOf(raw)>=0) return;
+        var canon=SHOP_ALIAS[raw]; if(!canon) return;
+        var meta=SHOP_CANON[canon]; if(!meta) return;
+        if(!acc[canon]){ acc[canon]={canon:canon,en:meta[0],cat:meta[1],sum:{},txt:[],src:[]}; order.push(canon); }
+        var e=acc[canon];
+        var q=qtyParse(it[1]);
+        if(q){ e.sum[q.u]=(e.sum[q.u]||0)+q.n; }
+        else {
+          var t=(rl.g[gi]&&rl.g[gi][1][ii]) ? rl.g[gi][1][ii][1] : it[1];
+          if(t && e.txt.indexOf(t)<0) e.txt.push(t);
+        }
+        var nm=rl.n;
+        if(e.src.indexOf(nm)<0) e.src.push(nm);
+      });
+    });
+  });
+  var out=[];
+  Object.keys(SHOP_CAT).forEach(function(c){
+    var rows=order.filter(function(k){ return acc[k].cat===c; }).map(function(k){
+      var e=acc[k], parts=[], sum=qtyMerge(e.sum);
+      Object.keys(sum).forEach(function(u){ parts.push(qtyFormat({n:sum[u],u:u}, LANG)); });
+      e.txt.forEach(function(t){ parts.push(t); });
+      return {name: LANG==='en' ? e.en : e.canon, qty: parts.join(' + '), src: e.src};
+    });
+    if(rows.length) out.push({cat:c, label:SHOP_CAT[c][LANG==='en'?1:0], rows:rows});
+  });
+  return out;
+}
+
+function listText(){
+  var L=buildList(), lines=[U.listTitle,''];
+  lines.push(BASKET.map(function(id){ return R[id] ? R[id].n : id; }).join(' \u00b7 '));
+  L.forEach(function(sec){
+    lines.push(''); lines.push(sec.label.toUpperCase());
+    sec.rows.forEach(function(r){
+      lines.push('- '+r.name+(r.qty?'  '+r.qty:'')+'  ('+r.src.join(', ')+')');
+    });
+  });
+  return lines.join('\n');
+}
+
+/* Même compteur que l'onglet Ingrédients : coché / total par rayon. */
+function cCounts(){
+  document.querySelectorAll('#courses .sec-n').forEach(function(el){
+    var g=el.dataset.c; if(!g) return;
+    var all=document.querySelectorAll('#courses .item[data-grp="'+g+'"]');
+    var on=document.querySelectorAll('#courses .item.on[data-grp="'+g+'"]');
+    el.textContent=on.length+' / '+all.length;
+  });
+}
+
+function renderCourses(){
+  var el=document.getElementById('courses');
+  if(!BASKET.length){ el.innerHTML='<div class="empty">'+U.emptyC+'</div>'; return; }
+  var h='<div class="bask">';
+  BASKET.forEach(function(id){
+    h+='<span class="chip">'+(R[id]?R[id].n:id)+'<button data-rm="'+id+'" aria-label="x">\u00d7</button></span>';
+  });
+  h+='</div>';
+  var L=buildList(), total=0;
+  L.forEach(function(sec){
+    h+='<div class="sec"><div class="sec-h"><span class="sec-t">'+sec.label+'</span><span class="sec-n" data-c="'+sec.cat+'"></span></div>';
+    sec.rows.forEach(function(r,i){
+      var k=key('shop',sec.cat,i);
+      h+='<div class="item'+(get(k)?' on':'')+'" data-k="'+k+'" data-grp="'+sec.cat+'">'+CHECK+
+         '<div class="item-body"><div class="item-n">'+r.name+'</div>'+
+         '<div class="srcs">'+r.src.join(', ')+'</div></div>'+
+         '<span class="qty">'+r.qty+'</span></div>';
+      total++;
+    });
+    h+='</div>';
+  });
+  h+='<div class="acts"><button class="reset" id="c-copy">'+U.copy+'</button>'+
+     '<button class="reset" id="c-clear">'+U.clear+'</button></div>';
+  el.innerHTML=pin(h);
+
+  el.querySelectorAll('[data-rm]').forEach(function(b){
+    b.addEventListener('click',function(){
+      BASKET=BASKET.filter(function(x){ return x!==b.dataset.rm; });
+      saveBasket(); renderCourses(); syncAdd();
+    });
+  });
+  el.querySelectorAll('.item').forEach(function(it){
+    it.addEventListener('click',function(){
+      var on=!it.classList.contains('on');
+      it.classList.toggle('on',on); set(it.dataset.k,on); cCounts();
+    });
+  });
+  cCounts();
+  document.getElementById('c-clear').addEventListener('click',function(){
+    BASKET=[]; saveBasket(); renderCourses(); syncAdd();
+  });
+  document.getElementById('c-copy').addEventListener('click',function(){
+    var btn=this, txt=listText();
+    function fallback(){
+      var ta=document.getElementById('copyout');
+      if(!ta){ ta=document.createElement('textarea'); ta.id='copyout'; btn.parentNode.parentNode.appendChild(ta); }
+      ta.value=txt; ta.focus(); ta.select();
+      btn.textContent=U.manual;
+    }
+    try{
+      navigator.clipboard.writeText(txt).then(function(){
+        btn.textContent=U.copied;
+        setTimeout(function(){ btn.textContent=U.copy; },1800);
+      }, fallback);
+    }catch(e){ fallback(); }
+  });
+}
+
+document.getElementById('add').addEventListener('click',function(){
+  var i=BASKET.indexOf(cur);
+  if(i>=0) BASKET.splice(i,1); else BASKET.push(cur);
+  saveBasket(); syncAdd();
+  if(!document.getElementById('courses').hidden) renderCourses();
+});
+
 function showTab(name){
   document.getElementById('ing').hidden = (name!=='ing');
   document.getElementById('prep').hidden = (name!=='prep');
+  document.getElementById('courses').hidden = (name!=='courses');
+  if(name==='courses') renderCourses();
   document.querySelectorAll('.tab').forEach(function(t){
     t.setAttribute('aria-selected', String(t.dataset.p===name));
   });
@@ -1869,6 +2421,9 @@ function boot(keep){
   render(start);
   document.getElementById('u-brand').textContent =
     U.brand+' · '+Object.keys(R).length+' '+U.count;
+  BASKET=BASKET.filter(function(id){ return !!R[id]; });
+  syncAdd();
+  if(!document.getElementById('courses').hidden) renderCourses();
 }
 
 document.getElementById('pick').addEventListener('change',function(e){

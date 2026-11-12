@@ -11,6 +11,10 @@ GitHub Pages est activé sur le dépôt.
 - Un menu déroulant qui liste les recettes, groupées par cuisine
 - Un onglet Ingrédients, avec cases à cocher et compteur par groupe
 - Un onglet Préparation, avec étapes cochables et notes de technique
+- Un onglet Courses : un bouton sur chaque recette l'ajoute au panier du
+  jour, les ingrédients de toutes les recettes choisies sont fusionnés,
+  rangés par rayon, et un bouton copie la liste en texte brut, prête à
+  coller dans WhatsApp
 - Pour les ingrédients chinois peu courants, un bouton qui ouvre une
   recherche d'images, avec les caractères à montrer en magasin
 
@@ -70,6 +74,28 @@ se modifient jamais à la main :
 d'elle-même mais que GitHub Pages ne fournit pas : doctype, charset,
 viewport et les métadonnées de raccourci iOS. `build-recipes.js`
 extrait les données et vérifie que `R` et `ORDER` concordent.
+
+## Comment la liste de courses fusionne
+
+Trois tables dans le `<script>`, juste avant la logique du panier :
+
+- `SHOP_SKIP` : ce qu'on n'achète pas (l'eau, les os à bouillon)
+- `SHOP_CANON` : le nom canonique de chaque ingrédient, son nom anglais
+  et son rayon
+- `SHOP_ALIAS` : chaque nom tel qu'il est écrit dans une recette, vers
+  son nom canonique. Un ingrédient ajouté à une recette doit être
+  ajouté ici, sinon il n'apparaîtra pas dans la liste.
+
+`qtyParse` lit une quantité française et rend un nombre et une unité.
+`qtyMerge` additionne ce qui est additionnable : les grammes entre eux,
+les cuillères entre elles (1 c. à s. = 3 c. à c.), un nombre nu sous
+l'unité de comptage quand il n'y en a qu'une. Ce qui n'est pas
+comparable reste affiché côte à côte, par exemple « ¾ c. à c. + un
+filet » : mieux vaut deux chiffres qu'un faux total. Les quantités non
+chiffrées (« au goût », « quelques feuilles ») passent telles quelles.
+
+Le panier est mémorisé dans le navigateur sous `carnet-basket`. Il
+survit à la fermeture de l'onglet.
 
 ## Pourquoi recipes.json
 
