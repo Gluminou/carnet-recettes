@@ -27,8 +27,8 @@ liste de courses en cours sur une recette n'affecte pas les autres.
 
 Chine : gongbao jiding, porc yuxiang, soupe aigre-piquante, tofu braisé
 aux shiitake et pak choi, boulettes tête de lion, bœuf braisé aux pommes
-de terre, chou-fleur à l'ail, pommes de terre sautées en julienne, black
-pepper beef, chou déchiré au porc, mapo tofu, dan dan noodles, char siu,
+de terre, chou-fleur à l'ail, pommes de terre sautées en julienne, bœuf au
+poivre noir, chou déchiré au porc, mapo tofu, dan dan noodles, char siu,
 kale sauté.
 
 Vietnam : poulet au caramel.
