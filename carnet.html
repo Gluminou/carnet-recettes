@@ -2398,13 +2398,15 @@ function basketRecipes(){
   return out;
 }
 
+/* Le texte envoyé ne porte que des articles et des quantités : les noms
+   de recettes n'aident pas la personne qui fait les courses. Ils restent
+   affichés à l'écran, eux. */
 function listText(){
-  var L=buildList(), lines=[U.listTitle,''];
-  lines.push(basketRecipes().map(function(r){ return r.n; }).join(' \u00b7 '));
+  var L=buildList(), lines=[U.listTitle];
   L.forEach(function(sec){
     lines.push(''); lines.push(sec.label.toUpperCase());
     sec.rows.forEach(function(r){
-      lines.push('- '+r.name+(r.qty?'  '+r.qty:'')+'  ('+r.src.join(', ')+')');
+      lines.push('- '+r.name+(r.qty?'  '+r.qty:''));
     });
   });
   return lines.join('\n');
