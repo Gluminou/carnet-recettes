@@ -11,10 +11,10 @@ GitHub Pages est activé sur le dépôt.
 - Un menu déroulant qui liste les recettes, groupées par cuisine
 - Un onglet Ingrédients, avec cases à cocher et compteur par groupe
 - Un onglet Préparation, avec étapes cochables et notes de technique
-- Un onglet Courses : un bouton sur chaque recette l'ajoute au panier du
-  jour, les ingrédients de toutes les recettes choisies sont fusionnés,
-  rangés par rayon, et un bouton copie la liste en texte brut, prête à
-  coller dans WhatsApp
+- Un onglet Courses : un panier à droite de chaque ingrédient l'envoie
+  dans la liste du jour, ligne par ligne et en piochant dans plusieurs
+  recettes. Les quantités se fusionnent, se rangent par rayon, et un
+  bouton copie le tout en texte brut, prêt à coller dans WhatsApp
 - Pour les ingrédients chinois peu courants, un bouton qui ouvre une
   recherche d'images, avec les caractères à montrer en magasin
 
@@ -94,8 +94,15 @@ comparable reste affiché côte à côte, par exemple « ¾ c. à c. + un
 filet » : mieux vaut deux chiffres qu'un faux total. Les quantités non
 chiffrées (« au goût », « quelques feuilles ») passent telles quelles.
 
+Le panier retient des ingrédients, pas des recettes : chaque entrée
+vaut `recette|groupe|rang`. On choisit donc ce qu'il faut vraiment
+acheter, sans trimbaler le riz et la sauce soja déjà au placard. Le
+bouton d'en-tête est un simple raccourci « tout ajouter » ou « tout
+retirer » pour la recette ouverte.
+
 Le panier est mémorisé dans le navigateur sous `carnet-basket`. Il
-survit à la fermeture de l'onglet.
+survit à la fermeture de l'onglet. L'ancien format, qui retenait des
+recettes entières, est déplié automatiquement au premier chargement.
 
 ## Pourquoi recipes.json
 

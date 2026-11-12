@@ -52,6 +52,7 @@ select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .addbtn.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
 .bask{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
 .chip{display:inline-flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:5px 7px 5px 11px;font-size:12.5px}
+.chip .cnt{font-family:var(--font-mono);font-size:11px;color:var(--ink-3)}
 .chip button{appearance:none;border:0;background:var(--line);color:var(--ink-2);width:17px;height:17px;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;padding:0}
 .chip button:hover{background:var(--accent);color:#fff}
 .srcs{font-size:11.5px;color:var(--ink-3);margin-top:2px}
@@ -79,6 +80,13 @@ main{padding-block:18px 56px}
 .item-body{flex:1;min-width:0}
 .item-n{font-size:14.5px}
 .item.on .item-n{color:var(--ink-3);text-decoration:line-through}
+.cart{appearance:none;flex:0 0 auto;border:1px solid var(--line);background:var(--bg);color:var(--ink-3);width:31px;height:31px;border-radius:5px;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cart svg{width:15px;height:15px;display:block}
+.cart:hover{color:var(--accent);border-color:var(--accent)}
+.cart.on{color:#fff;background:var(--accent);border-color:var(--accent)}
+.item.on .cart{opacity:.45}
+.cart.rm{border:0;background:none;color:var(--ink-3);font-size:19px;line-height:1;width:28px;height:28px}
+.cart.rm:hover{color:var(--accent);background:var(--accent-soft);border-radius:5px}
 .qty{flex:0 0 auto;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;padding-top:1px;text-align:right;max-width:38%}
 .item.on .qty{color:var(--ink-3)}
 .hanzi{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:3px 9px;background:var(--accent-soft);color:var(--accent);border-radius:3px;text-decoration:none;font-family:var(--font-cjk);font-size:15px;font-weight:500;line-height:1.3}
@@ -137,6 +145,10 @@ var PY={"宮保雞丁": "gōngbǎo jīdīng", "鎮江香醋": "zhènjiāng xiān
 function pin(h){return h.replace(/[\u3400-\u9FFF]+/g,function(m){
   return PY[m]?m+'<span class="py">'+PY[m]+'</span>':m;});}
 var CHECK='<span class="dot"><svg viewBox="0 0 12 12"><path d="M2 6.3 4.6 9 10 3"/></svg></span>';
+var CART='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+
+  '<path d="M1.5 2.5h3l2.7 12.2a1.6 1.6 0 0 0 1.6 1.3h8.5a1.6 1.6 0 0 0 1.6-1.3L21 6.2H5.6"/>'+
+  '<circle cx="9.5" cy="20.5" r="1.3" fill="currentColor" stroke="none"/>'+
+  '<circle cx="17.5" cy="20.5" r="1.3" fill="currentColor" stroke="none"/></svg>';
 
 /* Chaque entrée : g = groupe d'ingrédients, i = [nom, quantité, {h:hanzi, t:astuce}] */
 var R_FR = {
@@ -1757,18 +1769,20 @@ var UI={
      serves:"3 pers.",prep:"Prep",cook:"Cuisson",method:"Préparation",steps:"étapes",
      resetC:"Tout décocher",resetS:"Décocher toutes les étapes",
      photo:"photo",pick:"Choisir une recette",other:"EN",
-     tabC:"Courses",add:"Ajouter aux courses",added:"Retirer des courses",
+     tabC:"Courses",add:"Tout ajouter aux courses",added:"Tout retirer des courses",
+     cartL:"Ajouter aux courses",rmL:"Retirer de la liste",
      listTitle:"LISTE DE COURSES",copy:"Copier la liste",copied:"Copié",
      clear:"Vider",manual:"Copie refusée par le navigateur. Sélectionnez le texte ci-dessous.",
-     emptyC:"Aucune recette sélectionnée. Ouvrez une recette et appuyez sur « Ajouter aux courses » pour la faire entrer dans la liste du jour."},
+     emptyC:"Liste vide. Ouvrez une recette et appuyez sur le panier à droite de chaque ingrédient dont vous avez besoin. Vous pouvez piocher dans plusieurs recettes."},
  en:{brand:"Recipe book",count:"recipes",tabs:["Ingredients","Method"],
      serves:"serves 3",prep:"Prep",cook:"Cook",method:"Method",steps:"steps",
      resetC:"Clear all",resetS:"Clear all steps",
      photo:"photo",pick:"Choose a recipe",other:"FR",
-     tabC:"Shopping",add:"Add to shopping list",added:"Remove from list",
+     tabC:"Shopping",add:"Add everything to the list",added:"Remove everything from the list",
+     cartL:"Add to shopping list",rmL:"Remove from the list",
      listTitle:"SHOPPING LIST",copy:"Copy the list",copied:"Copied",
      clear:"Clear",manual:"The browser refused to copy. Select the text below.",
-     emptyC:"No recipes selected. Open a recipe and tap \u201cAdd to shopping list\u201d to put it in today\u2019s list."}
+     emptyC:"The list is empty. Open a recipe and tap the cart to the right of each ingredient you need. You can pick from several recipes."}
 };
 
 /* Table de courses : chaque nom d'ingrédient tel qu'il apparaît dans les
@@ -2186,13 +2200,15 @@ function render(id){
   var n=0, gi=0, ing='';
   r.g.forEach(function(grp){
     ing+='<div class="sec"><div class="sec-h"><span class="sec-t">'+grp[0]+'</span><span class="sec-n" data-c="'+gi+'"></span></div>';
-    grp[1].forEach(function(it){
-      var o=it[2]||{}, k=key(id,'i',n);
+    grp[1].forEach(function(it,ii){
+      var o=it[2]||{}, k=key(id,'i',n), sh=shoppable(id,gi,ii);
       ing+='<div class="item'+(get(k)?' on':'')+'" data-k="'+k+'" data-grp="'+gi+'">'+CHECK+
            '<div class="item-body"><div class="item-n">'+it[0]+'</div>'+
            (o.h?'<a class="hanzi" href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(o.h)+'" target="_blank" rel="noopener">'+o.h+' <span class="ar">'+U.photo+'</span></a>':'')+
            (o.t?'<div class="tip">'+o.t+'</div>':'')+
-           '</div><span class="qty">'+it[1]+'</span></div>';
+           '</div><span class="qty">'+it[1]+'</span>'+
+           (sh?'<button class="cart'+(inBasket(id,gi,ii)?' on':'')+'" data-b="'+gi+'|'+ii+'" title="'+U.cartL+'" aria-label="'+U.cartL+'">'+CART+'</button>':'')+
+           '</div>';
       n++;
     });
     ing+='</div>';
@@ -2233,8 +2249,17 @@ function counts(){
 function wire(){
   document.querySelectorAll('#ing .item').forEach(function(el){
     el.addEventListener('click',function(ev){
-      if(ev.target.closest('a'))return;
+      if(ev.target.closest('a')||ev.target.closest('.cart'))return;
       el.classList.toggle('on'); set(el.dataset.k, el.classList.contains('on')); counts();
+    });
+  });
+  document.querySelectorAll('#ing .cart').forEach(function(b){
+    b.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var g=b.dataset.b.split('|');
+      toggleItem(cur, +g[0], +g[1]);
+      b.classList.toggle('on');
+      syncAdd();
     });
   });
   document.querySelectorAll('#prep .step').forEach(function(el){
@@ -2262,43 +2287,91 @@ function toTop(){
 
 
 /* ---- Panier du jour ---- */
+/* Le panier retient des ingrédients, pas des recettes : une entrée vaut
+   "recette|groupe|rang". On choisit donc ligne par ligne, en piochant dans
+   plusieurs recettes, ce qu'il faut vraiment acheter. */
 var BASKET=[];
-try{var _b=JSON.parse(localStorage.getItem('carnet-basket')||'[]'); if(Array.isArray(_b)) BASKET=_b;}catch(e){}
+try{
+  var _b=JSON.parse(localStorage.getItem('carnet-basket')||'[]');
+  if(Array.isArray(_b)) BASKET=_b.filter(function(x){ return typeof x==='string'; });
+}catch(e){}
+/* Ancien format : une recette entière. On la déplie en ses ingrédients. */
+(function(){
+  var out=[], changed=false;
+  BASKET.forEach(function(x){
+    if(x.indexOf('|')>=0){ out.push(x); return; }
+    changed=true;
+    var r=R_FR[x]; if(!r) return;
+    r.g.forEach(function(grp,g){ grp[1].forEach(function(it,i){
+      if(shoppable(x,g,i)) out.push(x+'|'+g+'|'+i);
+    });});
+  });
+  if(changed) BASKET=out;
+})();
+
 function saveBasket(){ try{localStorage.setItem('carnet-basket',JSON.stringify(BASKET));}catch(e){} }
 
-function syncAdd(){
-  var b=document.getElementById('add');
-  var on=BASKET.indexOf(cur)>=0;
-  b.textContent = on ? U.added : U.add;
-  b.classList.toggle('on', on);
+/* Un ingrédient entre dans la liste s'il a un nom canonique et qu'il
+   s'achète : l'eau et les os à bouillon n'ont rien à y faire. */
+function shoppable(id,g,i){
+  var r=R_FR[id]; if(!r||!r.g[g]||!r.g[g][1][i]) return false;
+  var raw=r.g[g][1][i][0];
+  return SHOP_SKIP.indexOf(raw)<0 && !!SHOP_ALIAS[raw] && !!SHOP_CANON[SHOP_ALIAS[raw]];
+}
+function inBasket(id,g,i){ return BASKET.indexOf(id+'|'+g+'|'+i)>=0; }
+function toggleItem(id,g,i){
+  var k=id+'|'+g+'|'+i, p=BASKET.indexOf(k);
+  if(p>=0) BASKET.splice(p,1); else BASKET.push(k);
+  saveBasket();
+}
+/* Les ingrédients de la recette courante qui peuvent entrer dans la liste. */
+function shopKeys(id){
+  var r=R_FR[id], out=[]; if(!r) return out;
+  r.g.forEach(function(grp,g){ grp[1].forEach(function(it,i){
+    if(shoppable(id,g,i)) out.push(id+'|'+g+'|'+i);
+  });});
+  return out;
 }
 
-/* Fusionne les ingrédients des recettes choisies. La catégorisation et
-   l'analyse des quantités partent toujours du français, les deux jeux de
-   données étant superposables par position. */
+/* Le bouton d'en-tête ne fait qu'un raccourci : tout prendre, ou tout
+   enlever. Le choix fin se fait ingrédient par ingrédient. */
+function syncAdd(){
+  var b=document.getElementById('add'), ks=shopKeys(cur);
+  var all = ks.length>0 && ks.every(function(k){ return BASKET.indexOf(k)>=0; });
+  b.hidden = ks.length===0;
+  b.textContent = all ? U.added : U.add;
+  b.classList.toggle('on', all);
+}
+
+/* Après une suppression faite depuis l'onglet Courses, les paniers de la
+   recette ouverte doivent suivre. */
+function syncCarts(){
+  document.querySelectorAll('#ing .cart').forEach(function(b){
+    var g=b.dataset.b.split('|');
+    b.classList.toggle('on', inBasket(cur, +g[0], +g[1]));
+  });
+  syncAdd();
+}
+
 function buildList(){
   var acc={}, order=[];
-  BASKET.forEach(function(id){
+  BASKET.forEach(function(k){
+    var p=k.split('|'), id=p[0], gi=+p[1], ii=+p[2];
     var rf=R_FR[id], rl=R[id];
-    if(!rf) return;
-    rf.g.forEach(function(grp,gi){
-      grp[1].forEach(function(it,ii){
-        var raw=it[0];
-        if(SHOP_SKIP.indexOf(raw)>=0) return;
-        var canon=SHOP_ALIAS[raw]; if(!canon) return;
-        var meta=SHOP_CANON[canon]; if(!meta) return;
-        if(!acc[canon]){ acc[canon]={canon:canon,en:meta[0],cat:meta[1],sum:{},txt:[],src:[]}; order.push(canon); }
-        var e=acc[canon];
-        var q=qtyParse(it[1]);
-        if(q){ e.sum[q.u]=(e.sum[q.u]||0)+q.n; }
-        else {
-          var t=(rl.g[gi]&&rl.g[gi][1][ii]) ? rl.g[gi][1][ii][1] : it[1];
-          if(t && e.txt.indexOf(t)<0) e.txt.push(t);
-        }
-        var nm=rl.n;
-        if(e.src.indexOf(nm)<0) e.src.push(nm);
-      });
-    });
+    if(!rf||!rl||!rf.g[gi]||!rf.g[gi][1][ii]) return;
+    var it=rf.g[gi][1][ii], raw=it[0];
+    var canon=SHOP_ALIAS[raw]; if(!canon) return;
+    var meta=SHOP_CANON[canon]; if(!meta) return;
+    if(!acc[canon]){ acc[canon]={canon:canon,en:meta[0],cat:meta[1],sum:{},txt:[],src:[],keys:[]}; order.push(canon); }
+    var e=acc[canon];
+    e.keys.push(k);
+    var q=qtyParse(it[1]);
+    if(q){ e.sum[q.u]=(e.sum[q.u]||0)+q.n; }
+    else {
+      var t=(rl.g[gi]&&rl.g[gi][1][ii]) ? rl.g[gi][1][ii][1] : it[1];
+      if(t && e.txt.indexOf(t)<0) e.txt.push(t);
+    }
+    if(e.src.indexOf(rl.n)<0) e.src.push(rl.n);
   });
   var out=[];
   Object.keys(SHOP_CAT).forEach(function(c){
@@ -2306,16 +2379,28 @@ function buildList(){
       var e=acc[k], parts=[], sum=qtyMerge(e.sum);
       Object.keys(sum).forEach(function(u){ parts.push(qtyFormat({n:sum[u],u:u}, LANG)); });
       e.txt.forEach(function(t){ parts.push(t); });
-      return {name: LANG==='en' ? e.en : e.canon, qty: parts.join(' + '), src: e.src};
+      return {name: LANG==='en' ? e.en : e.canon, qty: parts.join(' + '), src: e.src, keys: e.keys};
     });
     if(rows.length) out.push({cat:c, label:SHOP_CAT[c][LANG==='en'?1:0], rows:rows});
   });
   return out;
 }
 
+/* Les recettes d'où viennent les ingrédients retenus, dans l'ordre d'ajout. */
+function basketRecipes(){
+  var seen={}, out=[];
+  BASKET.forEach(function(k){
+    var id=k.split('|')[0];
+    if(!R[id]) return;
+    if(!seen[id]){ seen[id]={id:id, n:R[id].n, c:0}; out.push(seen[id]); }
+    seen[id].c++;
+  });
+  return out;
+}
+
 function listText(){
   var L=buildList(), lines=[U.listTitle,''];
-  lines.push(BASKET.map(function(id){ return R[id] ? R[id].n : id; }).join(' \u00b7 '));
+  lines.push(basketRecipes().map(function(r){ return r.n; }).join(' \u00b7 '));
   L.forEach(function(sec){
     lines.push(''); lines.push(sec.label.toUpperCase());
     sec.rows.forEach(function(r){
@@ -2339,8 +2424,9 @@ function renderCourses(){
   var el=document.getElementById('courses');
   if(!BASKET.length){ el.innerHTML='<div class="empty">'+U.emptyC+'</div>'; return; }
   var h='<div class="bask">';
-  BASKET.forEach(function(id){
-    h+='<span class="chip">'+(R[id]?R[id].n:id)+'<button data-rm="'+id+'" aria-label="x">\u00d7</button></span>';
+  basketRecipes().forEach(function(r){
+    h+='<span class="chip">'+r.n+'<span class="cnt">'+r.c+'</span>'+
+       '<button data-rm="'+r.id+'" aria-label="x">\u00d7</button></span>';
   });
   h+='</div>';
   var L=buildList(), total=0;
@@ -2351,7 +2437,8 @@ function renderCourses(){
       h+='<div class="item'+(get(k)?' on':'')+'" data-k="'+k+'" data-grp="'+sec.cat+'">'+CHECK+
          '<div class="item-body"><div class="item-n">'+r.name+'</div>'+
          '<div class="srcs">'+r.src.join(', ')+'</div></div>'+
-         '<span class="qty">'+r.qty+'</span></div>';
+         '<span class="qty">'+r.qty+'</span>'+
+         '<button class="cart rm" data-rk="'+r.keys.join(';')+'" title="'+U.rmL+'" aria-label="'+U.rmL+'">\u00d7</button></div>';
       total++;
     });
     h+='</div>';
@@ -2362,19 +2449,29 @@ function renderCourses(){
 
   el.querySelectorAll('[data-rm]').forEach(function(b){
     b.addEventListener('click',function(){
-      BASKET=BASKET.filter(function(x){ return x!==b.dataset.rm; });
-      saveBasket(); renderCourses(); syncAdd();
+      var id=b.dataset.rm;
+      BASKET=BASKET.filter(function(x){ return x.split('|')[0]!==id; });
+      saveBasket(); renderCourses(); syncCarts();
     });
   });
   el.querySelectorAll('.item').forEach(function(it){
-    it.addEventListener('click',function(){
+    it.addEventListener('click',function(ev){
+      if(ev.target.closest('.cart'))return;
       var on=!it.classList.contains('on');
       it.classList.toggle('on',on); set(it.dataset.k,on); cCounts();
     });
   });
+  el.querySelectorAll('.cart[data-rk]').forEach(function(b){
+    b.addEventListener('click',function(ev){
+      ev.stopPropagation();
+      var ks=b.dataset.rk.split(';');
+      BASKET=BASKET.filter(function(k){ return ks.indexOf(k)<0; });
+      saveBasket(); renderCourses(); syncCarts();
+    });
+  });
   cCounts();
   document.getElementById('c-clear').addEventListener('click',function(){
-    BASKET=[]; saveBasket(); renderCourses(); syncAdd();
+    BASKET=[]; saveBasket(); renderCourses(); syncCarts();
   });
   document.getElementById('c-copy').addEventListener('click',function(){
     var btn=this, txt=listText();
@@ -2394,9 +2491,15 @@ function renderCourses(){
 }
 
 document.getElementById('add').addEventListener('click',function(){
-  var i=BASKET.indexOf(cur);
-  if(i>=0) BASKET.splice(i,1); else BASKET.push(cur);
+  var ks=shopKeys(cur);
+  var all = ks.length>0 && ks.every(function(k){ return BASKET.indexOf(k)>=0; });
+  if(all) BASKET=BASKET.filter(function(k){ return ks.indexOf(k)<0; });
+  else ks.forEach(function(k){ if(BASKET.indexOf(k)<0) BASKET.push(k); });
   saveBasket(); syncAdd();
+  document.querySelectorAll('#ing .cart').forEach(function(b){
+    var g=b.dataset.b.split('|');
+    b.classList.toggle('on', inBasket(cur, +g[0], +g[1]));
+  });
   if(!document.getElementById('courses').hidden) renderCourses();
 });
 
@@ -2421,7 +2524,8 @@ function boot(keep){
   render(start);
   document.getElementById('u-brand').textContent =
     U.brand+' · '+Object.keys(R).length+' '+U.count;
-  BASKET=BASKET.filter(function(id){ return !!R[id]; });
+  /* Une recette disparue du carnet ne doit pas laisser de lignes fantômes. */
+  BASKET=BASKET.filter(function(k){ return !!R[k.split('|')[0]]; });
   syncAdd();
   if(!document.getElementById('courses').hidden) renderCourses();
 }
