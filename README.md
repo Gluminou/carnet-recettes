@@ -111,6 +111,22 @@ Le panier est mémorisé dans le navigateur sous `carnet-basket`. Il
 survit à la fermeture de l'onglet. L'ancien format, qui retenait des
 recettes entières, est déplié automatiquement au premier chargement.
 
+## Les scripts de construction
+
+`index.html` et `recipes.json` sont générés, jamais édités à la main.
+`carnet.html` est la source de référence.
+
+    node build-site.js      # carnet.html -> index.html
+    node build-recipes.js   # carnet.html -> recipes.json
+
+`build-recipes.js` refuse d'écrire si les deux langues divergent de
+structure : nombre de recettes, de catégories, de groupes,
+d'ingrédients par groupe, d'étapes, de notes, et position des
+caractères chinois. Ce n'est pas du zèle. Les cases à cocher de
+l'application sont indexées par position, donc une ligne en plus d'un
+seul côté ferait silencieusement correspondre les coches aux mauvaises
+lignes, sans message d'erreur et sans que personne le remarque.
+
 ## Pourquoi recipes.json
 
 Un raccourci ajouté à l'écran d'accueil d'un iPhone garde sa propre
