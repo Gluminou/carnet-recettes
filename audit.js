@@ -114,6 +114,30 @@ for (const id of Object.keys(FR)) {
   });
 }
 
+
+// --- 4. une note qui recommande un geste que plus aucune étape ne fait ---
+// C'est exactement ce qui est arrivé au char siu : l'étape d'entaillage a
+// été supprimée et la note qui la justifiait est restée, si bien que la
+// fiche conseillait en note ce qu'elle interdisait en étape. Une correction
+// faite à un seul endroit laisse toujours ce genre de trace.
+// Volontairement court. Uniquement des gestes structurels, qu'une fiche
+// fait ou ne fait pas, jamais des mots qu'une note peut employer en
+// parlant d'une variante ou de la conservation ("tremper", "griller",
+// "mariner" reviennent partout et noyaient la sortie).
+const GESTES = ['entaill', 'incis', 'ecum', 'degaz', 'claqu', 'flamb', 'tamis',
+  'deglac', 'petri', 'panur', 'blanchi'];
+for (const id of Object.keys(FR)) {
+  const f = FR[id];
+  const etapes = sansAccent(f.s.join(' ') + ' ' + f.g.map(g => g[1].map(i => i[0] + ' ' + ((i[2] || {}).t || '')).join(' ')).join(' '));
+  (f.no || []).forEach((n, i) => {
+    const texte = sansAccent(n[0] + ' ' + n[1]);
+    GESTES.forEach(g => {
+      if (texte.includes(g) && !etapes.includes(g))
+        dire(id, 'note ' + (i + 1) + ' parle d\'un geste absent des étapes', `« ${n[0]} » évoque « ${g}… » qu'aucune étape ne fait`);
+    });
+  });
+}
+
 console.log(`${Object.keys(FR).length} recettes examinées, ${out.length} signalement(s).\n`);
 const parId = {};
 out.forEach(o => (parId[o.id] = parId[o.id] || []).push(o));

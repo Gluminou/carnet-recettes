@@ -143,6 +143,16 @@ comparer noyait la sortie sous les faux positifs. Il en reste une
 poignée, toujours les mêmes, principalement les notes qui expliquent
 pourquoi l'oignon a été retiré.
 
+Elle signale aussi les notes qui recommandent un geste qu'aucune étape ne
+fait. C'est ce qui était arrivé au char siu : l'étape d'entaillage avait
+été supprimée et la note qui la justifiait était restée, si bien que la
+fiche conseillait en note ce que l'étape interdisait. La liste de gestes
+est volontairement courte, limitée aux gestes structurels, parce que des
+mots comme « tremper » ou « mariner » reviennent légitimement dans les
+notes de variante et de conservation. Deux faux positifs connus
+subsistent, le blanchiment facultatif du kale et la comparaison du panga
+avec la panure du cordon bleu.
+
 Le script ne sait pas cuisiner. Il attrape les incohérences mécaniques,
 pas les erreurs de technique ni les contradictions de sens.
 
