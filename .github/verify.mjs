@@ -11,7 +11,7 @@
 // d'intégration n'a ni jeton ni accès garanti, et un message console.error
 // émis volontairement par l'application.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, extname } from 'node:path';
+import { join, relative, extname, resolve } from 'node:path';
 import { createServer } from 'node:http';
 import { chromium } from 'playwright';
 
@@ -60,11 +60,14 @@ const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
   '.css': 'text/css; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
 
+// Chemins résolus des deux côtés : avec une racine donnée comme ".",
+// une comparaison de préfixe sur les chemins bruts rejetterait tout.
+const racine = resolve(root);
 const serveur = createServer((req, res) => {
   const chemin = decodeURIComponent(req.url.split('?')[0]);
-  const f = join(root, chemin === '/' ? 'index.html' : chemin);
+  const f = resolve(racine, '.' + (chemin === '/' ? '/index.html' : chemin));
   try {
-    if (!f.startsWith(join(root))) throw new Error('hors racine');
+    if (relative(racine, f).startsWith('..')) throw new Error('hors racine');
     const corps = readFileSync(f);
     res.writeHead(200, { 'Content-Type': types[extname(f)] || 'application/octet-stream' });
     res.end(corps);
