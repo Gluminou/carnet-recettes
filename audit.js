@@ -1,0 +1,125 @@
+// Passe automatique sur les fiches : ce qu'une machine peut repérer sans
+// rien comprendre à la cuisine. Le but est d'avoir peu de faux positifs,
+// sinon la liste devient du bruit qu'on finit par ignorer.
+//   node audit.js
+const R = require('./recipes.json');
+const FR = R.R, EN = R.R_EN;
+
+const out = [];
+const dire = (id, quoi, detail) => out.push({ id, quoi, detail });
+
+// --- normalisation des nombres -----------------------------------------
+// Le français écrit 2,5 et l'anglais 2.5 ; le carnet écrit ½ et 1,5 ;
+// 70 cl et 700 ml sont la même chose. Rien de tout cela n'est une erreur.
+const FRACTIONS = { '½': '.5', '¼': '.25', '¾': '.75', '⅓': '.33', '⅔': '.67', '⅛': '.125' };
+// Seuls les chiffres écrits en chiffres sont comparés. Les nombres en
+// toutes lettres ne se traduisent pas un pour un ("en deux" devient
+// "halve", "une quinzaine" devient "about fifteen") et les comparer ne
+// produit que du bruit.
+
+function normaliser(t) {
+  let s = ' ' + String(t).toLowerCase() + ' ';
+  for (const [g, v] of Object.entries(FRACTIONS)) s = s.split(g).join(v);
+  // décimale française
+  s = s.replace(/(\d),(\d)/g, '$1.$2');
+  // un chiffre collé à sa fraction : 1 .5 -> 1.5
+  s = s.replace(/(\d)\s+\.(\d)/g, '$1.$2');
+  // volumes ramenés au millilitre
+  s = s.replace(/(\d+(?:\.\d+)?)\s*cl\b/g, (_, n) => (parseFloat(n) * 10) + ' ml');
+  s = s.replace(/(\d+(?:\.\d+)?)\s*(?:litres?|l)\b/g, (_, n) => (parseFloat(n) * 1000) + ' ml');
+  return s;
+}
+const nombres = t => {
+  const n = (normaliser(t).match(/\d+(?:\.\d+)?/g) || []).map(x => String(parseFloat(x)));
+  return n.sort().join(' ');
+};
+
+const corps = s => String(s).split('|')[0];
+const astuce = s => String(s).split('|')[1] || '';
+
+// --- mots d'un ingrédient, pour savoir s'il est employé -----------------
+const VIDES = new Set(['pour', 'avec', 'dans', 'sans', 'cm', 'chair', 'morceaux', 'tranches',
+  'lamelles', 'lanieres', 'haché', 'hachée', 'hachés', 'écrasé', 'ciselée', 'émincé',
+  'coupé', 'coupée', 'frais', 'fraîche', 'sèche', 'séchés', 'entier', 'entières']);
+function motsCles(nom) {
+  return nom.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[,(].*$/, '')
+    .split(/[\s'’]+/)
+    .filter(w => w.length > 2 && !VIDES.has(w))
+    .map(w => w.replace(/s$/, '').slice(0, 5));
+}
+const sansAccent = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+for (const id of Object.keys(FR)) {
+  const f = FR[id], e = EN[id];
+  if (!e) { dire(id, 'ABSENT EN', "la recette n'existe pas en anglais"); continue; }
+
+  // --- 1. les chiffres doivent concorder entre les deux langues ---
+  f.s.forEach((s, i) => {
+    const a = nombres(corps(s)), b = nombres(corps(e.s[i]));
+    if (a !== b) dire(id, 'étape ' + (i + 1) + ', chiffres divergents', `FR [${a}] vs EN [${b}]\n      FR: ${corps(s)}\n      EN: ${corps(e.s[i])}`);
+    const ta = nombres(astuce(s)), tb = nombres(astuce(e.s[i]));
+    if (ta !== tb) dire(id, 'étape ' + (i + 1) + ', chiffres divergents dans l\'astuce', `FR [${ta}] vs EN [${tb}]`);
+  });
+
+  f.g.forEach((grp, gi) => grp[1].forEach((it, ii) => {
+    const ei = e.g[gi][1][ii];
+    if (nombres(it[1]) !== nombres(ei[1]))
+      dire(id, 'quantité divergente', `${it[0]} = ${it[1]}   vs   ${ei[0]} = ${ei[1]}`);
+    if (!String(it[1]).trim()) dire(id, 'quantité vide', it[0]);
+    const ha = (it[2] || {}).t, hb = (ei[2] || {}).t;
+    if (!!ha !== !!hb) dire(id, 'astuce présente d\'un seul côté', it[0]);
+    else if (ha && nombres(ha) !== nombres(hb))
+      dire(id, 'astuce d\'ingrédient, chiffres divergents', `${it[0]} : FR [${nombres(ha)}] vs EN [${nombres(hb)}]\n      FR: ${ha}\n      EN: ${hb}`);
+  }));
+
+  (f.no || []).forEach((n, i) => {
+    const m = (e.no || [])[i] || ['', ''];
+    if (nombres(n[1]) !== nombres(m[1]))
+      dire(id, 'note ' + (i + 1) + ', chiffres divergents', `« ${n[0]} » : FR [${nombres(n[1])}] vs EN [${nombres(m[1])}]`);
+  });
+  if (nombres(f.p || '') !== nombres(e.p || ''))
+    dire(id, 'conclusion, chiffres divergents', `FR [${nombres(f.p || '')}] vs EN [${nombres(e.p || '')}]`);
+  if (nombres(f.prep + ' ' + f.cook) !== nombres(e.prep + ' ' + e.cook))
+    dire(id, 'temps de la fiche divergents', `FR ${f.prep} / ${f.cook}   vs   EN ${e.prep} / ${e.cook}`);
+
+  // --- 2. oignon et échalote, proscrits ---
+  const plat = (JSON.stringify(f) + JSON.stringify(e)).replace(/\\"/g, '"');
+  const re = /.{0,60}(oignons?|échalotes?|shallots?|onions?).{0,45}/gi;
+  const trouve = [];
+  let m;
+  while ((m = re.exec(plat))) {
+    if (/spring onion|ciboule|oignon de la recette|sans oignon|l'oignon de|à l'oignon émincé|no onion|the onion of|thinly sliced onion/i.test(m[0])) continue;
+    trouve.push(m[0].trim());
+  }
+  if (trouve.length) dire(id, 'OIGNON OU ÉCHALOTE', [...new Set(trouve)].slice(0, 2).join('  //  '));
+
+  // --- 3. un ingrédient listé doit se retrouver dans les étapes ---
+  // Les composants d'une sauce ou d'une marinade sont employés en bloc
+  // ("mélanger la sauce"), et l'accompagnement ne figure pas dans le
+  // déroulé : les uns comme les autres ne sont pas des oublis.
+  const COLLECTIFS = /sauce|marinade|assaisonnement|seasoning|aromates|pour finir|le reste|to finish|accompagnement/i;
+  const GARNITURES = /^(riz|nouilles|pain|rice|noodles|bread)/i;
+  const texteFR = sansAccent(f.s.join(' ') + ' ' + (f.no || []).map(n => n[0] + ' ' + n[1]).join(' '));
+  f.g.forEach(grp => {
+    if (COLLECTIFS.test(grp[0])) return;
+    grp[1].forEach(it => {
+      if (GARNITURES.test(it[0])) return;
+      const mots = motsCles(it[0]);
+      if (!mots.length) return;
+      if (!mots.some(w => texteFR.includes(w)))
+        dire(id, 'ingrédient listé mais absent des étapes', `${it[0]} (${it[1]})`);
+    });
+  });
+}
+
+console.log(`${Object.keys(FR).length} recettes examinées, ${out.length} signalement(s).\n`);
+const parId = {};
+out.forEach(o => (parId[o.id] = parId[o.id] || []).push(o));
+for (const id of Object.keys(parId)) {
+  console.log('### ' + id + '  (' + FR[id].n + ')');
+  parId[id].forEach(o => console.log('  - ' + o.quoi + ' : ' + o.detail));
+  console.log();
+}
+if (!out.length) console.log('Rien à signaler.');

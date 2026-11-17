@@ -127,6 +127,25 @@ l'application sont indexées par position, donc une ligne en plus d'un
 seul côté ferait silencieusement correspondre les coches aux mauvaises
 lignes, sans message d'erreur et sans que personne le remarque.
 
+## Auditer les fiches
+
+    node audit.js
+
+Passe mécanique sur les 27 recettes : chiffres qui divergent entre le
+français et l'anglais, quantités qui ne concordent pas, astuce présente
+d'un seul côté, oignon ou échalote, ingrédient listé mais jamais employé
+dans les étapes.
+
+Elle ne compare que les chiffres écrits en chiffres. Les nombres en
+toutes lettres ne se traduisent pas un pour un, « en deux » devient
+« halve » et « une quinzaine » devient « about fifteen », et les
+comparer noyait la sortie sous les faux positifs. Il en reste une
+poignée, toujours les mêmes, principalement les notes qui expliquent
+pourquoi l'oignon a été retiré.
+
+Le script ne sait pas cuisiner. Il attrape les incohérences mécaniques,
+pas les erreurs de technique ni les contradictions de sens.
+
 ## Pourquoi recipes.json
 
 Un raccourci ajouté à l'écran d'accueil d'un iPhone garde sa propre
