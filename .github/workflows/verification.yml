@@ -1,0 +1,46 @@
+name: Vérification
+
+# Pourquoi ce fichier existe.
+#
+# Le 10 novembre 2026, carnet.html est passé au bilingue et le script qui
+# fabrique recipes.json a été modifié en conséquence, mais la version
+# corrigée est restée hors du dépôt. Pendant sept jours le dépôt a contenu
+# un produit fini correct et une recette de fabrication périmée, sans que
+# rien ne le signale, parce que personne n'exécutait jamais la copie
+# commitée. Ce workflow l'exécute à chaque push.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Propre à ce dépôt : index.html et recipes.json sont fabriqués à
+      # partir de carnet.html, qui est la seule source à éditer à la main.
+      # On les refabrique et on exige qu'ils soient identiques à ceux du
+      # dépôt. Échoue donc aussi bien si un script ne tourne plus que si la
+      # source a changé sans que les fichiers générés soient recommités.
+      - name: Les fichiers générés correspondent-ils à leur source
+        run: |
+          node build-site.js
+          node build-recipes.js
+          git --no-pager diff --stat -- index.html recipes.json
+          git diff --exit-code -- index.html recipes.json
+
+      - name: Installer le navigateur
+        run: |
+          npm install --no-save 'playwright@^1'
+          npx playwright install --with-deps chromium
+
+      # Syntaxe de tous les .js et .json, puis chargement réel de la page.
+      - name: Syntaxe, chargement et fichiers manquants
+        run: node .github/verify.mjs .
