@@ -132,7 +132,9 @@ for (const id of Object.keys(FR)) {
   (f.no || []).forEach((n, i) => {
     const texte = sansAccent(n[0] + ' ' + n[1]);
     GESTES.forEach(g => {
-      if (texte.includes(g) && !etapes.includes(g))
+      // Frontière de mot : sans elle, « éventailler » déclenche « entailler ».
+      const re = new RegExp('\\b' + g);
+      if (re.test(texte) && !re.test(etapes))
         dire(id, 'note ' + (i + 1) + ' parle d\'un geste absent des étapes', `« ${n[0]} » évoque « ${g}… » qu'aucune étape ne fait`);
     });
   });
