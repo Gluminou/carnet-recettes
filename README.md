@@ -107,6 +107,16 @@ acheter, sans trimbaler le riz et la sauce soja déjà au placard. Le
 bouton d'en-tête est un simple raccourci « tout ajouter » ou « tout
 retirer » pour la recette ouverte.
 
+Les quantités de la liste se corrigent à la main : on touche le chiffre,
+on écrit ce qu'on veut acheter. Le total calculé est juste
+arithmétiquement mais pas toujours au regard de l'étal, dix gousses
+d'ail se vendant en une tête. La correction prime sur le calcul, et
+vider le champ revient au total calculé. Elle est gardée par langue,
+sous `carnet-qty`, parce que la liste copiée part en anglais chez
+l'aide ménagère : « 1 tête » saisi en français n'a rien à y faire. Tant
+que l'autre langue n'a pas été saisie, c'est la correction existante
+qui s'affiche, pour ne pas la perdre en changeant de langue.
+
 Le panier est mémorisé dans le navigateur sous `carnet-basket`. Il
 survit à la fermeture de l'onglet. L'ancien format, qui retenait des
 recettes entières, est déplié automatiquement au premier chargement.

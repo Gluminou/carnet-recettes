@@ -95,6 +95,9 @@ main{padding-block:18px 56px}
 .cart:hover{color:var(--accent);border-color:var(--accent)}
 .cart.on{color:#fff;background:var(--accent);border-color:var(--accent)}
 .item.on .cart{opacity:.45}
+.qty[contenteditable]{border-bottom:1px dashed var(--line);cursor:text;min-width:28px;outline:none}
+.qty[contenteditable]:focus{border-bottom-color:var(--accent);background:var(--accent-soft)}
+.qty.over{color:var(--accent);border-bottom-style:solid;border-bottom-color:var(--accent)}
 .zh{font-size:15px;margin-top:2px;color:var(--ink)}
 .zh .py{margin-left:5px}
 .cart.rm{border:0;background:none;color:var(--ink-3);font-size:19px;line-height:1;width:28px;height:28px}
@@ -2093,6 +2096,7 @@ var UI={
      photo:"photo",pick:"Choisir une recette",other:"EN",
      tabC:"Courses",add:"Tout ajouter aux courses",added:"Tout retirer des courses",
      cartL:"Ajouter aux courses",rmL:"Retirer de la liste",
+     qtyT:"Touchez pour corriger la quantité. Videz le champ pour revenir au total calculé.",
      listTitle:"LISTE DE COURSES",copy:"Copier la liste",copied:"Copié",
      clear:"Vider",manual:"Copie refusée par le navigateur. Sélectionnez le texte ci-dessous.",
      emptyC:"Liste vide. Ouvrez une recette et appuyez sur le panier à droite de chaque ingrédient dont vous avez besoin. Vous pouvez piocher dans plusieurs recettes."},
@@ -2102,6 +2106,7 @@ var UI={
      photo:"photo",pick:"Choose a recipe",other:"FR",
      tabC:"Shopping",add:"Add everything to the list",added:"Remove everything from the list",
      cartL:"Add to shopping list",rmL:"Remove from the list",
+     qtyT:"Tap to correct the quantity. Clear the field to go back to the calculated total.",
      listTitle:"SHOPPING LIST",copy:"Copy the list",copied:"Copied",
      clear:"Clear",manual:"The browser refused to copy. Select the text below.",
      emptyC:"The list is empty. Open a recipe and tap the cart to the right of each ingredient you need. You can pick from several recipes."}
@@ -2821,6 +2826,41 @@ try{
 
 function saveBasket(){ try{localStorage.setItem('carnet-basket',JSON.stringify(BASKET));}catch(e){} }
 
+/* Quantités corrigées à la main, par ingrédient canonique. Le total calculé
+   est juste arithmétiquement mais pas toujours au regard de ce qu'on achète :
+   dix gousses d'ail se vendent en une tête, et on ne cuit le riz qu'une fois
+   pour trois plats. La correction prime sur le calcul et survit au
+   rechargement. Vider le champ revient au total calculé. */
+var QTY_OVER={};
+try{
+  var _q=JSON.parse(localStorage.getItem('carnet-qty')||'{}');
+  if(_q && typeof _q==='object') QTY_OVER=_q;
+}catch(e){}
+function saveQty(){ try{localStorage.setItem('carnet-qty',JSON.stringify(QTY_OVER));}catch(e){} }
+
+/* Une correction par langue, parce que la liste copiée part chez l'aide
+   ménagère en anglais : « 1 tête » saisi en français n'a rien à y faire.
+   Tant que la version de l'autre langue n'a pas été saisie, on affiche
+   celle qui existe plutôt que de perdre la correction. */
+function qtyOver(canon){
+  var o=QTY_OVER[canon];
+  if(o==null) return null;
+  if(typeof o==='string') return o;            // ancien format, une seule valeur
+  return o[LANG] != null ? o[LANG] : (o[LANG==='en'?'fr':'en'] != null ? o[LANG==='en'?'fr':'en'] : null);
+}
+function setQty(canon, texte){
+  texte=(texte||'').replace(/\s+/g,' ').trim();
+  var o=QTY_OVER[canon];
+  if(typeof o==='string') o={fr:o, en:o};      // dépliage de l'ancien format
+  o=o||{};
+  /* Vider un champ veut dire « rends-moi le total calculé », donc on retire
+     la correction dans les deux langues. Sinon on retomberait sur celle de
+     l'autre langue, ce qui n'est pas ce qu'on demandait. */
+  if(texte){ o[LANG]=texte; QTY_OVER[canon]=o; }
+  else delete QTY_OVER[canon];
+  saveQty();
+}
+
 /* Un ingrédient entre dans la liste s'il a un nom canonique et qu'il
    s'achète : l'eau et les os à bouillon n'ont rien à y faire. */
 function shoppable(id,g,i){
@@ -2889,8 +2929,9 @@ function buildList(){
       var e=acc[k], parts=[], sum=qtyMerge(e.sum);
       Object.keys(sum).forEach(function(u){ parts.push(qtyFormat({n:sum[u],u:u}, LANG)); });
       e.txt.forEach(function(t){ parts.push(t); });
-      var z=SHOP_ZH[e.canon]||[];
-      return {name: LANG==='en' ? e.en : e.canon, qty: parts.join(' + '), src: e.src, keys: e.keys, zh: z[0]||''};
+      var z=SHOP_ZH[e.canon]||[], auto=parts.join(' + '), over=qtyOver(e.canon);
+      return {name: LANG==='en' ? e.en : e.canon, canon: e.canon, auto: auto,
+              qty: over!=null ? over : auto, over: over!=null, src: e.src, keys: e.keys, zh: z[0]||''};
     });
     if(rows.length) out.push({cat:c, label:SHOP_CAT[c][LANG==='en'?1:0], rows:rows});
   });
@@ -2934,6 +2975,10 @@ function cCounts(){
   });
 }
 
+/* Les noms canoniques contiennent des apostrophes (Tête d'ail), qui
+   casseraient l'attribut si on les posait tels quels. */
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
 function renderCourses(){
   var el=document.getElementById('courses');
   if(!BASKET.length){ el.innerHTML='<div class="empty">'+U.emptyC+'</div>'; return; }
@@ -2952,7 +2997,8 @@ function renderCourses(){
          '<div class="item-body"><div class="item-n">'+r.name+'</div>'+
          (r.zh?'<div class="zh">'+r.zh+'</div>':'')+
          '<div class="srcs">'+r.src.join(', ')+'</div></div>'+
-         '<span class="qty">'+r.qty+'</span>'+
+         '<span class="qty'+(r.over?' over':'')+'" contenteditable="true" spellcheck="false" '+
+           'data-c="'+esc(r.canon)+'" data-auto="'+esc(r.auto)+'" title="'+U.qtyT+'">'+r.qty+'</span>'+
          '<button class="cart rm" data-rk="'+r.keys.join(';')+'" title="'+U.rmL+'" aria-label="'+U.rmL+'">\u00d7</button></div>';
       total++;
     });
@@ -2976,6 +3022,28 @@ function renderCourses(){
       it.classList.toggle('on',on); set(it.dataset.k,on); cCounts();
     });
   });
+  el.querySelectorAll('.qty[contenteditable]').forEach(function(q){
+    /* Toucher la quantité ne doit pas cocher la ligne. */
+    ['click','mousedown','touchstart'].forEach(function(ev){
+      q.addEventListener(ev,function(e){ e.stopPropagation(); });
+    });
+    q.addEventListener('focus',function(){
+      var r=document.createRange(); r.selectNodeContents(q);
+      var sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    });
+    q.addEventListener('keydown',function(e){
+      if(e.key==='Enter'){ e.preventDefault(); q.blur(); }
+      if(e.key==='Escape'){ q.textContent=q.dataset.auto; q.blur(); }
+    });
+    q.addEventListener('blur',function(){
+      var saisi=q.textContent.replace(/\s+/g,' ').trim();
+      var canon=q.dataset.c;
+      /* Revenir au calcul si le champ est vide ou s'il retrouve la valeur calculée. */
+      setQty(canon, saisi===q.dataset.auto ? '' : saisi);
+      renderCourses();
+    });
+  });
+
   el.querySelectorAll('.cart[data-rk]').forEach(function(b){
     b.addEventListener('click',function(ev){
       ev.stopPropagation();
