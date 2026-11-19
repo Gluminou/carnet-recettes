@@ -85,14 +85,16 @@ main{padding-block:18px 56px}
 .cart:hover{color:var(--accent);border-color:var(--accent)}
 .cart.on{color:#fff;background:var(--accent);border-color:var(--accent)}
 .item.on .cart{opacity:.45}
-.qty[contenteditable]{border-bottom:1px dashed var(--line);cursor:text;min-width:28px;outline:none}
-.qty[contenteditable]:focus{border-bottom-color:var(--accent);background:var(--accent-soft)}
-.qty.over{color:var(--accent);border-bottom-style:solid;border-bottom-color:var(--accent)}
+.qp{white-space:nowrap}
+.qn{border-bottom:1px dashed var(--line);cursor:text;min-width:16px;outline:none;display:inline-block;text-align:right}
+.qn:focus{border-bottom-color:var(--accent);background:var(--accent-soft)}
+.qn.over{color:var(--accent);border-bottom-style:solid;border-bottom-color:var(--accent)}
+.qu{color:var(--ink-2)}
 .zh{font-size:15px;margin-top:2px;color:var(--ink)}
 .zh .py{margin-left:5px}
 .cart.rm{border:0;background:none;color:var(--ink-3);font-size:19px;line-height:1;width:28px;height:28px}
 .cart.rm:hover{color:var(--accent);background:var(--accent-soft);border-radius:5px}
-.qty{flex:0 0 auto;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;padding-top:1px;text-align:right;max-width:38%}
+.qty{flex:0 0 auto;font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;padding-top:1px;text-align:right;max-width:46%}
 .item.on .qty{color:var(--ink-3)}
 .hanzi{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:3px 9px;background:var(--accent-soft);color:var(--accent);border-radius:3px;text-decoration:none;font-family:var(--font-cjk);font-size:15px;font-weight:500;line-height:1.3}
 .hanzi .ar{font-family:var(--font-sans);font-size:10px;font-weight:600;opacity:.75}
@@ -2086,7 +2088,7 @@ var UI={
      photo:"photo",pick:"Choisir une recette",other:"EN",
      tabC:"Courses",add:"Tout ajouter aux courses",added:"Tout retirer des courses",
      cartL:"Ajouter aux courses",rmL:"Retirer de la liste",
-     qtyT:"Touchez pour corriger la quantité. Videz le champ pour revenir au total calculé.",
+     qtyT:"Touchez pour corriger le nombre. Videz-le pour revenir au total calculé.",
      listTitle:"LISTE DE COURSES",copy:"Copier la liste",copied:"Copié",
      clear:"Vider",manual:"Copie refusée par le navigateur. Sélectionnez le texte ci-dessous.",
      emptyC:"Liste vide. Ouvrez une recette et appuyez sur le panier à droite de chaque ingrédient dont vous avez besoin. Vous pouvez piocher dans plusieurs recettes."},
@@ -2096,7 +2098,7 @@ var UI={
      photo:"photo",pick:"Choose a recipe",other:"FR",
      tabC:"Shopping",add:"Add everything to the list",added:"Remove everything from the list",
      cartL:"Add to shopping list",rmL:"Remove from the list",
-     qtyT:"Tap to correct the quantity. Clear the field to go back to the calculated total.",
+     qtyT:"Tap to correct the number. Clear it to go back to the calculated total.",
      listTitle:"SHOPPING LIST",copy:"Copy the list",copied:"Copied",
      clear:"Clear",manual:"The browser refused to copy. Select the text below.",
      emptyC:"The list is empty. Open a recipe and tap the cart to the right of each ingredient you need. You can pick from several recipes."}
@@ -2634,20 +2636,47 @@ function qtyNum(n, fr){
   return s;
 }
 
-function qtyFormat(q, lang){
+/* Rend le nombre et l'unité séparément, pour que la liste de courses puisse
+   laisser corriger le nombre sans toucher à l'unité. `facteur` dit par quoi
+   multiplier le nombre affiché pour retrouver la valeur de base : 900 g
+   s'affiche « 9 cl » quand il s'agit de 90 ml, et taper 12 doit vouloir dire
+   12 cl, donc 120 ml. */
+function qtySplit(q, lang){
   var fr = lang !== "en", n = q.n, u = q.u;
-  if(u === "g") return n >= 1000 ? qtyNum(n/1000, fr) + " kg" : qtyNum(n, fr) + " g";
-  if(u === "ml"){
-    if(n >= 1000) return qtyNum(n/1000, fr) + (fr ? " l" : " l");
-    if(fr && n >= 100 && n % 10 === 0) return qtyNum(n/10, fr) + " cl";
-    return qtyNum(n, fr) + " ml";
+  if(u === "g"){
+    if(n >= 1000) return {num:qtyNum(n/1000, fr), unit:"kg", f:1000};
+    return {num:qtyNum(n, fr), unit:"g", f:1};
   }
-  if(u === ""){ return qtyNum(n, fr); }
+  if(u === "ml"){
+    if(n >= 1000) return {num:qtyNum(n/1000, fr), unit:"l", f:1000};
+    if(fr && n >= 100 && n % 10 === 0) return {num:qtyNum(n/10, fr), unit:"cl", f:10};
+    return {num:qtyNum(n, fr), unit:"ml", f:1};
+  }
+  if(u === "") return {num:qtyNum(n, fr), unit:"", f:1};
   var d = QTY_NAMES[u];
-  if(!d) return qtyNum(n, fr);
+  if(!d) return {num:qtyNum(n, fr), unit:"", f:1};
   var label = d[fr ? 0 : 1];
-  if(typeof label === "string") return qtyNum(n, fr) + " " + label;
-  return qtyNum(n, fr) + " " + label[n > 1 ? 1 : 0];
+  return {num:qtyNum(n, fr), unit:(typeof label === "string" ? label : label[n > 1 ? 1 : 0]), f:1};
+}
+
+function qtyFormat(q, lang){
+  var p = qtySplit(q, lang);
+  return p.unit ? p.num + " " + p.unit : p.num;
+}
+
+/* Lit un nombre tapé à la main : virgule décimale, fractions du carnet. */
+function qtyRead(t){
+  t = String(t).trim().replace(",", ".");
+  var f = {"¼":0.25, "½":0.5, "¾":0.75, "⅓":0.33, "⅔":0.67};
+  var g = t.slice(-1), base = f[g];
+  if(base != null){
+    var tete = t.slice(0, -1).trim();
+    if(tete === "") return base;
+    var w = parseFloat(tete);
+    return isNaN(w) ? null : w + base;
+  }
+  var v = parseFloat(t);
+  return (isNaN(v) || v < 0) ? null : v;
 }
 
 /* Fusionne les unités compatibles d'un même ingrédient : les cuillères
@@ -2816,38 +2845,37 @@ try{
 
 function saveBasket(){ try{localStorage.setItem('carnet-basket',JSON.stringify(BASKET));}catch(e){} }
 
-/* Quantités corrigées à la main, par ingrédient canonique. Le total calculé
-   est juste arithmétiquement mais pas toujours au regard de ce qu'on achète :
-   dix gousses d'ail se vendent en une tête, et on ne cuit le riz qu'une fois
-   pour trois plats. La correction prime sur le calcul et survit au
-   rechargement. Vider le champ revient au total calculé. */
+/* Quantités corrigées à la main, par ingrédient canonique puis par unité.
+   Le total calculé est juste arithmétiquement mais pas toujours au regard de
+   ce qu'on achète : on ne cuit le riz qu'une fois pour trois plats. Seul le
+   nombre se corrige, jamais l'unité, et on le garde dans l'unité de base,
+   donc en millilitres même quand l'écran affiche des centilitres. Un nombre
+   n'ayant pas de langue, la correction vaut pour les deux. */
 var QTY_OVER={};
 try{
   var _q=JSON.parse(localStorage.getItem('carnet-qty')||'{}');
-  if(_q && typeof _q==='object') QTY_OVER=_q;
+  if(_q && typeof _q==='object'){
+    /* On ne garde que la forme attendue : les essais d'un format précédent
+       stockaient du texte libre et n'ont plus de sens ici. */
+    Object.keys(_q).forEach(function(c){
+      var v=_q[c];
+      if(v && typeof v==='object' && !Array.isArray(v)){
+        var net={};
+        Object.keys(v).forEach(function(u){ if(typeof v[u]==='number' && isFinite(v[u])) net[u]=v[u]; });
+        if(Object.keys(net).length) QTY_OVER[c]=net;
+      }
+    });
+  }
 }catch(e){}
 function saveQty(){ try{localStorage.setItem('carnet-qty',JSON.stringify(QTY_OVER));}catch(e){} }
-
-/* Une correction par langue, parce que la liste copiée part chez l'aide
-   ménagère en anglais : « 1 tête » saisi en français n'a rien à y faire.
-   Tant que la version de l'autre langue n'a pas été saisie, on affiche
-   celle qui existe plutôt que de perdre la correction. */
-function qtyOver(canon){
+function qtyOver(canon, unite){
   var o=QTY_OVER[canon];
-  if(o==null) return null;
-  if(typeof o==='string') return o;            // ancien format, une seule valeur
-  return o[LANG] != null ? o[LANG] : (o[LANG==='en'?'fr':'en'] != null ? o[LANG==='en'?'fr':'en'] : null);
+  return (o && o[unite]!=null) ? o[unite] : null;
 }
-function setQty(canon, texte){
-  texte=(texte||'').replace(/\s+/g,' ').trim();
-  var o=QTY_OVER[canon];
-  if(typeof o==='string') o={fr:o, en:o};      // dépliage de l'ancien format
-  o=o||{};
-  /* Vider un champ veut dire « rends-moi le total calculé », donc on retire
-     la correction dans les deux langues. Sinon on retomberait sur celle de
-     l'autre langue, ce qui n'est pas ce qu'on demandait. */
-  if(texte){ o[LANG]=texte; QTY_OVER[canon]=o; }
-  else delete QTY_OVER[canon];
+function setQty(canon, unite, valeur){
+  var o=QTY_OVER[canon]||{};
+  if(valeur==null) delete o[unite]; else o[unite]=valeur;
+  if(Object.keys(o).length) QTY_OVER[canon]=o; else delete QTY_OVER[canon];
   saveQty();
 }
 
@@ -2917,15 +2945,38 @@ function buildList(){
   Object.keys(SHOP_CAT).forEach(function(c){
     var rows=order.filter(function(k){ return acc[k].cat===c; }).map(function(k){
       var e=acc[k], parts=[], sum=qtyMerge(e.sum);
-      Object.keys(sum).forEach(function(u){ parts.push(qtyFormat({n:sum[u],u:u}, LANG)); });
-      e.txt.forEach(function(t){ parts.push(t); });
-      var z=SHOP_ZH[e.canon]||[], auto=parts.join(' + '), over=qtyOver(e.canon);
-      return {name: LANG==='en' ? e.en : e.canon, canon: e.canon, auto: auto,
-              qty: over!=null ? over : auto, over: over!=null, src: e.src, keys: e.keys, zh: z[0]||''};
+      Object.keys(sum).forEach(function(u){
+        var o=qtyOver(e.canon,u);
+        parts.push({u:u, auto:sum[u], n:(o!=null?o:sum[u]), over:o!=null});
+      });
+      e.txt.forEach(function(t){ parts.push({txt:t}); });
+      var z=SHOP_ZH[e.canon]||[];
+      return {name: LANG==='en' ? e.en : e.canon, canon: e.canon, parts: parts,
+              qty: rowQty(parts), src: e.src, keys: e.keys, zh: z[0]||''};
     });
     if(rows.length) out.push({cat:c, label:SHOP_CAT[c][LANG==='en'?1:0], rows:rows});
   });
   return out;
+}
+
+/* La quantité en texte brut, pour le presse-papiers. */
+function rowQty(parts){
+  return parts.map(function(p){
+    return p.txt != null ? p.txt : qtyFormat({n:p.n, u:p.u}, LANG);
+  }).join(' + ');
+}
+
+/* La même, en champs : seul le nombre est modifiable, l'unité reste posée
+   à côté et ne bouge jamais. */
+function rowQtyHtml(canon, parts){
+  return parts.map(function(p){
+    if(p.txt != null) return '<span class="qu qp">'+p.txt+'</span>';
+    var d=qtySplit({n:p.n, u:p.u}, LANG), a=qtySplit({n:p.auto, u:p.u}, LANG);
+    return '<span class="qp"><span class="qn'+(p.over?' over':'')+'" contenteditable="true" spellcheck="false" '+
+           'inputmode="decimal" data-c="'+esc(canon)+'" data-u="'+esc(p.u)+'" '+
+           'data-f="'+d.f+'" data-auto="'+esc(a.num)+'" title="'+U.qtyT+'">'+d.num+'</span>'+
+           (d.unit ? '<span class="qu"> '+d.unit+'</span>' : '')+'</span>';
+  }).join('<span class="qu"> + </span>');
 }
 
 /* Les recettes d'où viennent les ingrédients retenus, dans l'ordre d'ajout. */
@@ -2987,8 +3038,7 @@ function renderCourses(){
          '<div class="item-body"><div class="item-n">'+r.name+'</div>'+
          (r.zh?'<div class="zh">'+r.zh+'</div>':'')+
          '<div class="srcs">'+r.src.join(', ')+'</div></div>'+
-         '<span class="qty'+(r.over?' over':'')+'" contenteditable="true" spellcheck="false" '+
-           'data-c="'+esc(r.canon)+'" data-auto="'+esc(r.auto)+'" title="'+U.qtyT+'">'+r.qty+'</span>'+
+         '<span class="qty">'+rowQtyHtml(r.canon, r.parts)+'</span>'+
          '<button class="cart rm" data-rk="'+r.keys.join(';')+'" title="'+U.rmL+'" aria-label="'+U.rmL+'">\u00d7</button></div>';
       total++;
     });
@@ -3012,8 +3062,8 @@ function renderCourses(){
       it.classList.toggle('on',on); set(it.dataset.k,on); cCounts();
     });
   });
-  el.querySelectorAll('.qty[contenteditable]').forEach(function(q){
-    /* Toucher la quantité ne doit pas cocher la ligne. */
+  el.querySelectorAll('.qn[contenteditable]').forEach(function(q){
+    /* Toucher le nombre ne doit pas cocher la ligne. */
     ['click','mousedown','touchstart'].forEach(function(ev){
       q.addEventListener(ev,function(e){ e.stopPropagation(); });
     });
@@ -3026,10 +3076,11 @@ function renderCourses(){
       if(e.key==='Escape'){ q.textContent=q.dataset.auto; q.blur(); }
     });
     q.addEventListener('blur',function(){
-      var saisi=q.textContent.replace(/\s+/g,' ').trim();
-      var canon=q.dataset.c;
-      /* Revenir au calcul si le champ est vide ou s'il retrouve la valeur calculée. */
-      setQty(canon, saisi===q.dataset.auto ? '' : saisi);
+      var saisi=q.textContent.trim();
+      /* Vide, illisible, ou revenu à la valeur calculée : on reprend le calcul. */
+      var v = saisi==='' ? null : qtyRead(saisi);
+      if(v!=null && saisi!==q.dataset.auto) setQty(q.dataset.c, q.dataset.u, v*parseFloat(q.dataset.f));
+      else setQty(q.dataset.c, q.dataset.u, null);
       renderCourses();
     });
   });

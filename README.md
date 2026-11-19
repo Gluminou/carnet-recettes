@@ -108,14 +108,23 @@ bouton d'en-tête est un simple raccourci « tout ajouter » ou « tout
 retirer » pour la recette ouverte.
 
 Les quantités de la liste se corrigent à la main : on touche le chiffre,
-on écrit ce qu'on veut acheter. Le total calculé est juste
-arithmétiquement mais pas toujours au regard de l'étal, dix gousses
-d'ail se vendant en une tête. La correction prime sur le calcul, et
-vider le champ revient au total calculé. Elle est gardée par langue,
-sous `carnet-qty`, parce que la liste copiée part en anglais chez
-l'aide ménagère : « 1 tête » saisi en français n'a rien à y faire. Tant
-que l'autre langue n'a pas été saisie, c'est la correction existante
-qui s'affiche, pour ne pas la perdre en changeant de langue.
+on écrit le nombre qu'on veut acheter. Le total calculé est juste
+arithmétiquement mais pas toujours au regard de l'étal, 900 g de riz
+s'achetant en paquet d'un kilo. Seul le nombre se tape ; l'unité est
+posée à côté, hors du champ, et ne se touche pas. Une ligne qui porte
+plusieurs unités, « 2 cm + 6 tranches », en offre un par unité, chacun
+indépendant.
+
+L'unité affichée reste celle du moment de la saisie, mais elle se
+redéduit du nombre une fois celui-ci enregistré : 1200 tapé dans un
+champ en grammes se réaffiche « 1,2 kg ». La correction est donc gardée
+dans l'unité de base, grammes ou millilitres, sous `carnet-qty`, et
+non dans l'unité affichée. Un nombre n'ayant pas de langue, elle vaut
+pour les deux : corrigée en français, elle suit en anglais dans la
+liste qui part chez l'aide ménagère. La virgule décimale et les
+fractions du carnet (½, ¾) sont acceptées. La correction prime sur le
+calcul ; vider le champ, ou y écrire n'importe quoi, revient au total
+calculé.
 
 Le panier est mémorisé dans le navigateur sous `carnet-basket`. Il
 survit à la fermeture de l'onglet. L'ancien format, qui retenait des
