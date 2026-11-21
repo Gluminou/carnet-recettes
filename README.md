@@ -207,3 +207,13 @@ ligne, et au démarrage la page va chercher `recipes.json` avec un
 horodatage qui contourne le cache. Dès que le réseau répond, ce
 fichier fait autorité et la page se redessine. Une nouvelle recette
 apparaît donc sans avoir à recréer le raccourci.
+
+## Versions
+
+L'app affiche son numéro de version et sa date en bas, avec un bouton **Rechercher une mise à jour** et la liste des **Nouveautés**. Chaque changement se publie avec :
+
+```
+node tools/release.mjs patch "Ce qui change, en mots simples"
+```
+
+`patch` pour une correction, `minor` pour une nouveauté visible, `major` pour une refonte. Le script garde la page, `version.json` et `changelog.json` en accord, puis relance `node build-site.js`. La section elle-même est `updates.js`, commune à toutes les apps.

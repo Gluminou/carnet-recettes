@@ -1,0 +1,6 @@
+{
+  "source": "carnet.html",
+  "build": [
+    "node build-site.js"
+  ]
+}
