@@ -140,6 +140,56 @@ for (const id of Object.keys(FR)) {
   });
 }
 
+// --- ingrédient absent de SHOP_ALIAS ------------------------------------
+// Un ingrédient dont le libellé n'est pas dans SHOP_ALIAS n'apparaît pas
+// dans la liste de courses, sans erreur ni trace : il manque simplement
+// à l'étal. C'est arrivé aux carottes des lasagnes, alias présent pour
+// « Carotte en biseau » et consorts mais pas pour « Carottes » tout court.
+{
+  const fs = require('fs');
+  const src = fs.readFileSync('carnet.html', 'utf8');
+  // SHOP_SKIP est un tableau, les deux autres des objets : on compte les
+  // délimiteurs plutôt que de chercher « }; », qui attrapait la table
+  // suivante et faisait passer toute l'eau du carnet pour un oubli.
+  const bloc = (nom) => {
+    const i = src.indexOf('var ' + nom);
+    if (i < 0) return null;
+    let d = -1;
+    for (let k = i; k < src.length; k++) {
+      if (src[k] === '{' || src[k] === '[') { d = k; break; }
+      if (src[k] === ';') break;
+    }
+    if (d < 0) return null;
+    const ouvre = src[d], ferme = ouvre === '{' ? '}' : ']';
+    let n = 0, dansTexte = null;
+    for (let k = d; k < src.length; k++) {
+      const c = src[k];
+      if (dansTexte) { if (c === '\\') k++; else if (c === dansTexte) dansTexte = null; continue; }
+      if (c === '"' || c === "'") { dansTexte = c; continue; }
+      if (c === ouvre) n++;
+      else if (c === ferme && --n === 0) {
+        try { return eval('(' + src.slice(d, k + 1) + ')'); } catch (e) { return null; }
+      }
+    }
+    return null;
+  };
+  const alias = bloc('SHOP_ALIAS'), skip = bloc('SHOP_SKIP'), canon = bloc('SHOP_CANON');
+  if (!alias || !skip || !canon) {
+    dire('(tables)', 'tables de courses illisibles', 'SHOP_ALIAS, SHOP_SKIP ou SHOP_CANON n\'a pas pu être lu dans carnet.html');
+  } else {
+    const estIgnore = (nom) => Array.isArray(skip) ? skip.includes(nom) : !!skip[nom];
+    for (const id of Object.keys(FR)) {
+      FR[id].g.forEach(g => g[1].forEach(it => {
+        const nom = it[0];
+        if (estIgnore(nom)) return;
+        if (alias[nom] && estIgnore(alias[nom])) return;
+        if (!alias[nom]) dire(id, 'ingrédient absent de la liste de courses', `« ${nom} » n'a pas d'entrée dans SHOP_ALIAS`);
+        else if (!canon[alias[nom]]) dire(id, 'alias sans nom canonique', `« ${nom} » renvoie à « ${alias[nom]} », absent de SHOP_CANON`);
+      }));
+    }
+  }
+}
+
 console.log(`${Object.keys(FR).length} recettes examinées, ${out.length} signalement(s).\n`);
 const parId = {};
 out.forEach(o => (parId[o.id] = parId[o.id] || []).push(o));
