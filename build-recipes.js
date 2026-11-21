@@ -65,6 +65,23 @@ fr.forEach(k => {
   });
 });
 
-fs.writeFileSync(out, JSON.stringify({ R: d.R, ORDER: d.ORDER, R_EN: d.R_EN, ORDER_EN: d.ORDER_EN }));
-console.log(fr.length + ' recettes × 2 langues écrites dans ' + out);
+/* Numéro de fabrication.
+   Il permet à la page d'ignorer un recipes.json plus ancien qu'elle au lieu
+   de se laisser écraser : c'est arrivé le 21 novembre 2026, l'artefact
+   servant encore un recipes.json d'avant le passage au bilingue, si bien
+   que la page affichait 28 recettes alors qu'elle en embarquait 29.
+   Il n'augmente que lorsque le contenu change, pour que la CI puisse
+   refabriquer le fichier et le retrouver identique. */
+const corps = { R: d.R, ORDER: d.ORDER, R_EN: d.R_EN, ORDER_EN: d.ORDER_EN };
+let v = 1;
+try {
+  const ancien = JSON.parse(fs.readFileSync(out, 'utf8'));
+  const memeContenu = JSON.stringify({ R: ancien.R, ORDER: ancien.ORDER, R_EN: ancien.R_EN, ORDER_EN: ancien.ORDER_EN })
+    === JSON.stringify(corps);
+  const vAncien = typeof ancien.v === 'number' ? ancien.v : 0;
+  v = memeContenu ? (vAncien || 1) : vAncien + 1;
+} catch (e) { /* premier passage */ }
+
+fs.writeFileSync(out, JSON.stringify(Object.assign({ v: v }, corps)));
+console.log(fr.length + ' recettes × 2 langues écrites dans ' + out + ' (fabrication ' + v + ')');
 d.ORDER.forEach((g, i) => console.log('  ' + g[0] + ' / ' + d.ORDER_EN[i][0] + ' : ' + g[1].length));

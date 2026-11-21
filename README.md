@@ -67,13 +67,36 @@ Le fichier de travail est `carnet.html`, qui est aussi publié comme
 artifact Claude. `index.html` et `recipes.json` en sont dérivés et ne
 se modifient jamais à la main :
 
-    node build-site.js carnet.html index.html
     node build-recipes.js carnet.html recipes.json
+    node build-site.js carnet.html index.html
+
+Dans cet ordre, et pas l'inverse : `build-site.js` recopie dans la page
+le numéro de fabrication que `build-recipes.js` vient de poser.
 
 `build-site.js` ajoute l'en-tête HTML que la plateforme Claude fournit
 d'elle-même mais que GitHub Pages ne fournit pas : doctype, charset,
 viewport et les métadonnées de raccourci iOS. `build-recipes.js`
 extrait les données et vérifie que `R` et `ORDER` concordent.
+
+## Le numéro de fabrication
+
+Les recettes sont écrites deux fois dans ce qui est livré : en dur dans
+la page, et dans `recipes.json` que la page va chercher au chargement.
+Le fichier distant l'emporte, c'est ce qui permet au raccourci iOS de
+voir une nouvelle recette sans être recréé.
+
+Il ne l'emporte plus s'il est plus ancien que la page. `recipes.json`
+porte un champ `v` qui n'augmente que lorsque le contenu change, et
+`build-site.js` recopie ce numéro dans la page sous le nom `DATA_V`.
+Au chargement, un `recipes.json` d'un numéro inférieur, ou sans numéro
+du tout, est ignoré.
+
+Cette garde existe parce que le 21 novembre 2026 l'artefact Claude
+servait encore un `recipes.json` d'avant le passage au bilingue : seul
+`index.html` y était republié à chaque fois. La page embarquait 29
+recettes, en affichait 28, et rien dans la console ne le signalait.
+**Republier l'artefact, c'est republier les deux fichiers**, puis
+vérifier que les empreintes correspondent à celles d'ici.
 
 ## Comment la liste de courses fusionne
 

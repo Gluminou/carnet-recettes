@@ -3283,11 +3283,19 @@ bootLang(null);
 
 /* Les recettes embarquées ci-dessus servent de secours hors ligne.
    Quand le réseau répond, recipes.json fait autorité, ce qui évite
-   d'avoir à recréer le raccourci iOS à chaque nouvelle recette. */
+   d'avoir à recréer le raccourci iOS à chaque nouvelle recette.
+
+   Mais seulement s'il est au moins aussi récent que la page. Le 21
+   novembre 2026, l'artefact servait encore un recipes.json d'avant le
+   passage au bilingue : la page embarquait 29 recettes et en affichait
+   28, sans la moindre erreur dans la console. Le numéro de fabrication
+   est posé par build-recipes.js et recopié ici par build-site.js. */
+var DATA_V=1;
 fetch('recipes.json?t='+Date.now(),{cache:'no-store'})
   .then(function(res){ return res.ok ? res.json() : null; })
   .then(function(d){
     if(!d || !d.R || !d.ORDER) return;
+    if(DATA_V && !(typeof d.v==='number' && d.v>=DATA_V)) return;
     var sameFR = JSON.stringify(d.R)===JSON.stringify(R_FR) && JSON.stringify(d.ORDER)===JSON.stringify(ORDER_FR);
     var sameEN = !d.R_EN || (JSON.stringify(d.R_EN)===JSON.stringify(R_EN) && JSON.stringify(d.ORDER_EN)===JSON.stringify(ORDER_EN));
     if(sameFR && sameEN) return;

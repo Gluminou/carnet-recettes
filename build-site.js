@@ -4,9 +4,21 @@
 const fs = require('fs');
 const src = process.argv[2] || 'carnet.html';
 const out = process.argv[3] || 'index.html';
-const body = fs.readFileSync(src, 'utf8');
+let body = fs.readFileSync(src, 'utf8');
 
 if (/<!doctype/i.test(body)) throw new Error(src + ' a déjà un doctype');
+
+/* Le numéro de fabrication de recipes.json est recopié dans la page, pour
+   qu'elle puisse refuser un recipes.json plus ancien qu'elle. Lancer
+   build-recipes.js avant celui-ci : dans l'autre ordre la page porte le
+   numéro précédent, ce qui fait seulement accepter le fichier distant. */
+const json = process.argv[4] || 'recipes.json';
+let v = 0;
+try { const d = JSON.parse(fs.readFileSync(json, 'utf8')); if (typeof d.v === 'number') v = d.v; }
+catch (e) { console.warn(json + ' illisible, la page sort avec DATA_V=0'); }
+const marque = 'var DATA_V=0;';
+if (body.indexOf(marque) < 0) throw new Error(src + ' ne contient pas « ' + marque + ' »');
+body = body.replace(marque, 'var DATA_V=' + v + ';');
 
 const head = '<!doctype html>\n<html lang="fr">\n<head>\n' +
   '<meta charset="utf-8">\n' +
@@ -18,4 +30,4 @@ const head = '<!doctype html>\n<html lang="fr">\n<head>\n' +
   '<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">\n';
 
 fs.writeFileSync(out, head + body + '\n</body>\n</html>\n');
-console.log(out + ' écrit (' + Math.round((head.length + body.length) / 1024) + ' Ko)');
+console.log(out + ' écrit (' + Math.round((head.length + body.length) / 1024) + ' Ko, fabrication ' + v + ')');
