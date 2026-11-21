@@ -95,8 +95,13 @@ Cette garde existe parce que le 21 novembre 2026 l'artefact Claude
 servait encore un `recipes.json` d'avant le passage au bilingue : seul
 `index.html` y était republié à chaque fois. La page embarquait 29
 recettes, en affichait 28, et rien dans la console ne le signalait.
-**Republier l'artefact, c'est republier les deux fichiers**, puis
-vérifier que les empreintes correspondent à celles d'ici.
+**Republier l'artefact, c'est republier tous les fichiers servis**,
+puis vérifier que les empreintes correspondent à celles d'ici. Ils
+sont cinq depuis la version 1.0.0 : `index.html`, `recipes.json`,
+`updates.js`, `version.json` et `changelog.json`. Un fichier oublié ne
+casse rien visiblement, il reste juste en arrière, et c'est précisément
+ce qui rend l'oubli coûteux. La liste se relit dans la page :
+`grep -o 'src="[^"]*"' index.html` et les `fetch` de `updates.js`.
 
 ## Comment la liste de courses fusionne
 
