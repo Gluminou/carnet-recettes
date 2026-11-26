@@ -222,3 +222,9 @@ node tools/release.mjs patch "Ce qui change, en mots simples"
 ```
 
 `patch` pour une correction, `minor` pour une nouveauté visible, `major` pour une refonte. Le script garde la page, `version.json` et `changelog.json` en accord, puis relance `node build-site.js`. La section elle-même est `updates.js`, commune à toutes les apps.
+
+## Synchronisation entre appareils
+
+`sync.js` (le même fichier dans toutes les apps de Gluminou) copie les données de cette app d'un appareil à l'autre par `data.json` dans le dépôt privé **Gluminou/carnet-recettes-data** : panier, quantités corrigées, ingrédients cochés et langue (la dernière recette ouverte reste propre à chaque appareil). Chaque appareil se connecte une fois avec une clé GitHub à grain fin qui a **Contents : Read and write** sur ce dépôt (**Read-only** donne un accès en lecture seule). La clé se colle dans la section **Synchronisation entre appareils**, en bas de la page. Sur un ordinateur, les apps partagent la même adresse, donc une clé saisie dans une app sert aussi aux autres, et chaque app peut être déconnectée à part.
+
+Les changements venus de deux appareils sont fusionnés élément par élément. Quand les deux ont changé la même chose, le plus récent l'emporte. L'historique du dépôt garde chaque version.

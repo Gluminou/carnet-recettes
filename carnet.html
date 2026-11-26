@@ -3304,6 +3304,8 @@ function saveBasket(){ try{localStorage.setItem('carnet-basket',JSON.stringify(B
    nombre se corrige, jamais l'unité, et on le garde dans l'unité de base,
    donc en millilitres même quand l'écran affiche des centilitres. Un nombre
    n'ayant pas de langue, la correction vaut pour les deux. */
+var QTY_OVER=readQty();
+function readQty(){
 var QTY_OVER={};
 try{
   var _q=JSON.parse(localStorage.getItem('carnet-qty')||'{}');
@@ -3320,6 +3322,8 @@ try{
     });
   }
 }catch(e){}
+return QTY_OVER;
+}
 function saveQty(){ try{localStorage.setItem('carnet-qty',JSON.stringify(QTY_OVER));}catch(e){} }
 function qtyOver(canon, unite){
   var o=QTY_OVER[canon];
@@ -3638,6 +3642,32 @@ document.getElementById('lang').addEventListener('click',function(){
 
 bootLang(null);
 
+/* Synchronisation entre appareils (sync.js) : quand un autre appareil a
+   changé le panier, les quantités, les cases cochées ou la langue, sync.js
+   l'écrit dans le stockage puis émet un événement « storage » par clé. On
+   relit alors ce qui est gardé en mémoire et on redessine en restant sur la
+   même recette et le même onglet. Sans cette relecture, le prochain
+   enregistrement d'ici écraserait ce qui vient d'arriver. */
+var _syncRedraw=0;
+window.addEventListener('storage',function(e){
+  var k=e.key||'';
+  if(k!=='carnet-basket' && k!=='carnet-qty' && k!=='carnet-lang' && k.indexOf('ck-')!==0) return;
+  if(k==='carnet-basket'){
+    try{ var b=JSON.parse(localStorage.getItem('carnet-basket')||'[]');
+      BASKET=Array.isArray(b)?b.filter(function(x){ return typeof x==='string' && x.indexOf('|')>=0; }):[]; }catch(x){ BASKET=[]; }
+  }
+  if(k==='carnet-qty') QTY_OVER=readQty();
+  if(k==='carnet-lang'){ var l=localStorage.getItem('carnet-lang'); if(l==='en'||l==='fr') LANG=l; }
+  clearTimeout(_syncRedraw);
+  _syncRedraw=setTimeout(function(){
+    var tab = !document.getElementById('courses').hidden ? 'courses' : document.getElementById('prep').hidden ? 'ing' : 'prep';
+    var y = window.scrollY;
+    bootLang(document.getElementById('pick').value);
+    showTab(tab);
+    try{ window.scrollTo(0, y); if(document.scrollingElement) document.scrollingElement.scrollTop=y; }catch(x){}
+  },50);
+});
+
 /* Les recettes embarquées ci-dessus servent de secours hors ligne.
    Quand le réseau répond, recipes.json fait autorité, ce qui évite
    d'avoir à recréer le raccourci iOS à chaque nouvelle recette.
@@ -3664,9 +3694,16 @@ fetch('recipes.json?t='+Date.now(),{cache:'no-store'})
   .catch(function(){});
 </script>
 <script>
-const APP_RELEASE="1.0.0";
-const APP_DATE="2026-11-21";
-const APP_VERSION="202611210445";
+const APP_RELEASE="1.1.0";
+const APP_DATE="2026-11-26";
+const APP_VERSION="202611260211";
+</script>
+<script>
+/* Ce qui se synchronise entre appareils : panier, quantités corrigées,
+   ingrédients cochés et langue. La recette ouverte en dernier reste propre
+   à chaque appareil. Données dans le dépôt privé Gluminou/carnet-recettes-data. */
+const APP_SYNC={app:"carnet-recettes",keys:["carnet-basket","carnet-qty","carnet-lang"],prefixes:["ck-"]};
 </script>
 <div id="app-updates"></div>
+<script src="sync.js"></script>
 <script src="updates.js"></script>

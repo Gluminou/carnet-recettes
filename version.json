@@ -1,8 +1,8 @@
 {
-  "v": "202611210445",
-  "version": "1.0.0",
-  "date": "2026-11-21",
+  "v": "202611260211",
+  "version": "1.1.0",
+  "date": "2026-11-26",
   "notes": [
-    "Bouton Rechercher une mise à jour, numéro de version avec sa date, et cette liste des nouveautés."
+    "Synchronisation entre appareils : une fois la clé GitHub collée, le panier, les quantités corrigées, les ingrédients cochés et la langue se retrouvent sur le téléphone et l'ordinateur."
   ]
 }
