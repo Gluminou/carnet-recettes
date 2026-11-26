@@ -54,6 +54,26 @@ for (const f of tous) {
 }
 console.log(`Syntaxe : ${verifies} fichier(s) lu(s) sans erreur.`);
 
+// --- 1 bis. la version embarquée et version.json concordent -------------
+// Les apps installables sur l'écran d'accueil comparent l'APP_VERSION
+// compilée dans index.html au contenu de version.json pour savoir s'il
+// faut se recharger. Si les deux divergent, l'app ne se met jamais à jour,
+// ou se recharge en boucle. Rien d'autre ne vérifie que les deux bougent
+// ensemble. Contrôle ignoré en silence si le dépôt n'a pas ce mécanisme.
+try {
+  const html = readFileSync(join(root, 'index.html'), 'utf8');
+  const m = html.match(/APP_VERSION\s*=\s*["']([^"']+)["']/);
+  const vj = JSON.parse(readFileSync(join(root, 'version.json'), 'utf8'));
+  const declaree = vj.v ?? vj.version;
+  if (m && declaree != null) {
+    if (m[1] !== declaree) {
+      problemes.push(`version.json annonce ${declaree} mais index.html embarque ${m[1]} : l'app ne se mettra pas à jour correctement`);
+    } else {
+      console.log(`Version : index.html et version.json annoncent tous deux ${declaree}.`);
+    }
+  }
+} catch { /* pas de version.json ou pas d'index.html : rien à vérifier */ }
+
 // --- 2 et 3. la page se charge ------------------------------------------
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.mjs': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8',

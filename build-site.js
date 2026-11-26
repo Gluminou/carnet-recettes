@@ -27,7 +27,11 @@ const head = '<!doctype html>\n<html lang="fr">\n<head>\n' +
   '<meta name="apple-mobile-web-app-status-bar-style" content="default">\n' +
   '<meta name="apple-mobile-web-app-title" content="Recettes">\n' +
   '<meta name="theme-color" content="#F2F2EE" media="(prefers-color-scheme: light)">\n' +
-  '<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">\n';
+  '<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">\n' +
+  '<meta name="mobile-web-app-capable" content="yes">\n' +
+  '<link rel="manifest" href="manifest.webmanifest">\n' +
+  '<link rel="apple-touch-icon" href="icon-180.png">\n' +
+  '<link rel="icon" href="icon-192.png">\n';
 
 fs.writeFileSync(out, head + body + '\n</body>\n</html>\n');
 console.log(out + ' écrit (' + Math.round((head.length + body.length) / 1024) + ' Ko, fabrication ' + v + ')');

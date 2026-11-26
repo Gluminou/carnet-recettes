@@ -23,6 +23,9 @@
    "storage" event is fired on window for each changed key (as if another tab
    had written it) and an "appsync" event with detail {keys}. The app listens
    to one of them and redraws. With reload: true the page reloads instead.
+   Each time the sync state changes, an "appsyncstatus" event carries
+   {connected, state: idle|busy|ok|err|view, pending, message} for apps that
+   show it themselves; window.appSync.status() returns the same.
 
    Merging: the module keeps the last version both sides agreed on and merges
    three ways, so a change made on one device is never lost because of an
@@ -191,7 +194,7 @@
   /* ---------- watch this app's own saves ---------- */
   function touched(k) {
     if (applying || !tracked(k)) return;
-    S.t[k] = Date.now(); S.dirty = true; gen++; saveState(); schedule(1200);
+    S.t[k] = Date.now(); S.dirty = true; gen++; saveState(); render(); schedule(1200);
   }
   Storage.prototype.setItem = function (k, v) {
     var mine = this === LS && tracked(String(k)), before = mine ? get(String(k)) : null;
@@ -365,7 +368,15 @@
     if (s < 86400) return w.ago + Math.floor(s / 3600) + w.h;
     return w.ago + Math.floor(s / 86400) + w.d;
   }
+  function info() {
+    var w = T(), st = status.state;
+    return { connected: !!token(), state: token() ? st : 'idle', pending: !!S.dirty,
+      message: st === 'err' ? (w[status.msg] || w.other).replace('{r}', REPO).replace('{s}', status.code || '') : st === 'view' ? w.view : '' };
+  }
+  var lastInfo = '';
   function render() {
+    var i = info(), k = JSON.stringify(i);
+    if (k !== lastInfo) { lastInfo = k; try { window.dispatchEvent(new CustomEvent('appsyncstatus', { detail: i })); } catch (e) {} }
     if (!host) return;
     var w = T(), on = !!token();
     if (host.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return; // don't wipe what is being typed
@@ -395,7 +406,7 @@
 
   /* ---------- when to sync ---------- */
   if (S.dirty || !sameAsBase(snapshot())) S.dirty = true;
-  window.appSync = { sync: function () { S.etag = null; return sync(); }, repo: REPO };
+  window.appSync = { sync: function () { S.etag = null; return sync(); }, repo: REPO, status: info };
   var prev = window.beforeAppUpdate; // updates.js waits for this before reloading into a new version
   window.beforeAppUpdate = function () { return Promise.resolve(typeof prev === 'function' ? prev() : 0).then(function () { return S.dirty ? sync() : 0; }); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount); else mount();
