@@ -1,8 +1,8 @@
 // Passe automatique sur les fiches : ce qu'une machine peut repérer sans
 // rien comprendre à la cuisine. Le but est d'avoir peu de faux positifs,
 // sinon la liste devient du bruit qu'on finit par ignorer.
-//   node audit.js
-const R = require('./recipes.json');
+//   node audit.js <recipes.json>     (dans le dépôt privé Gluminou/carnet-recettes-data)
+const R = JSON.parse(require('fs').readFileSync(process.argv[2] || 'recipes.json', 'utf8'));
 const FR = R.R, EN = R.R_EN;
 
 const out = [];
@@ -147,7 +147,7 @@ for (const id of Object.keys(FR)) {
 // « Carotte en biseau » et consorts mais pas pour « Carottes » tout court.
 {
   const fs = require('fs');
-  const src = fs.readFileSync('carnet.html', 'utf8');
+  const src = fs.readFileSync(require('path').join(__dirname, 'carnet.html'), 'utf8');
   // SHOP_SKIP est un tableau, les deux autres des objets : on compte les
   // délimiteurs plutôt que de chercher « }; », qui attrapait la table
   // suivante et faisait passer toute l'eau du carnet pour un oubli.

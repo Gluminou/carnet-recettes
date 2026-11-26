@@ -27,28 +27,22 @@ liste de courses en cours sur une recette n'affecte pas les autres.
 - Sans oignon, la base aromatique est remontée au cas par cas
 - Chaque recette indique comment adapter la part de l'enfant
 
-## Recettes
+## Où sont les recettes
 
-Chine : gongbao jiding, porc yuxiang, soupe aigre-piquante, tofu braisé
-aux shiitake et pak choi, boulettes tête de lion, bœuf braisé aux pommes
-de terre, chou-fleur à l'ail, pommes de terre sautées en julienne, bœuf au
-poivre noir, bœuf sauté à l'orange, chou déchiré au porc, mapo tofu, dan dan noodles, char siu,
-kale sauté.
+Pas dans ce dépôt public. Les recettes vivent dans le dépôt privé
+**Gluminou/carnet-recettes-data**, dans `recipes.src.js`, et la page les
+reçoit par `sync.js` une fois l'appareil connecté avec une clé. Sans clé,
+l'app n'affiche que l'écran de clé.
 
-Vietnam : poulet au caramel.
+Ajouter ou corriger une recette, depuis le dépôt privé (chemins vers ce
+dépôt-ci à adapter) :
 
-France : bouillon de bœuf maison, crevettes à l'armoricaine, bœuf
-bourguignon, poulet à la crème et aux champignons, filet de panga en
-croûte d'herbes, cordon bleu maison.
+    node ../carnet-recettes/build-recipes.js recipes.src.js recipes.json
+    node ../carnet-recettes/audit.js recipes.json
+    node ../carnet-recettes/tools/content.mjs put recipes.json data.json carnet-content
 
-Sucré : cookies au chocolat, donuts levés.
-
-## Modifier
-
-Tout est dans `index.html`. Les recettes sont un objet JavaScript nommé
-`R` en haut du `<script>`, une entrée par recette. Pour en ajouter une,
-copiez une entrée existante et ajoutez son identifiant au tableau
-`ORDER` juste en dessous.
+puis commit et push du dépôt privé. Les appareils connectés rechargent
+le carnet d'eux-mêmes avec la nouvelle version.
 
 ## Deux langues
 
@@ -62,46 +56,6 @@ doivent rester superposables : même ordre de recettes, même nombre de
 groupes, d'ingrédients, d'étapes et de notes, mêmes caractères chinois
 aux mêmes places. `build-recipes.js` vérifie tout cela et refuse de
 produire `recipes.json` en cas d'écart.
-
-Le fichier de travail est `carnet.html`, qui est aussi publié comme
-artifact Claude. `index.html` et `recipes.json` en sont dérivés et ne
-se modifient jamais à la main :
-
-    node build-recipes.js carnet.html recipes.json
-    node build-site.js carnet.html index.html
-
-Dans cet ordre, et pas l'inverse : `build-site.js` recopie dans la page
-le numéro de fabrication que `build-recipes.js` vient de poser.
-
-`build-site.js` ajoute l'en-tête HTML que la plateforme Claude fournit
-d'elle-même mais que GitHub Pages ne fournit pas : doctype, charset,
-viewport et les métadonnées de raccourci iOS. `build-recipes.js`
-extrait les données et vérifie que `R` et `ORDER` concordent.
-
-## Le numéro de fabrication
-
-Les recettes sont écrites deux fois dans ce qui est livré : en dur dans
-la page, et dans `recipes.json` que la page va chercher au chargement.
-Le fichier distant l'emporte, c'est ce qui permet au raccourci iOS de
-voir une nouvelle recette sans être recréé.
-
-Il ne l'emporte plus s'il est plus ancien que la page. `recipes.json`
-porte un champ `v` qui n'augmente que lorsque le contenu change, et
-`build-site.js` recopie ce numéro dans la page sous le nom `DATA_V`.
-Au chargement, un `recipes.json` d'un numéro inférieur, ou sans numéro
-du tout, est ignoré.
-
-Cette garde existe parce que le 21 novembre 2026 l'artefact Claude
-servait encore un `recipes.json` d'avant le passage au bilingue : seul
-`index.html` y était republié à chaque fois. La page embarquait 29
-recettes, en affichait 28, et rien dans la console ne le signalait.
-**Republier l'artefact, c'est republier tous les fichiers servis**,
-puis vérifier que les empreintes correspondent à celles d'ici. Ils
-sont cinq depuis la version 1.0.0 : `index.html`, `recipes.json`,
-`updates.js`, `version.json` et `changelog.json`. Un fichier oublié ne
-casse rien visiblement, il reste juste en arrière, et c'est précisément
-ce qui rend l'oubli coûteux. La liste se relit dans la page :
-`grep -o 'src="[^"]*"' index.html` et les `fetch` de `updates.js`.
 
 ## Comment la liste de courses fusionne
 
@@ -160,13 +114,16 @@ recettes entières, est déplié automatiquement au premier chargement.
 
 ## Les scripts de construction
 
-`index.html` et `recipes.json` sont générés, jamais édités à la main.
-`carnet.html` est la source de référence.
+`index.html` est généré à partir de `carnet.html`, jamais édité à la main :
 
     node build-site.js      # carnet.html -> index.html
-    node build-recipes.js   # carnet.html -> recipes.json
 
-`build-recipes.js` refuse d'écrire si les deux langues divergent de
+`build-site.js` ajoute l'en-tête HTML que la plateforme Claude fournit
+d'elle-même mais que GitHub Pages ne fournit pas : doctype, charset,
+viewport et les métadonnées de raccourci iOS.
+
+`build-recipes.js` fabrique `recipes.json` à partir de `recipes.src.js`
+(dépôt privé) et refuse d'écrire si les deux langues divergent de
 structure : nombre de recettes, de catégories, de groupes,
 d'ingrédients par groupe, d'étapes, de notes, et position des
 caractères chinois. Ce n'est pas du zèle. Les cases à cocher de
@@ -176,9 +133,9 @@ lignes, sans message d'erreur et sans que personne le remarque.
 
 ## Auditer les fiches
 
-    node audit.js
+    node audit.js recipes.json     # dans le dépôt privé
 
-Passe mécanique sur les 27 recettes : chiffres qui divergent entre le
+Passe mécanique sur toutes les recettes : chiffres qui divergent entre le
 français et l'anglais, quantités qui ne concordent pas, astuce présente
 d'un seul côté, oignon ou échalote, ingrédient listé mais jamais employé
 dans les étapes.
@@ -191,27 +148,16 @@ poignée, toujours les mêmes, principalement les notes qui expliquent
 pourquoi l'oignon a été retiré.
 
 Elle signale aussi les notes qui recommandent un geste qu'aucune étape ne
-fait. C'est ce qui était arrivé au char siu : l'étape d'entaillage avait
+fait. C'est déjà arrivé à une fiche : une étape avait
 été supprimée et la note qui la justifiait était restée, si bien que la
 fiche conseillait en note ce que l'étape interdisait. La liste de gestes
 est volontairement courte, limitée aux gestes structurels, parce que des
 mots comme « tremper » ou « mariner » reviennent légitimement dans les
 notes de variante et de conservation. Deux faux positifs connus
-subsistent, le blanchiment facultatif du kale et la comparaison du panga
-avec la panure du cordon bleu.
+subsistent, un blanchiment facultatif et une comparaison entre deux panures.
 
 Le script ne sait pas cuisiner. Il attrape les incohérences mécaniques,
 pas les erreurs de technique ni les contradictions de sens.
-
-## Pourquoi recipes.json
-
-Un raccourci ajouté à l'écran d'accueil d'un iPhone garde sa propre
-copie de la page, sans barre d'adresse ni rafraîchissement. Les
-recettes embarquées dans `index.html` servent donc de secours hors
-ligne, et au démarrage la page va chercher `recipes.json` avec un
-horodatage qui contourne le cache. Dès que le réseau répond, ce
-fichier fait autorité et la page se redessine. Une nouvelle recette
-apparaît donc sans avoir à recréer le raccourci.
 
 ## Versions
 
@@ -225,6 +171,6 @@ node tools/release.mjs patch "Ce qui change, en mots simples"
 
 ## Synchronisation entre appareils
 
-`sync.js` (le même fichier dans toutes les apps de Gluminou) copie les données de cette app d'un appareil à l'autre par `data.json` dans le dépôt privé **Gluminou/carnet-recettes-data** : panier, quantités corrigées, ingrédients cochés et langue (la dernière recette ouverte reste propre à chaque appareil). Chaque appareil se connecte une fois avec une clé GitHub à grain fin qui a **Contents : Read and write** sur ce dépôt (**Read-only** donne un accès en lecture seule). La clé se colle dans la section **Synchronisation entre appareils**, en bas de la page. Sur un ordinateur, les apps partagent la même adresse, donc une clé saisie dans une app sert aussi aux autres, et chaque app peut être déconnectée à part.
+`sync.js` (le même fichier dans toutes les apps de Gluminou) copie les données de cette app d'un appareil à l'autre par `data.json` dans le dépôt privé **Gluminou/carnet-recettes-data** : les recettes elles-mêmes, puis panier, quantités corrigées, ingrédients cochés et langue (la dernière recette ouverte reste propre à chaque appareil). Chaque appareil se connecte une fois avec une clé GitHub à grain fin qui a **Contents : Read and write** sur ce dépôt (**Read-only** donne un accès en lecture seule). La clé se colle dans la section **Synchronisation entre appareils**, en bas de la page. Sur un ordinateur, les apps partagent la même adresse, donc une clé saisie dans une app sert aussi aux autres, et chaque app peut être déconnectée à part.
 
 Les changements venus de deux appareils sont fusionnés élément par élément. Quand les deux ont changé la même chose, le plus récent l'emporte. L'historique du dépôt garde chaque version.

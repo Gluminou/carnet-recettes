@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.2.0",
+    "date": "2026-11-26",
+    "notes": [
+      "Le carnet demande maintenant une clé : les recettes ne sont plus publiques, elles arrivent du dépôt privé une fois l'appareil connecté."
+    ]
+  },
+  {
     "version": "1.1.1",
     "date": "2026-11-26",
     "notes": [

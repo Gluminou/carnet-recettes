@@ -1,4 +1,6 @@
-// Extrait les deux jeux de données de carnet.html vers recipes.json.
+// Fabrique recipes.json à partir de la source des recettes, recipes.src.js,
+// rangée dans le dépôt privé Gluminou/carnet-recettes-data :
+//   node build-recipes.js <recipes.src.js> <recipes.json>
 // Source unique : les blocs "var R_FR = {...}" / "var ORDER_FR=[...]" et
 // leurs équivalents anglais.
 //
@@ -7,21 +9,12 @@
 // par position, donc un ingrédient ou une étape en plus d'un côté ferait
 // silencieusement correspondre les coches aux mauvaises lignes.
 const fs = require('fs');
-const src = process.argv[2] || 'carnet.html';
-const out = process.argv[3] || 'recipes.json';
+const src = process.argv[2], out = process.argv[3];
+if (!src || !out) throw new Error('usage : node build-recipes.js <recipes.src.js> <recipes.json>');
 
-const html = fs.readFileSync(src, 'utf8');
-const m = html.match(/<script>([\s\S]*)<\/script>/);
-if (!m) throw new Error('bloc <script> introuvable');
-
-const s = m[1];
-// Le bloc anglais vient après "var cur", d'où la borne de fin sur "var UI",
-// qui est la première déclaration suivant ORDER_EN.
-const a = s.indexOf('var R_FR = {');
-const b = s.indexOf('var UI=');
-if (a < 0 || b < 0 || b <= a) throw new Error('bloc de données introuvable');
-
-const d = eval(s.slice(a, b) + ' ({R: R_FR, ORDER: ORDER_FR, R_EN: R_EN, ORDER_EN: ORDER_EN})');
+const s = fs.readFileSync(src, 'utf8');
+if (s.indexOf('var R_FR = {') < 0 || s.indexOf('var R_EN={') < 0) throw new Error('blocs R_FR / R_EN introuvables dans ' + src);
+const d = eval(s + '\n({R: R_FR, ORDER: ORDER_FR, R_EN: R_EN, ORDER_EN: ORDER_EN})');
 
 // --- le menu et les données se répondent, dans les deux langues ---
 function checkMenu(R, ORDER, lang) {

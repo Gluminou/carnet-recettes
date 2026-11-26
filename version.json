@@ -1,8 +1,8 @@
 {
-  "v": "202611260257",
-  "version": "1.1.1",
+  "v": "202611260452",
+  "version": "1.2.0",
   "date": "2026-11-26",
   "notes": [
-    "Icône et nom propres sur l'écran d'accueil (ajouter à nouveau l'app à l'écran d'accueil pour voir la nouvelle icône) ; fichiers communs de synchronisation et de mise à jour alignés sur toutes les autres apps."
+    "Le carnet demande maintenant une clé : les recettes ne sont plus publiques, elles arrivent du dépôt privé une fois l'appareil connecté."
   ]
 }

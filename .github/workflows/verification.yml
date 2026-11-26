@@ -24,7 +24,9 @@ jobs:
         with:
           node-version: '22'
 
-      # Propre à ce dépôt : index.html et recipes.json sont fabriqués à
+      # Les recettes ne sont plus ici : recipes.json se fabrique et se vérifie dans le
+      # dépôt privé Gluminou/carnet-recettes-data (build-recipes.js et audit.js).
+      # Propre à ce dépôt : index.html et recipes.json étaient fabriqués à
       # partir de carnet.html, qui est la seule source à éditer à la main.
       # On les refabrique et on exige qu'ils soient identiques à ceux du
       # dépôt. Échoue donc aussi bien si un script ne tourne plus que si la
@@ -32,9 +34,8 @@ jobs:
       - name: Les fichiers générés correspondent-ils à leur source
         run: |
           node build-site.js
-          node build-recipes.js
-          git --no-pager diff --stat -- index.html recipes.json
-          git diff --exit-code -- index.html recipes.json
+          git --no-pager diff --stat -- index.html
+          git diff --exit-code -- index.html
 
       - name: Installer le navigateur
         run: |
