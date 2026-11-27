@@ -1,8 +1,9 @@
 {
-  "v": "202611270637",
-  "version": "1.3.1",
+  "v": "202611270651",
+  "version": "1.4.0",
   "date": "2026-11-27",
   "notes": [
-    "Les trois langues s'affichent côte à côte en haut du carnet, EN | FR | ZH, celle qui est active étant mise en avant : un seul geste pour aller directement à la langue voulue, au lieu de faire défiler le bouton."
+    "Le nombre de parts se règle sur chaque recette, de 1 à 8 personnes, et les quantités suivent, dans la fiche comme dans la liste de courses. Les lignes qui ne se multiplient pas restent telles quelles : sel au goût, pincées, et l'huile de friture. Au delà d'une fois et demie la recette, un rappel indique que les temps et les ustensiles, eux, ne suivent pas.",
+    "Les étapes ne répètent plus les quantités chiffrées de la liste d'ingrédients, pour qu'une recette mise à l'échelle reste cohérente d'un bout à l'autre."
   ]
 }

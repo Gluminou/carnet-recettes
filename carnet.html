@@ -42,6 +42,10 @@ select{width:100%;appearance:none;background:var(--surface-2);border:1px solid v
 select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .meta-row{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
 .pill{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;background:var(--surface-2);color:var(--ink-2);padding:4px 9px;border-radius:3px}
+.pill.sv{padding:0;background:none}
+.pill.sv select{font:inherit;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);font-weight:600;border:0;border-radius:3px;padding:4px 20px 4px 9px;cursor:pointer;appearance:none;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 11px) 52%,calc(100% - 7px) 52%;background-size:4px 4px,4px 4px;background-repeat:no-repeat}
+.pill.sv select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.scale-w{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-radius:6px;padding:8px 10px;margin:12px 0 0}
 .pill.cjk{font-family:var(--font-cjk);font-size:13px;letter-spacing:0;text-transform:none;background:var(--accent-soft);color:var(--accent);font-weight:500;padding:3px 9px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .top .brand{margin-bottom:0}
@@ -194,6 +198,7 @@ var UI={
      serves:"3 pers.",prep:"Prep",cook:"Cuisson",method:"Préparation",steps:"étapes",
      resetC:"Tout décocher",resetS:"Décocher toutes les étapes",
      photo:"photo",pick:"Choisir une recette",lang:"Langue",
+     servesL:"Pour combien",scaleW:"Quantités recalculées. Les temps, la poêle et la cocotte, eux, ne suivent pas : prévoyez plus grand ou deux fournées.",
      tabC:"Courses",add:"Tout ajouter aux courses",added:"Tout retirer des courses",
      cartL:"Ajouter aux courses",rmL:"Retirer de la liste",
      qtyT:"Touchez pour corriger le nombre. Videz-le pour revenir au total calculé.",
@@ -204,6 +209,7 @@ var UI={
      serves:"serves 3",prep:"Prep",cook:"Cook",method:"Method",steps:"steps",
      resetC:"Clear all",resetS:"Clear all steps",
      photo:"photo",pick:"Choose a recipe",lang:"Language",
+     servesL:"How many",scaleW:"Quantities rescaled. Times, pans and pots do not follow: use something bigger, or cook in two batches.",
      tabC:"Shopping",add:"Add everything to the list",added:"Remove everything from the list",
      cartL:"Add to shopping list",rmL:"Remove from the list",
      qtyT:"Tap to correct the number. Clear it to go back to the calculated total.",
@@ -214,6 +220,7 @@ var UI={
      serves:"3人份",prep:"准备",cook:"烹饪",method:"做法",steps:"步骤",
      resetC:"全部取消",resetS:"取消所有步骤",
      photo:"图片",pick:"选择菜谱",lang:"语言",
+     servesL:"做几人份",scaleW:"分量已重新计算。时间、锅具不会跟着变：请换大一点的锅，或者分两锅做。",
      tabC:"购物",add:"全部加入购物清单",added:"全部移出购物清单",
      cartL:"加入购物清单",rmL:"从清单移除",
      qtyT:"点击修改数量，清空则恢复自动合计。",
@@ -800,6 +807,65 @@ var QTY_NAMES = {
   cm:["cm","cm","厘米"], bulbe:[["bulbe","bulbes"],["bulb","bulbs"],"头"]
 };
 
+/* ---------- Nombre de parts ----------------------------------------
+   La base d'une recette est le premier nombre de son rendement : « 3 pers. »,
+   « 18 cookies », « 1,5 l ». Sans rendement annoncé, le carnet est écrit pour
+   trois. Le choix de l'utilisateur est gardé par recette et se synchronise. */
+var YIELDS = { fondboeuf:[0.5,1,1.5,2,3], cookies:[9,18,27,36], donuts:[6,12,18,24] };
+var SERVES_OPTS = [1,2,3,4,5,6,7,8];
+
+function readServes(){ try{ return JSON.parse(localStorage.getItem('carnet-serves')||'{}') || {}; }catch(e){ return {}; } }
+var SERVES = readServes();
+function saveServes(){ try{ localStorage.setItem('carnet-serves', JSON.stringify(SERVES)); }catch(e){} }
+
+function baseOf(id){
+  var r = R_FR[id]; if(!r) return 3;
+  var m = String(r.y || '3').match(/\d+(?:[.,]\d+)?/);
+  return m ? parseFloat(m[0].replace(',', '.')) : 3;
+}
+function servesOf(id){ var v = SERVES[id]; return (typeof v === 'number' && v > 0) ? v : baseOf(id); }
+function factorOf(id){ var b = baseOf(id); return b ? servesOf(id) / b : 1; }
+function servesOpts(id){
+  var l = (YIELDS[id] || SERVES_OPTS).slice(), v = servesOf(id);
+  if(l.indexOf(v) < 0){ l.push(v); l.sort(function(a,b){ return a-b; }); }
+  return l;
+}
+
+/* Le rendement affiché, avec le nombre remplacé par celui qu'on a choisi. */
+function yieldLabel(id, n){
+  var y = (R[id] && R[id].y) || U.serves;
+  return String(y).replace(/\d+(?:[.,]\d+)?/, qtyNum(n, LANG === 'fr'));
+}
+
+/* Un pas d'arrondi par unité : au gramme sous 50 g, aux 5 g jusqu'à 200,
+   aux 10 au delà ; au quart de cuillère ; à l'unité pour ce qui se compte. */
+function scaleQty(n, u, f){
+  if(f === 1) return n;
+  var v = n * f, step;
+  if(u === 'g' || u === 'ml') step = v < 50 ? 1 : v < 200 ? 5 : 10;
+  else if(u === 'cas' || u === 'cac') step = 0.25;
+  else if(u === '') step = 1;
+  else step = 0.5;
+  var r = Math.round(v / step) * step;
+  if(r < step) r = step;
+  return +r.toFixed(2);
+}
+
+/* La quantité telle qu'elle s'affiche sur la fiche. À l'échelle 1 on rend la
+   ligne écrite à la main, qui dit parfois mieux les choses qu'un calcul
+   (« 1, de 1,4 à 1,6 kg »). Une ligne marquée x ne se multiplie jamais :
+   l'huile de friture ne double pas parce qu'on est six. */
+function qtyShown(id, gi, ii){
+  var rl = R[id], rf = R_FR[id];
+  var brut = rl.g[gi][1][ii][1], f = factorOf(id);
+  if(f === 1) return brut;
+  var it = rf.g[gi][1][ii], o = it[2] || {};
+  if(o.x) return brut;
+  var q = qtyParse(it[1]);
+  if(!q) return brut;
+  return qtyFormat({n: scaleQty(q.n, q.u, f), u: q.u}, LANG);
+}
+
 function qtyNum(n, fr){
   var w = Math.floor(n), f = +(n - w).toFixed(2), s;
   var fr_ = {0.25:"¼",0.5:"½",0.75:"¾"}[f];
@@ -902,7 +968,12 @@ function render(id){
   cur=id;
   var r=R[id];
 
-  var m='<span class="pill">'+r.c+'</span><span class="pill">'+(r.y||U.serves)+'</span>'+
+  var sv='', _n=servesOf(id);
+  servesOpts(id).forEach(function(v){
+    sv+='<option value="'+v+'"'+(v===_n?' selected':'')+'>'+yieldLabel(id,v)+'</option>';
+  });
+  var m='<span class="pill">'+r.c+'</span>'+
+        '<span class="pill sv"><select id="serves" aria-label="'+U.servesL+'">'+sv+'</select></span>'+
         '<span class="pill">'+U.prep+' '+r.prep+'</span><span class="pill">'+U.cook+' '+r.cook+'</span>';
   if(r.cjk) m+='<span class="pill cjk">'+r.cjk+'</span>';
   document.getElementById('meta').innerHTML=pin(m);
@@ -916,7 +987,7 @@ function render(id){
            '<div class="item-body"><div class="item-n">'+it[0]+'</div>'+
            (o.h?'<a class="hanzi" href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(o.h)+'" target="_blank" rel="noopener">'+o.h+' <span class="ar">'+U.photo+'</span></a>':'')+
            (o.t?'<div class="tip">'+o.t+'</div>':'')+
-           '</div><span class="qty">'+it[1]+'</span>'+
+           '</div><span class="qty">'+qtyShown(id,gi,ii)+'</span>'+
            (sh?'<button class="cart'+(inBasket(id,gi,ii)?' on':'')+'" data-b="'+gi+'|'+ii+'" title="'+U.cartL+'" aria-label="'+U.cartL+'">'+CART+'</button>':'')+
            '</div>';
       n++;
@@ -924,6 +995,7 @@ function render(id){
     ing+='</div>';
     gi++;
   });
+  if(factorOf(id)>1.5) ing+='<div class="scale-w">'+U.scaleW+'</div>';
   ing+='<button class="reset" id="r-i">'+U.resetC+'</button>';
   document.getElementById('ing').innerHTML=pin(ing);
 
@@ -1113,8 +1185,8 @@ function buildList(){
     if(!acc[canon]){ acc[canon]={canon:canon,en:meta[0],cat:meta[1],sum:{},txt:[],src:[],keys:[]}; order.push(canon); }
     var e=acc[canon];
     e.keys.push(k);
-    var q=qtyParse(it[1]);
-    if(q){ e.sum[q.u]=(e.sum[q.u]||0)+q.n; }
+    var q=qtyParse(it[1]), fx=(it[2]&&it[2].x)?1:factorOf(id);
+    if(q){ e.sum[q.u]=(e.sum[q.u]||0)+scaleQty(q.n,q.u,fx); }
     else {
       var t=(rl.g[gi]&&rl.g[gi][1][ii]) ? rl.g[gi][1][ii][1] : it[1];
       if(t && e.txt.indexOf(t)<0) e.txt.push(t);
@@ -1355,6 +1427,17 @@ document.querySelectorAll('.tab').forEach(function(t){
 
 function bootLang(keep){ applyLang(); boot(keep); }
 
+document.getElementById('meta').addEventListener('change',function(e){
+  if(!e.target || e.target.id!=='serves' || !cur) return;
+  var v=parseFloat(e.target.value);
+  if(!isFinite(v) || v<=0) return;
+  if(v===baseOf(cur)) delete SERVES[cur]; else SERVES[cur]=v;
+  saveServes();
+  var tab = !document.getElementById('courses').hidden ? 'courses' : document.getElementById('prep').hidden ? 'ing' : 'prep';
+  render(cur);
+  showTab(tab);
+});
+
 document.getElementById('lang').addEventListener('click',function(e){
   var b = e.target.closest('button[data-l]');
   if(!b || b.dataset.l === LANG || LANGS.indexOf(b.dataset.l) < 0) return;
@@ -1377,12 +1460,13 @@ if(CONTENT) bootLang(null); // sans les recettes, sync.js affiche l'écran de cl
 var _syncRedraw=0;
 window.addEventListener('storage',function(e){
   var k=e.key||'';
-  if(k!=='carnet-basket' && k!=='carnet-qty' && k!=='carnet-lang' && k.indexOf('ck-')!==0) return;
+  if(k!=='carnet-basket' && k!=='carnet-qty' && k!=='carnet-lang' && k!=='carnet-serves' && k.indexOf('ck-')!==0) return;
   if(k==='carnet-basket'){
     try{ var b=JSON.parse(localStorage.getItem('carnet-basket')||'[]');
       BASKET=Array.isArray(b)?b.filter(function(x){ return typeof x==='string' && x.indexOf('|')>=0; }):[]; }catch(x){ BASKET=[]; }
   }
   if(k==='carnet-qty') QTY_OVER=readQty();
+  if(k==='carnet-serves') SERVES=readServes();
   if(k==='carnet-lang'){ var l=localStorage.getItem('carnet-lang'); if(LANGS.indexOf(l)>=0) LANG=l; }
   clearTimeout(_syncRedraw);
   _syncRedraw=setTimeout(function(){
@@ -1396,16 +1480,16 @@ window.addEventListener('storage',function(e){
 
 </script>
 <script>
-const APP_RELEASE="1.3.1";
+const APP_RELEASE="1.4.0";
 const APP_DATE="2026-11-27";
-const APP_VERSION="202611270637";
+const APP_VERSION="202611270651";
 </script>
 <script>
 /* Ce qui se synchronise entre appareils : panier, quantités corrigées,
    ingrédients cochés et langue, plus les recettes elles-mêmes (carnet-content).
    La recette ouverte en dernier reste propre à chaque appareil. Données dans le
    dépôt privé Gluminou/carnet-recettes-data. */
-const APP_SYNC={app:"carnet-recettes",keys:["carnet-basket","carnet-qty","carnet-lang"],prefixes:["ck-"],content:"carnet-content"};
+const APP_SYNC={app:"carnet-recettes",keys:["carnet-basket","carnet-qty","carnet-lang","carnet-serves"],prefixes:["ck-"],content:"carnet-content"};
 </script>
 <div id="app-updates"></div>
 <script src="sync.js"></script>
