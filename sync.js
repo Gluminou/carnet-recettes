@@ -91,9 +91,24 @@
       lockT: 'This app needs a key', lockP: 'Paste the GitHub key you were given for this app. You only do this once on this device.',
       opening: 'Opening…', firstNet: 'Connect to the internet to open it the first time on this device.',
       locale: 'en-GB'
+    },
+    zh: {
+      title: '设备间同步', off: '这个应用的数据只存在这台设备上。',
+      intro: '粘贴能打开这个应用数据的 GitHub 密钥', keyL: 'GitHub 密钥', devL: '这台设备的名称',
+      connect: '连接', connecting: '连接中…', now: '立即同步', disc: '断开这台设备',
+      on: '已同步', busy: '同步中…', never: '还没有同步过', ago: '', justNow: '刚刚',
+      min: '分钟前', h: '小时前', d: '天前', device: '这台设备：', view: '只读：这个密钥能看到这些数据，但不能修改。',
+      badkey: '密钥被拒绝或已过期。请粘贴一个新的。', norepo: '仓库 {r} 不存在，或者这个密钥打不开它。',
+      denied: '这个密钥没有访问仓库 {r} 的权限。', rate: 'GitHub 要求稍等一下。稍后会再试。',
+      net: '当前离线。恢复网络后改动会自动发出。', other: 'GitHub 错误 {s}。稍后会再试。',
+      pending: '有改动等着发出。', got: '已从另一台设备收到。', empty: '请粘贴一个密钥。',
+      lockT: '这个应用需要一个密钥', lockP: '粘贴别人给你的这个应用的 GitHub 密钥。在这台设备上只需要做一次。',
+      opening: '打开中…', firstNet: '第一次在这台设备上打开，需要连接互联网。',
+      locale: 'zh-CN'
     }
   };
-  var T = function () { return /^fr/i.test(document.documentElement.lang || '') ? WORDS.fr : WORDS.en; };
+  var T = function () { var l = document.documentElement.lang || '';
+    return /^zh/i.test(l) ? WORDS.zh : /^fr/i.test(l) ? WORDS.fr : WORDS.en; };
 
   /* ---------- small helpers ---------- */
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
