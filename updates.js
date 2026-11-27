@@ -14,14 +14,8 @@
    stale cache can't loop). An app that is already open shows an Update bar. */
 (function () {
   if (window.__appUpdates) return; window.__appUpdates = true;
-  var _l = document.documentElement.lang || '';
-  var fr = /^fr/i.test(_l), zh = /^zh/i.test(_l);
-  var T = zh ? {
-    version: '版本', check: '检查更新', update: '立即更新',
-    checking: '检查中…', latest: '你用的已经是最新版本。', error: '无法检查。联网后再试一次。',
-    updating: '更新中…', ready: function (v) { return v ? '版本 ' + v + ' 已就绪' : '有一个更新已就绪'; },
-    news: '更新内容', loading: '加载中…', logError: '列表加载不出来。检查一下网络。', locale: 'zh-CN'
-  } : fr ? {
+  var fr = /^fr/i.test(document.documentElement.lang || '');
+  var T = fr ? {
     version: 'version', check: 'Rechercher une mise à jour', update: 'Mettre à jour',
     checking: 'Recherche…', latest: 'Vous avez la dernière version.', error: 'Impossible de vérifier. Réessayez une fois en ligne.',
     updating: 'Mise à jour…', ready: function (v) { return v ? 'La version ' + v + ' est prête' : 'Une mise à jour est prête'; },
