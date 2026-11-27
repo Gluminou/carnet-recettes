@@ -45,8 +45,11 @@ select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .pill.cjk{font-family:var(--font-cjk);font-size:13px;letter-spacing:0;text-transform:none;background:var(--accent-soft);color:var(--accent);font-weight:500;padding:3px 9px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 .top .brand{margin-bottom:0}
-.lang{appearance:none;border:1px solid var(--line);background:var(--bg);font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.12em;color:var(--ink-2);padding:4px 9px;border-radius:999px;cursor:pointer;flex:none}
-.lang:hover{color:var(--accent);border-color:var(--accent)}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+.lang button{appearance:none;border:0;background:var(--bg);font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.12em;color:var(--ink-2);padding:4px 9px;cursor:pointer}
+.lang button+button{border-left:1px solid var(--line)}
+.lang button:hover{color:var(--accent)}
+.lang button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:700;cursor:default}
 .addbtn{appearance:none;width:100%;margin-top:9px;border:1px solid var(--line);background:var(--bg);font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);padding:8px;border-radius:4px;cursor:pointer}
 .addbtn:hover{color:var(--accent);border-color:var(--accent)}
 .addbtn.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
@@ -122,7 +125,7 @@ main{padding-block:18px 56px}
 
 <header>
   <div class="wrap head-in">
-    <div class="top"><div class="brand" id="u-brand"></div><button class="lang" id="lang"></button></div>
+    <div class="top"><div class="brand" id="u-brand"></div><div class="lang" id="lang" role="group"><button type="button" data-l="en">EN</button><button type="button" data-l="fr">FR</button><button type="button" data-l="zh">ZH</button></div></div>
     <select id="pick" aria-label="Choisir une recette"></select>
     <div class="meta-row" id="meta"></div>
     <button class="addbtn" id="add"></button>
@@ -190,7 +193,7 @@ var UI={
  fr:{brand:"Carnet de cuisine",count:"recettes",tabs:["Ingrédients","Préparation"],
      serves:"3 pers.",prep:"Prep",cook:"Cuisson",method:"Préparation",steps:"étapes",
      resetC:"Tout décocher",resetS:"Décocher toutes les étapes",
-     photo:"photo",pick:"Choisir une recette",other:"EN",
+     photo:"photo",pick:"Choisir une recette",lang:"Langue",
      tabC:"Courses",add:"Tout ajouter aux courses",added:"Tout retirer des courses",
      cartL:"Ajouter aux courses",rmL:"Retirer de la liste",
      qtyT:"Touchez pour corriger le nombre. Videz-le pour revenir au total calculé.",
@@ -200,7 +203,7 @@ var UI={
  en:{brand:"Recipe book",count:"recipes",tabs:["Ingredients","Method"],
      serves:"serves 3",prep:"Prep",cook:"Cook",method:"Method",steps:"steps",
      resetC:"Clear all",resetS:"Clear all steps",
-     photo:"photo",pick:"Choose a recipe",other:"中",
+     photo:"photo",pick:"Choose a recipe",lang:"Language",
      tabC:"Shopping",add:"Add everything to the list",added:"Remove everything from the list",
      cartL:"Add to shopping list",rmL:"Remove from the list",
      qtyT:"Tap to correct the number. Clear it to go back to the calculated total.",
@@ -210,7 +213,7 @@ var UI={
  zh:{brand:"菜谱本",count:"道菜",tabs:["食材","做法"],
      serves:"3人份",prep:"准备",cook:"烹饪",method:"做法",steps:"步骤",
      resetC:"全部取消",resetS:"取消所有步骤",
-     photo:"图片",pick:"选择菜谱",other:"FR",
+     photo:"图片",pick:"选择菜谱",lang:"语言",
      tabC:"购物",add:"全部加入购物清单",added:"全部移出购物清单",
      cartL:"加入购物清单",rmL:"从清单移除",
      qtyT:"点击修改数量，清空则恢复自动合计。",
@@ -884,7 +887,9 @@ function applyLang(){
   R = LANG==='en' ? R_EN : LANG==='zh' ? R_ZH : R_FR;
   ORDER = LANG==='en' ? ORDER_EN : LANG==='zh' ? ORDER_ZH : ORDER_FR;
   document.documentElement.lang = LANG;
-  document.getElementById('lang').textContent = U.other;
+  var lg = document.getElementById('lang');
+  lg.setAttribute('aria-label', U.lang);
+  lg.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.l === LANG ? 'true' : 'false'); });
   document.querySelectorAll('.tab').forEach(function(t,i){ t.textContent = i<2 ? U.tabs[i] : U.tabC; });
   document.getElementById('pick').setAttribute('aria-label', U.pick);
 }
@@ -1350,10 +1355,12 @@ document.querySelectorAll('.tab').forEach(function(t){
 
 function bootLang(keep){ applyLang(); boot(keep); }
 
-document.getElementById('lang').addEventListener('click',function(){
+document.getElementById('lang').addEventListener('click',function(e){
+  var b = e.target.closest('button[data-l]');
+  if(!b || b.dataset.l === LANG || LANGS.indexOf(b.dataset.l) < 0) return;
   var tab = document.getElementById('prep').hidden ? 'ing' : 'prep';
   var keep = document.getElementById('pick').value;
-  LANG = LANGS[(LANGS.indexOf(LANG)+1) % LANGS.length];
+  LANG = b.dataset.l;
   try{localStorage.setItem('carnet-lang',LANG);}catch(e){}
   bootLang(keep);
   showTab(tab);
@@ -1389,9 +1396,9 @@ window.addEventListener('storage',function(e){
 
 </script>
 <script>
-const APP_RELEASE="1.3.0";
+const APP_RELEASE="1.3.1";
 const APP_DATE="2026-11-27";
-const APP_VERSION="202611270626";
+const APP_VERSION="202611270637";
 </script>
 <script>
 /* Ce qui se synchronise entre appareils : panier, quantités corrigées,
